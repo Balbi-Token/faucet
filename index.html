@@ -43,7 +43,7 @@
     <div id="login-section" class="section">
       <div id="g_id_onload"
            data-client_id="645184236716-ot9o4ph69223j12rcg5ldudju2t4jvhu.apps.googleusercontent.com"
-           data-login_uri="https://5fd76166-6feb-40b5-8959-7af0eae30f33-00-196vs76k8rbla.janeway.replit.dev/create-wallet"
+           data-login_uri="https://balbi-token.github.io/teste/create-wallet"
            data-auto_prompt="false">
       </div>
       <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
@@ -151,7 +151,7 @@
 
     function autoFillEmissionFactors() {
       const region = document.getElementById('region').value;
-      // Placeholder: fatores já estão no cálculo, mas podem ser ajustados dinamicamente
+      // Placeholder: fatores já estão no cálculo
     }
 
     function googleCallback(response) {
@@ -222,7 +222,7 @@
       document.getElementById('result-total').textContent = total.toFixed(2);
       document.getElementById('result-offset').textContent = offset.toFixed(2);
       document.getElementById('results').style.display = 'block';
-      document.getElementById('save-btn').style.display = 'inline-block'; // Ativar com saldo Balbi
+      document.getElementById('save-btn').style.display = 'inline-block';
     }
 
     function offsetCO2() {
@@ -268,5 +268,4 @@
     };
   </script>
 </body>
-
 </html>
