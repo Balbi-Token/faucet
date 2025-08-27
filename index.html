@@ -4,268 +4,169 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BalbiCO2</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #fff; color: #333; line-height: 1.6; }
-    .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-    .logo { width: 120px; margin: 20px 0; }
-    .title { color: #003087; font-size: 2.5em; margin: 10px 0; font-weight: 600; }
-    .subtitle { color: #555; font-size: 1em; }
-    .button { padding: 12px 25px; margin: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: transform 0.2s; }
-    .button:hover { transform: scale(1.05); }
-    .blue-btn { background: #003087; color: white; }
-    .gold-btn { background: #D4A017; color: white; }
-    .lilac-btn { background: #B266FF; color: white; }
-    .section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .input-group { margin: 10px 0; display: flex; flex-direction: column; align-items: center; }
-    .input-group label { margin-bottom: 5px; font-weight: 500; }
-    input, select { padding: 10px; width: 100%; max-width: 300px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; }
-    .wallet { font-size: 1.2em; color: #003087; margin: 10px 0; }
-    .results p { margin: 5px 0; font-size: 1.1em; }
-    @media (max-width: 600px) {
-      .container { padding: 10px; }
-      .input-group { width: 100%; }
-      input, select { width: 100%; }
-      .button { width: 100%; margin: 5px 0; }
-    }
-    .footer-line { height: 10px; width: 100%; }
-    #footer-blue { background: #003087; }
-    #footer-red { background: #FF0000; }
-  </style>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-<body>
-  <div class="container">
-    <img src="https://via.placeholder.com/120?text=HVAC" alt="HVAC Logo" class="logo">
-    <h1 class="title">BALBI</h1>
-    <p class="subtitle">Engenharia de Ar Condicionado</p>
+<body class="bg-gray-100 font-sans">
 
-    <div id="login-section" class="section">
-      <div id="g_id_onload"
-           data-client_id="645184236716-ot9o4ph69223j12rcg5ldudju2t4jvhu.apps.googleusercontent.com"
-           data-login_uri="https://balbi-token.github.io/teste/create-wallet"
-           data-auto_prompt="false">
-      </div>
-      <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
-    </div>
-
-    <div id="wallet-section" class="section" style="display: none;">
-      <h2>My Wallet</h2>
-      <p class="wallet" id="wallet-address"></p>
-      <p>Balbi Balance: <span id="balbi-balance">0</span></p>
-      <p>MCO2 Balance: <span id="mco2-balance">0</span></p>
-      <button class="button gold-btn" onclick="buyBalbi()">Buy Balbi (QuickSwap)</button>
-    </div>
-
-    <div id="calculator-section" class="section" style="display: none;">
-      <h2>Project's HVAC Carbon Footprint Calculator</h2>
-      <div class="input-group">
-        <label for="project-name">Project Name</label>
-        <input type="text" id="project-name" placeholder="Project Name">
-      </div>
-      <div class="input-group">
-        <label for="system-type">System Type</label>
-        <select id="system-type" onchange="autoFillEfficiency()">
-          <option value="">Select System Type</option>
-          <option value="chiller">Chiller</option>
-          <option value="vrf">VRF</option>
-        </select>
-      </div>
-      <div class="input-group">
-        <label for="cooling-capacity">Cooling Capacity (BTU/h)</label>
-        <input type="number" id="cooling-capacity" placeholder="Cooling Capacity (BTU/h)">
-      </div>
-      <div class="input-group">
-        <label for="operation-hours">Operation Hours per Day</label>
-        <input type="number" id="operation-hours" placeholder="Operation Hours per Day">
-      </div>
-      <div class="input-group">
-        <label for="days-per-year">Days of Operation per Year</label>
-        <input type="number" id="days-per-year" placeholder="Days of Operation per Year">
-      </div>
-      <div class="input-group">
-        <label for="efficiency">Equipment Efficiency (EER or COP)</label>
-        <input type="number" id="efficiency" placeholder="Auto-filled" readonly>
-      </div>
-      <div class="input-group">
-        <label for="refrigerant">Refrigerant Type</label>
-        <select id="refrigerant" onchange="autoFillGWP()">
-          <option value="">Select Refrigerant</option>
-          <option value="r410a">R410a</option>
-          <option value="r32">R32</option>
-        </select>
-      </div>
-      <div class="input-group">
-        <label for="gwp">GWP (Global Warming Potential)</label>
-        <input type="number" id="gwp" placeholder="Auto-filled" readonly>
-      </div>
-      <div class="input-group">
-        <label for="region">Project's Region</label>
-        <select id="region" onchange="autoFillEmissionFactors()">
-          <option value="">Select Region</option>
-          <option value="brazil">Brazil</option>
-          <option value="usa">USA</option>
-          <option value="europe">Europe</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-      <button class="button lilac-btn" onclick="calculate()">Calculate</button>
-      <div id="results" style="display: none;">
-        <p>System Type: <span id="result-system"></span></p>
-        <p>Cooling Capacity (kW): <span id="result-capacity"></span></p>
-        <p>Indirect Emissions (kg CO2/Year): <span id="result-indirect"></span></p>
-        <p>Direct Emissions (kg CO2/Year): <span id="result-direct"></span></p>
-        <p>Total Carbon Footprint (kg CO2/Year): <span id="result-total"></span></p>
-        <p>Offset Amount ($): <span id="result-offset"></span></p>
-        <button class="button blue-btn" id="save-btn" style="display: none;">Save & Download</button>
-        <button class="button gold-btn" onclick="offsetCO2()">Offset CO2 Emission</button>
-      </div>
-    </div>
+<!-- LOGIN -->
+<div id="login-page" class="min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
+    <h2 class="text-2xl font-bold mb-6 text-center">Login / Criar Carteira</h2>
+    <input id="user-name" type="text" placeholder="Seu nome" class="border p-2 w-full mb-4 rounded">
+    <input id="user-email" type="email" placeholder="Seu e-mail" class="border p-2 w-full mb-4 rounded">
+    <button id="login-btn" class="bg-blue-600 text-white w-full p-2 rounded hover:bg-blue-700">Criar Carteira / Login</button>
   </div>
+</div>
 
-  <div id="footer-blue" class="footer-line"></div>
-  <div id="footer-red" class="footer-line"></div>
+<!-- DASHBOARD -->
+<div id="dashboard-page" class="hidden min-h-screen p-8">
+  <h2 class="text-2xl font-bold mb-4">Dashboard</h2>
+  <div class="mb-6">
+    <p>Saldo MCO2: <span id="saldo-mco2">0</span></p>
+    <p>Saldo BALBI: <span id="saldo-balbi">0</span></p>
+  </div>
+  <div class="space-x-4">
+    <button id="btn-calculadora" class="bg-green-600 text-white p-2 rounded hover:bg-green-700">Calculadora de Pegada</button>
+    <button id="btn-carteira" class="bg-yellow-600 text-white p-2 rounded hover:bg-yellow-700">Carteira</button>
+    <a href="https://quickswap.exchange/#/swap?outputCurrency=0xSeuTokenBALBI" target="_blank" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700">Get BALBI</a>
+  </div>
+</div>
 
-  <script>
-    let userWallet = null;
-    const REPLIT_URL = 'https://5fd76166-6feb-40b5-8959-7af0eae30f33-00-196vs76k8rbla.janeway.replit.dev/';
+<!-- CALCULADORA -->
+<div id="calculadora-page" class="hidden min-h-screen p-8">
+  <h2 class="text-2xl font-bold mb-4">Calculadora de Pegada</h2>
+  <form id="calc-form" class="space-y-4 max-w-md">
+    <input type="number" id="distancia" placeholder="Distância percorrida (km)" class="border p-2 w-full rounded">
+    <input type="number" id="energia" placeholder="Consumo de energia (kWh)" class="border p-2 w-full rounded">
+    <button type="button" id="btn-gerar-pdf" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Gerar Relatório PDF</button>
+  </form>
+  <button id="btn-voltar-dash" class="mt-6 bg-gray-600 text-white p-2 rounded hover:bg-gray-700">Voltar ao Dashboard</button>
+</div>
 
-    const efficiencyMap = { chiller: 3.0, vrf: 4.0 };
-    const gwpMap = { r410a: 2085, r32: 675 };
-    const emissionFactors = {
-      brazil: { indirect: 0.0005, direct: 0.008 },
-      usa: { indirect: 0.0006, direct: 0.009 },
-      europe: { indirect: 0.0004, direct: 0.007 },
-      other: { indirect: 0.0005, direct: 0.008 }
-    };
+<!-- CARTEIRA -->
+<div id="carteira-page" class="hidden min-h-screen p-8">
+  <h2 class="text-2xl font-bold mb-4">Minha Carteira</h2>
+  <p>Saldo MCO2: <span id="carteira-mco2">0</span></p>
+  <p>Saldo BALBI: <span id="carteira-balbi">0</span></p>
+  <button id="btn-refresh-saldo" class="mt-4 bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Atualizar Saldo</button>
+  <button id="btn-voltar-dash2" class="mt-4 bg-gray-600 text-white p-2 rounded hover:bg-gray-700">Voltar ao Dashboard</button>
+</div>
 
-    function autoFillEfficiency() {
-      const system = document.getElementById('system-type').value;
-      document.getElementById('efficiency').value = efficiencyMap[system] || '';
-    }
+<script>
+  // Variáveis globais
+  let carteiraEnd = '';
+  let saldoMCO2 = 0;
+  let saldoBALBI = 0;
 
-    function autoFillGWP() {
-      const refrigerant = document.getElementById('refrigerant').value;
-      document.getElementById('gwp').value = gwpMap[refrigerant] || '';
-    }
+  // Páginas
+  const loginPage = document.getElementById('login-page');
+  const dashboardPage = document.getElementById('dashboard-page');
+  const calculadoraPage = document.getElementById('calculadora-page');
+  const carteiraPage = document.getElementById('carteira-page');
 
-    function autoFillEmissionFactors() {
-      const region = document.getElementById('region').value;
-      // Placeholder: fatores já estão no cálculo
-    }
+  const loginBtn = document.getElementById('login-btn');
 
-    function googleCallback(response) {
-      fetch(`${REPLIT_URL}create-wallet`, {
+  // FUNÇÕES DE BACKEND
+  async function createWallet(email) {
+    try {
+      const res = await fetch('/create-wallet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: response.getEmail() })
-      }).then(res => res.json()).then(data => {
-        if (data.success) {
-          userWallet = data.walletaddress;
-          document.getElementById('wallet-address').textContent = userWallet;
-          document.getElementById('login-section').style.display = 'none';
-          document.getElementById('wallet-section').style.display = 'block';
-          document.getElementById('calculator-section').style.display = 'block';
-          updateBalances();
-        } else {
-          alert('Login failed: ' + data.error);
-        }
-      }).catch(err => {
-        console.error('Google login error:', err);
-        alert('Error during login. Check console.');
+        body: JSON.stringify({ email })
       });
+      const data = await res.json();
+      if (data.success) return data.walletaddress;
+      else throw new Error(data.error || 'Erro ao criar carteira');
+    } catch (err) {
+      alert(err.message);
     }
+  }
 
-    function updateBalances() {
-      if (userWallet) {
-        fetch(`${REPLIT_URL}check-balance`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wallet: userWallet })
-        }).then(res => res.json()).then(data => {
-          if (data.success) document.getElementById('mco2-balance').textContent = data.balance;
-        }).catch(err => console.error('MCO2 balance check failed:', err));
-
-        fetch(`${REPLIT_URL}check-balbi-balance`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wallet: userWallet })
-        }).then(res => res.json()).then(data => {
-          if (data.success) document.getElementById('balbi-balance').textContent = data.balance;
-        }).catch(err => console.error('Balbi balance check failed:', err));
-      }
-    }
-
-    function buyBalbi() {
-      window.open('https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137', '_blank');
-    }
-
-    function calculate() {
-      const capacity = parseFloat(document.getElementById('cooling-capacity').value) || 0;
-      const hours = parseFloat(document.getElementById('operation-hours').value) || 0;
-      const days = parseFloat(document.getElementById('days-per-year').value) || 0;
-      const efficiency = parseFloat(document.getElementById('efficiency').value) || 1;
-      const gwp = parseFloat(document.getElementById('gwp').value) || 0;
-      const region = document.getElementById('region').value;
-      const factors = emissionFactors[region] || emissionFactors.other;
-
-      const capacityKW = capacity * 0.293071;
-      const indirect = (capacityKW * hours * days * factors.indirect) / efficiency;
-      const direct = (capacityKW * hours * days * factors.direct * gwp);
-      const total = indirect + direct;
-      const offset = total * 0.000189;
-
-      document.getElementById('result-system').textContent = document.getElementById('system-type').value || 'Chiller';
-      document.getElementById('result-capacity').textContent = capacityKW.toFixed(2);
-      document.getElementById('result-indirect').textContent = indirect.toFixed(2);
-      document.getElementById('result-direct').textContent = direct.toFixed(2);
-      document.getElementById('result-total').textContent = total.toFixed(2);
-      document.getElementById('result-offset').textContent = offset.toFixed(2);
-      document.getElementById('results').style.display = 'block';
-      document.getElementById('save-btn').style.display = 'inline-block';
-    }
-
-    function offsetCO2() {
-      const offsetAmount = document.getElementById('result-offset').textContent;
-      fetch(`${REPLIT_URL}create-now-invoice`, {
+  async function getBalance(wallet) {
+    try {
+      const res = await fetch('/check-balance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ price_amount: offsetAmount, userWallet })
-      }).then(res => res.json()).then(data => {
-        if (data.success) window.location.href = data.invoice_url;
-        else alert('Offset failed: ' + data.error);
+        body: JSON.stringify({ wallet })
       });
+      const data = await res.json();
+      if (data.success) return parseFloat(data.balance);
+      else throw new Error(data.error || 'Erro ao consultar saldo');
+    } catch (err) {
+      alert(err.message);
+      return 0;
     }
+  }
 
-    document.getElementById('save-btn').onclick = async () => {
-      if (!userWallet) return alert('Login required');
-      const offsetAmount = parseFloat(document.getElementById('result-offset').textContent);
-      const balbiResponse = await fetch(`${REPLIT_URL}check-balbi-balance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet: userWallet })
-      });
-      const balbiData = await balbiResponse.json();
-      if (balbiData.success && parseFloat(balbiData.balance) >= offsetAmount) {
-        const response = await fetch(`${REPLIT_URL}generate-report`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wallet: userWallet, data: {
-            system: document.getElementById('result-system').textContent,
-            capacity: document.getElementById('result-capacity').textContent,
-            indirect: document.getElementById('result-indirect').textContent,
-            direct: document.getElementById('result-direct').textContent,
-            total: document.getElementById('result-total').textContent,
-            offset: offsetAmount
-          }})
-        });
-        const pdfData = await response.json();
-        if (pdfData.success) window.open(pdfData.url, '_blank');
-        else alert('Report generation failed: ' + pdfData.error);
-      } else {
-        alert('Insufficient Balbi balance or login required.');
-      }
-    };
-  </script>
+  // LOGIN
+  loginBtn.addEventListener('click', async () => {
+    const name = document.getElementById('user-name').value;
+    const email = document.getElementById('user-email').value;
+    if (!name || !email) { alert('Preencha nome e e-mail'); return; }
+
+    const walletAddress = await createWallet(email);
+    if (!walletAddress) return;
+
+    carteiraEnd = walletAddress;
+    saldoMCO2 = await getBalance(walletAddress);
+    saldoBALBI = 0;
+
+    document.getElementById('saldo-mco2').innerText = saldoMCO2;
+    document.getElementById('saldo-balbi').innerText = saldoBALBI;
+
+    alert(`Carteira criada!\nEndereço: ${carteiraEnd}\nChave privada enviada por e-mail`);
+    loginPage.classList.add('hidden');
+    dashboardPage.classList.remove('hidden');
+  });
+
+  // NAVEGAÇÃO DASHBOARD → PÁGINAS
+  document.getElementById('btn-calculadora').addEventListener('click', () => {
+    dashboardPage.classList.add('hidden');
+    calculadoraPage.classList.remove('hidden');
+  });
+  document.getElementById('btn-carteira').addEventListener('click', () => {
+    dashboardPage.classList.add('hidden');
+    carteiraPage.classList.remove('hidden');
+    document.getElementById('carteira-mco2').innerText = saldoMCO2;
+    document.getElementById('carteira-balbi').innerText = saldoBALBI;
+  });
+
+  // VOLTAR AO DASHBOARD
+  document.getElementById('btn-voltar-dash').addEventListener('click', () => {
+    calculadoraPage.classList.add('hidden');
+    dashboardPage.classList.remove('hidden');
+  });
+  document.getElementById('btn-voltar-dash2').addEventListener('click', () => {
+    carteiraPage.classList.add('hidden');
+    dashboardPage.classList.remove('hidden');
+  });
+
+  // REFRESH SALDO
+  document.getElementById('btn-refresh-saldo').addEventListener('click', async () => {
+    saldoMCO2 = await getBalance(carteiraEnd);
+    document.getElementById('carteira-mco2').innerText = saldoMCO2;
+    alert('Saldo atualizado!');
+  });
+
+  // GERAR PDF - Calculadora
+  document.getElementById('btn-gerar-pdf').addEventListener('click', () => {
+    const distancia = document.getElementById('distancia').value || 0;
+    const energia = document.getElementById('energia').value || 0;
+    const pegada = (distancia * 0.21 + energia * 0.5).toFixed(2); // Exemplo simples
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Relatório de Pegada de Carbono", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Distância percorrida: ${distancia} km`, 20, 40);
+    doc.text(`Consumo de energia: ${energia} kWh`, 20, 50);
+    doc.text(`Pegada calculada: ${pegada} kgCO₂`, 20, 60);
+    doc.text(`Carteira: ${carteiraEnd}`, 20, 70);
+
+    doc.save("Relatorio_Pegada_CO2.pdf");
+  });
+</script>
 </body>
 </html>
