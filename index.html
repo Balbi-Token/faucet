@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balbi Faucet</title>
+    <title>Balbi Wallet</title>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
     <style>
         body {
@@ -385,9 +385,14 @@
     let lastClaimTime = null;
 
     async function conectarCarteira(chavePrivada) {
+        // CORREÇÃO: Verifica se a chave privada é válida antes de tentar qualquer coisa
+        if (!chavePrivada || typeof chavePrivada !== 'string' || chavePrivada.trim() === '') {
+            console.log("Nenhuma chave privada fornecida. Exibindo tela de login.");
+            return; // Sai da função sem mostrar erro
+        }
+        
         console.log("Conectando com a chave privada:", chavePrivada);
         
-        // CORREÇÃO: Adiciona o prefixo '0x' se estiver faltando
         const formattedPrivateKey = chavePrivada.startsWith('0x') ? chavePrivada : `0x${chavePrivada}`;
         
         let walletAddress;
