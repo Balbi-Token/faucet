@@ -188,6 +188,14 @@
             display: none;
         }
 
+        /* Novo estilo para a hash no rodapé */
+        .claim-hash {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
         .wallet-address {
             margin-top: 10px;
             font-size: 14px;
@@ -284,6 +292,7 @@
     <div id="walletAddress" class="wallet-address" style="display: none;">
         <span>Endereço da Carteira:</span>
         <div id="addressDisplay"></div>
+        <button id="logoutButton" style="margin-top:10px; padding: 5px 10px; font-size: 12px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Sair</button>
     </div>
     
     <div id="walletInfo" style="display: none;">
@@ -301,7 +310,7 @@
         
         <div class="action-buttons">
             <a href="#" class="action-button">Enviar Balbi</a>
-            <a href="https://quickswap.exchange/#/swap" target="_blank" class="action-button">Swap na Quickswap</a>
+            <a href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" class="action-button">Swap na Quickswap</a>
         </div>
 
         <div class="faucet-card">
@@ -313,6 +322,7 @@
             <button id="claimButton">Cultivar Balbi</button>
             <div id="claimTimer" class="claim-timer"></div>
             <div id="claimSuccess" class="claim-success">Tokens enviados com sucesso!</div>
+            <div id="claimHash" class="claim-hash" style="display: none;"></div>
         </div>
     </div>
     
@@ -363,7 +373,9 @@
     const claimButton = document.getElementById('claimButton');
     const claimTimerDiv = document.getElementById('claimTimer');
     const claimSuccessDiv = document.getElementById('claimSuccess');
+    const claimHashDiv = document.getElementById('claimHash');
     const cultivateTree = document.getElementById('cultivateTree');
+    const logoutButton = document.getElementById('logoutButton');
     
     // **A URL DO SEU NOVO PROJETO DO REPLIT AQUI**
     const REPLIT_URL = "https://74caa2ca-fab9-4e76-a1f0-3e32c4aaf7a4-00-lt9t4bvht6p6.spock.replit.dev"; 
@@ -414,18 +426,15 @@
     connectButton.addEventListener('click', () => {
         const privateKey = privateKeyInput.value.trim();
         if (privateKey) {
-            // Limpa o intervalo antigo, se existir
             if (updateInterval) {
                 clearInterval(updateInterval);
             }
             
-            // Conecta a carteira e faz a primeira chamada
             conectarCarteira(privateKey);
 
-            // Chama a função conectarCarteira a cada 10 segundos
             updateInterval = setInterval(() => {
                 conectarCarteira(privateKey);
-            }, 10000); // 10000 milissegundos = 10 segundos
+            }, 10000); 
             
         } else {
             alert('Por favor, insira sua chave privada.');
@@ -460,6 +469,7 @@
         claimButton.disabled = true;
         claimButton.textContent = "Cultivando...";
         claimSuccessDiv.style.display = 'none';
+        claimHashDiv.style.display = 'none';
 
         try {
             const response = await fetch(`${REPLIT_URL}/claim`, {
@@ -473,14 +483,24 @@
             const data = await response.json();
 
             if (response.ok) {
-                claimSuccessDiv.textContent = data.message;
+                claimSuccessDiv.textContent = "Tokens enviados com sucesso!";
                 claimSuccessDiv.style.display = 'block';
+                
+                // Exibe e preenche a hash da transação
+                claimHashDiv.textContent = `Tx Hash: ${data.txHash}`;
+                claimHashDiv.style.display = 'block';
+
                 cultivateTree.src = treeFullUrl;
                 
                 lastClaimTime = Date.now();
                 updateClaimButton(data.timeLeft || 0);
+
+                // Força a atualização do saldo após o claim
+                conectarCarteira(privateKeyInput.value.trim());
+
             } else {
-                alert(`Erro: ${data.error}`);
+                claimSuccessDiv.textContent = `Erro: ${data.error}`;
+                claimSuccessDiv.style.display = 'block';
                 updateClaimButton(data.timeLeft || 0);
             }
         } catch (error) {
@@ -502,6 +522,18 @@
             }
         }, 1000);
     }
+
+    // Adiciona o evento de clique para o botão de Sair
+    logoutButton.addEventListener('click', () => {
+        // Limpa o intervalo de atualização
+        clearInterval(updateInterval);
+        
+        // Esconde as informações da carteira e mostra a tela de login
+        walletAddressDiv.style.display = 'none';
+        walletInfoDiv.style.display = 'none';
+        loginSection.style.display = 'block';
+        privateKeyInput.value = ''; // Limpa o campo de chave privada
+    });
 
     startTimer();
     updateClaimButton(0);
