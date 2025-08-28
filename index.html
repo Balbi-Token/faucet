@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balbi Wallet</title>
+    <title>Balbi Faucet</title>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
     <style>
         body {
@@ -278,8 +278,8 @@
 <body>
 
 <div class="wallet-container">
-    <img src="https://i.ibb.co/6P0L8yJ/balbi-logo.png" alt="Balbi Logo" class="logo">
-    <h1>Balbi Wallet</h1>
+    <img src="https://i.ibb.co/L5yD29X/balbi-logo.png" alt="Balbi Logo" class="logo">
+    <h1>Balbi Faucet</h1>
 
     <div id="loginSection">
         <p>Insira sua chave privada para acessar sua carteira. Seus dados não são armazenados.</p>
@@ -351,15 +351,12 @@
     <div class="footer-social-icons">
         </div>
     <div class="footer-copy">
-        © 2024 Balbi Wallet. Construído com ❤️ para a comunidade cripto.
+        © 2024 Balbi Faucet. Construído com ❤️ para a comunidade cripto.
     </div>
 </div>
 
 
 <script>
-    const logoUrl = 'https://i.ibb.co/6P0L8yJ/balbi-logo.png';
-    document.querySelector('.logo').src = logoUrl;
-
     const loginSection = document.getElementById('loginSection');
     const walletAddressDiv = document.getElementById('walletAddress');
     const addressDisplay = document.getElementById('addressDisplay');
@@ -385,25 +382,29 @@
     let lastClaimTime = null;
 
     async function conectarCarteira(chavePrivada) {
-        // CORREÇÃO: Verifica se a chave privada é válida antes de tentar qualquer coisa
-        if (!chavePrivada || typeof chavePrivada !== 'string' || chavePrivada.trim() === '') {
-            console.log("Nenhuma chave privada fornecida. Exibindo tela de login.");
-            return; // Sai da função sem mostrar erro
-        }
-        
-        console.log("Conectando com a chave privada:", chavePrivada);
-        
-        const formattedPrivateKey = chavePrivada.startsWith('0x') ? chavePrivada : `0x${chavePrivada}`;
+        // CORREÇÃO FINAL: Valida a chave privada antes de prosseguir
+        const formattedPrivateKey = chavePrivada ? (chavePrivada.startsWith('0x') ? chavePrivada : `0x${chavePrivada}`) : null;
         
         let walletAddress;
         try {
+            if (!formattedPrivateKey || !ethers.utils.isHexString(formattedPrivateKey, 32)) {
+                // Se a chave não for um HexString válido, limpa o localStorage e sai.
+                localStorage.removeItem('balbiPrivateKey');
+                console.log("Chave privada inválida encontrada no localStorage. Limpando e exibindo tela de login.");
+                return;
+            }
             walletAddress = ethers.utils.computeAddress(formattedPrivateKey);
         } catch (error) {
+            // Se houver um erro, limpa o localStorage e avisa o usuário
+            localStorage.removeItem('balbiPrivateKey');
             alert('Chave privada inválida. Por favor, verifique e tente novamente.');
             console.error('Erro ao derivar endereço da chave privada:', error);
             return;
         }
-        
+
+        // Se chegou aqui, a chave é válida
+        console.log("Conectando com a chave privada:", chavePrivada);
+
         // Salva a chave privada no localStorage
         localStorage.setItem('balbiPrivateKey', formattedPrivateKey);
 
@@ -574,8 +575,8 @@
     // Função para checar o localStorage ao carregar a página
     window.onload = () => {
         const savedPrivateKey = localStorage.getItem('balbiPrivateKey');
+        privateKeyInput.value = savedPrivateKey || '';
         if (savedPrivateKey) {
-            privateKeyInput.value = savedPrivateKey;
             conectarCarteira(savedPrivateKey);
             
             // Inicia a atualização de saldo
@@ -585,7 +586,6 @@
             
             // Inicia o timer do claim
             startTimer();
-
         } else {
             updateClaimButton(0); // A tela de login está visível, o botão está liberado
         }
