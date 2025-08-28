@@ -372,8 +372,9 @@
     const cultivateTree = document.getElementById('cultivateTree');
     const logoutButton = document.getElementById('logoutButton');
     
-    // **A URL DO SEU NOVO PROJETO DO REPLIT AQUI**
-    const REPLIT_URL = "https://74caa2ca-fab9-4e76-a1f0-3e32c4aaf7a4-00-lt9t4bvht6p6.spock.replit.dev"; 
+    // **AVISO: Você DEVE ATUALIZAR esta URL!**
+    // Pegue a nova URL do seu servidor Replit e coloque aqui.
+    const REPLIT_URL = "https://SEU-NOVO-ENDERECO-DO-REPLIT-AQUI.replit.dev"; 
     
     const treeDryUrl = 'https://i.ibb.co/C0c92tS/tree-dry.png';
     const treeFullUrl = 'https://i.ibb.co/mF9m9hF/tree-full.png';
@@ -382,30 +383,25 @@
     let lastClaimTime = null;
 
     async function conectarCarteira(chavePrivada) {
-        // CORREÇÃO FINAL: Valida a chave privada antes de prosseguir
         const formattedPrivateKey = chavePrivada ? (chavePrivada.startsWith('0x') ? chavePrivada : `0x${chavePrivada}`) : null;
         
         let walletAddress;
         try {
             if (!formattedPrivateKey || !ethers.utils.isHexString(formattedPrivateKey, 32)) {
-                // Se a chave não for um HexString válido, limpa o localStorage e sai.
                 localStorage.removeItem('balbiPrivateKey');
-                console.log("Chave privada inválida encontrada no localStorage. Limpando e exibindo tela de login.");
+                console.log("Chave privada inválida encontrada. Limpando e exibindo tela de login.");
                 return;
             }
             walletAddress = ethers.utils.computeAddress(formattedPrivateKey);
         } catch (error) {
-            // Se houver um erro, limpa o localStorage e avisa o usuário
             localStorage.removeItem('balbiPrivateKey');
             alert('Chave privada inválida. Por favor, verifique e tente novamente.');
             console.error('Erro ao derivar endereço da chave privada:', error);
             return;
         }
 
-        // Se chegou aqui, a chave é válida
         console.log("Conectando com a chave privada:", chavePrivada);
 
-        // Salva a chave privada no localStorage
         localStorage.setItem('balbiPrivateKey', formattedPrivateKey);
 
         loginSection.style.display = 'none';
@@ -446,18 +442,15 @@
     connectButton.addEventListener('click', () => {
         const privateKey = privateKeyInput.value.trim();
         if (privateKey) {
-            // Limpa o intervalo antigo, se existir
             if (updateInterval) {
                 clearInterval(updateInterval);
             }
             
-            // Conecta a carteira e faz a primeira chamada
             conectarCarteira(privateKey);
 
-            // Chama a função conectarCarteira a cada 10 segundos
             updateInterval = setInterval(() => {
                 conectarCarteira(privateKey);
-            }, 10000); // 10000 milissegundos = 10 segundos
+            }, 10000); 
             
         } else {
             alert('Por favor, insira sua chave privada.');
@@ -485,10 +478,11 @@
         const privateKey = privateKeyInput.value.trim();
         const formattedPrivateKey = privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`;
 
-        const walletAddress = ethers.utils.computeAddress(formattedPrivateKey);
-
-        if (!walletAddress) {
-            alert('Por favor, conecte sua carteira primeiro.');
+        let walletAddress;
+        try {
+            walletAddress = ethers.utils.computeAddress(formattedPrivateKey);
+        } catch (error) {
+            alert('Chave privada inválida. Por favor, conecte sua carteira primeiro.');
             return;
         }
 
@@ -512,16 +506,13 @@
                 claimSuccessDiv.textContent = "Tokens enviados com sucesso!";
                 claimSuccessDiv.style.display = 'block';
                 
-                // Exibe e preenche a hash da transação
                 claimHashDiv.textContent = `Tx Hash: ${data.txHash}`;
                 claimHashDiv.style.display = 'block';
 
                 cultivateTree.src = treeFullUrl;
                 
-                // Força a atualização do saldo após o claim
                 conectarCarteira(privateKey);
                 
-                // Atualiza o tempo de claim
                 const now = Date.now();
                 localStorage.setItem('lastClaimTime', now);
                 updateClaimButton(4 * 60 * 60 * 1000);
@@ -537,10 +528,9 @@
         } finally {
             claimButton.textContent = "Cultivar Balbi";
             
-            // Inicia o timer com o tempo restante correto
             const storedTime = localStorage.getItem('lastClaimTime');
             if(storedTime) {
-                const timeLeft = storedTime + (4 * 60 * 60 * 1000) - Date.now();
+                const timeLeft = parseInt(storedTime) + (4 * 60 * 60 * 1000) - Date.now();
                 updateClaimButton(timeLeft);
             }
         }
@@ -555,39 +545,34 @@
                 const timeLeft = parseInt(storedTime) + (4 * 60 * 60 * 1000) - now;
                 updateClaimButton(timeLeft);
             } else {
-                updateClaimButton(0); // se não há tempo salvo, o botão está pronto
+                updateClaimButton(0);
             }
         }, 1000);
     }
 
     logoutButton.addEventListener('click', () => {
-        // Limpa o intervalo de atualização e o localStorage
         clearInterval(updateInterval);
         localStorage.removeItem('balbiPrivateKey');
         
-        // Esconde as informações da carteira e mostra a tela de login
         walletAddressDiv.style.display = 'none';
         walletInfoDiv.style.display = 'none';
         loginSection.style.display = 'block';
-        privateKeyInput.value = ''; // Limpa o campo de chave privada
+        privateKeyInput.value = '';
     });
 
-    // Função para checar o localStorage ao carregar a página
     window.onload = () => {
         const savedPrivateKey = localStorage.getItem('balbiPrivateKey');
         privateKeyInput.value = savedPrivateKey || '';
         if (savedPrivateKey) {
             conectarCarteira(savedPrivateKey);
             
-            // Inicia a atualização de saldo
             updateInterval = setInterval(() => {
                 conectarCarteira(savedPrivateKey);
             }, 10000);
             
-            // Inicia o timer do claim
             startTimer();
         } else {
-            updateClaimButton(0); // A tela de login está visível, o botão está liberado
+            updateClaimButton(0);
         }
     };
 
