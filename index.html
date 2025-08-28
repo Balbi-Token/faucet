@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Balbi Wallet</title>
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js" type="text/javascript"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -17,6 +16,7 @@
             margin: 0;
             color: #333;
         }
+
         .wallet-container {
             background-color: #ffffff;
             border-radius: 12px;
@@ -26,20 +26,24 @@
             max-width: 450px;
             text-align: center;
         }
+
         .logo {
             width: 80px;
             margin-bottom: 20px;
         }
+
         h1 {
             color: #007bff;
             font-size: 24px;
             margin-bottom: 10px;
         }
+
         p {
             color: #666;
             font-size: 14px;
             margin-bottom: 25px;
         }
+
         #privateKeyInput {
             width: calc(100% - 20px);
             padding: 10px;
@@ -48,6 +52,7 @@
             border-radius: 8px;
             font-size: 14px;
         }
+
         #connectButton {
             width: 100%;
             padding: 12px;
@@ -60,9 +65,11 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         #connectButton:hover {
             background-color: #0056b3;
         }
+
         .info-card {
             background-color: #e9ecef;
             border-radius: 8px;
@@ -70,11 +77,13 @@
             margin-top: 25px;
             text-align: left;
         }
+
         .info-card h2 {
             margin-top: 0;
             font-size: 16px;
             color: #007bff;
         }
+
         .balance-item {
             display: flex;
             justify-content: space-between;
@@ -82,18 +91,22 @@
             padding: 8px 0;
             border-bottom: 1px solid #dcdfe3;
         }
+
         .balance-item:last-child {
             border-bottom: none;
         }
+
         .balance-value {
             font-size: 18px;
             font-weight: bold;
         }
+        
         .action-buttons {
             display: flex;
             justify-content: space-between;
             margin-top: 20px;
         }
+
         .action-button {
             flex-grow: 1;
             margin: 0 5px;
@@ -106,32 +119,39 @@
             text-decoration: none;
             transition: all 0.3s ease;
         }
+
         .action-button:hover {
             background-color: #e9ecef;
             border-color: #007bff;
         }
+
         .faucet-card {
             background-color: #d4edda;
             border-radius: 8px;
             padding: 20px;
             margin-top: 20px;
         }
+
         .faucet-card h3 {
             color: #155724;
             font-size: 18px;
             margin-top: 0;
         }
+
         .faucet-card p {
             margin-bottom: 15px;
             color: #155724;
         }
+        
         .tree-container {
             margin-bottom: 15px;
         }
+
         .tree-image {
             width: 100px;
             height: auto;
         }
+
         #claimButton {
             width: 100%;
             padding: 12px;
@@ -144,18 +164,22 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         #claimButton:disabled {
             background-color: #6c757d;
             cursor: not-allowed;
         }
+
         #claimButton:hover:not(:disabled) {
             background-color: #218838;
         }
+
         .claim-timer {
             margin-top: 10px;
             font-size: 14px;
             color: #155724;
         }
+        
         .claim-success {
             margin-top: 10px;
             font-size: 14px;
@@ -163,12 +187,14 @@
             font-weight: bold;
             display: none;
         }
+
         .claim-hash {
             font-size: 12px;
             color: #666;
             margin-top: 5px;
             word-break: break-all;
         }
+
         .wallet-address {
             margin-top: 10px;
             font-size: 14px;
@@ -179,17 +205,20 @@
             border-radius: 4px;
             background-color: #e9ecef;
         }
+
         .faq-section {
             width: 90%;
             max-width: 450px;
             margin-top: 40px;
             margin-bottom: 40px;
         }
+
         .faq-section h2 {
             text-align: center;
             color: #007bff;
             margin-bottom: 20px;
         }
+
         .faq-item {
             background-color: #ffffff;
             border-radius: 8px;
@@ -197,15 +226,18 @@
             padding: 20px;
             margin-bottom: 15px;
         }
+
         .faq-item h3 {
             margin: 0;
             font-size: 16px;
         }
+
         .faq-item p {
             margin: 10px 0 0;
             font-size: 14px;
             color: #666;
         }
+
         .full-footer {
             width: 100%;
             background-color: #e9ecef;
@@ -213,23 +245,28 @@
             text-align: center;
             margin-top: auto;
         }
+        
         .footer-links {
             margin-bottom: 10px;
         }
+        
         .footer-links a {
             color: #007bff;
             text-decoration: none;
             margin: 0 10px;
             font-size: 14px;
         }
+
         .footer-social-icons {
             margin-top: 10px;
         }
+        
         .footer-social-icons a {
             color: #6c757d;
             font-size: 20px;
             margin: 0 8px;
         }
+
         .footer-copy {
             margin-top: 15px;
             font-size: 12px;
@@ -240,7 +277,7 @@
 <body>
 
 <div class="wallet-container">
-    <img src="logo.png" alt="Balbi Logo" class="logo">
+    <img src="https://i.ibb.co/6P0L8yJ/balbi-logo.png" alt="Balbi Logo" class="logo">
     <h1>Balbi Wallet</h1>
 
     <div id="loginSection">
@@ -285,6 +322,7 @@
             <div id="claimHash" class="claim-hash" style="display: none;"></div>
         </div>
     </div>
+    
 </div>
 
 <div class="faq-section">
@@ -310,20 +348,16 @@
         <a href="https://polygonscan.com/token/0xBalbiContrato" target="_blank">Ver Contrato (PolygonScan)</a>
     </div>
     <div class="footer-social-icons">
-    </div>
+        </div>
     <div class="footer-copy">
         © 2024 Balbi Wallet. Construído com ❤️ para a comunidade cripto.
     </div>
 </div>
 
-<script>
-    const REPLIT_URL = "https://74caa2ca-fab9-4e76-a1f0-3e32c4aaf7a4-00-lt9t4bvht6p6.spock.replit.dev"; 
-    const treeDryUrl = 'https://i.ibb.co/C0c92tS/tree-dry.png';
-    const treeFullUrl = 'https://i.ibb.co/mF9m9hF/tree-full.png';
 
-    let updateInterval; 
-    let timerInterval;
-    let claimEndTime = null;
+<script>
+    const logoUrl = 'https://i.ibb.co/6P0L8yJ/balbi-logo.png';
+    document.querySelector('.logo').src = logoUrl;
 
     const loginSection = document.getElementById('loginSection');
     const walletAddressDiv = document.getElementById('walletAddress');
@@ -339,68 +373,21 @@
     const claimHashDiv = document.getElementById('claimHash');
     const cultivateTree = document.getElementById('cultivateTree');
     const logoutButton = document.getElementById('logoutButton');
+    
+    // **A URL DO SEU NOVO PROJETO DO REPLIT AQUI**
+    const REPLIT_URL = "https://74caa2ca-fab9-4e76-a1f0-3e32c4aaf7a4-00-lt9t4bvht6p6.spock.replit.dev"; 
+    
+    const treeDryUrl = 'https://i.ibb.co/C0c92tS/tree-dry.png';
+    const treeFullUrl = 'https://i.ibb.co/mF9m9hF/tree-full.png';
 
-    async function derivarEndereco(chavePrivada) {
-        let pk = chavePrivada.trim();
-        if (!pk.startsWith('0x')) pk = '0x' + pk;
-        try {
-            const wallet = new ethers.Wallet(pk);
-            return wallet.address;
-        } catch (error) {
-            console.error('Chave privada inválida:', error);
-            alert('Chave privada inválida. Verifique e tente novamente.');
-            return null;
-        }
-    }
-
-    async function atualizarSaldos(walletAddress) {
-        balbiBalanceSpan.textContent = 'Carregando...';
-        usdcBalanceSpan.textContent = 'Carregando...';
-        try {
-            const response = await fetch(`${REPLIT_URL}/balance`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ address: walletAddress })
-            });
-            const data = await response.json();
-            if (response.ok) {
-                balbiBalanceSpan.textContent = `${parseFloat(data.balbi).toFixed(2)} BALBI`;
-                usdcBalanceSpan.textContent = `${parseFloat(data.usdc).toFixed(2)} USDC`;
-            } else {
-                throw new Error(data.error);
-            }
-        } catch (error) {
-            console.error('Erro ao buscar saldos:', error);
-            balbiBalanceSpan.textContent = 'Erro';
-            usdcBalanceSpan.textContent = 'Erro';
-        }
-    }
-
-    async function verificarTempoRestante(walletAddress) {
-        try {
-            const response = await fetch(`${REPLIT_URL}/claim`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ address: walletAddress })
-            });
-            const data = await response.json();
-            if (response.ok) {
-                return 0; // Pronto para claim
-            } else if (response.status === 429) {
-                return data.timeLeft || 0; // Tempo restante do servidor
-            } else {
-                throw new Error(data.error);
-            }
-        } catch (error) {
-            console.error('Erro ao verificar tempo restante:', error);
-            return null; // Fallback para localStorage ou 0
-        }
-    }
+    let updateInterval; 
+    let lastClaimTime = null;
 
     async function conectarCarteira(chavePrivada) {
-        const walletAddress = await derivarEndereco(chavePrivada);
-        if (!walletAddress) return;
+        console.log("Conectando com a chave privada:", chavePrivada);
+        const walletAddress = '0x' + chavePrivada.substring(chavePrivada.length - 40);
 
+        // Salva a chave privada no localStorage
         localStorage.setItem('balbiPrivateKey', chavePrivada);
 
         loginSection.style.display = 'none';
@@ -408,29 +395,58 @@
         addressDisplay.textContent = walletAddress;
         walletInfoDiv.style.display = 'block';
 
-        await atualizarSaldos(walletAddress);
+        balbiBalanceSpan.textContent = 'Carregando...';
+        usdcBalanceSpan.textContent = 'Carregando...';
 
-        const timeLeftFromServer = await verificarTempoRestante(walletAddress);
-        if (timeLeftFromServer !== null) {
-            claimEndTime = Date.now() + timeLeftFromServer;
-            localStorage.setItem('claimEndTime', claimEndTime);
-        } else {
-            claimEndTime = localStorage.getItem('claimEndTime') || Date.now();
+        try {
+            const response = await fetch(`${REPLIT_URL}/balance`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ address: walletAddress })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                balbiBalanceSpan.textContent = `${parseFloat(data.balbi).toFixed(2)} BALBI`;
+                usdcBalanceSpan.textContent = `${parseFloat(data.usdc).toFixed(2)} USDC`;
+            } else {
+                console.error('Erro ao buscar saldos:', data.error);
+                balbiBalanceSpan.textContent = 'Erro';
+                usdcBalanceSpan.textContent = 'Erro';
+            }
+
+        } catch (error) {
+            console.error('Erro de conexão ao buscar saldos:', error);
+            balbiBalanceSpan.textContent = 'Erro';
+            usdcBalanceSpan.textContent = 'Erro';
         }
-        updateClaimButton(timeLeftFromServer || 0);
-        startTimer();
     }
 
-    connectButton.addEventListener('click', async () => {
+    connectButton.addEventListener('click', () => {
         const privateKey = privateKeyInput.value.trim();
         if (privateKey) {
-            if (updateInterval) clearInterval(updateInterval);
-            await conectarCarteira(privateKey);
-            updateInterval = setInterval(() => atualizarSaldos(addressDisplay.textContent), 10000);
+            // Limpa o intervalo antigo, se existir
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+            
+            // Conecta a carteira e faz a primeira chamada
+            conectarCarteira(privateKey);
+
+            // Chama a função conectarCarteira a cada 10 segundos
+            updateInterval = setInterval(() => {
+                conectarCarteira(privateKey);
+            }, 10000); // 10000 milissegundos = 10 segundos
+            
         } else {
             alert('Por favor, insira sua chave privada.');
         }
     });
+
+    let timerInterval = null;
 
     function updateClaimButton(timeLeft) {
         if (timeLeft <= 0) {
@@ -439,26 +455,17 @@
             cultivateTree.src = treeDryUrl;
         } else {
             claimButton.disabled = true;
-            const hours = Math.floor(timeLeft / 3600000);
-            const minutes = Math.floor((timeLeft % 3600000) / 60000);
-            const seconds = Math.floor((timeLeft % 60000) / 1000);
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
             claimTimerDiv.textContent = `Próximo cultivo em: ${hours}h ${minutes}m ${seconds}s`;
-            cultivateTree.src = treeFullUrl;
+            cultivateTree.src = treeDryUrl;
         }
     }
 
-    function startTimer() {
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            const timeLeft = claimEndTime - Date.now();
-            updateClaimButton(timeLeft);
-            if (timeLeft <= 0) clearInterval(timerInterval);
-        }, 1000);
-    }
-
     claimButton.addEventListener('click', async () => {
-        const privateKey = localStorage.getItem('balbiPrivateKey');
-        const walletAddress = addressDisplay.textContent;
+        const privateKey = privateKeyInput.value.trim();
+        const walletAddress = '0x' + privateKey.substring(privateKey.length - 40);
 
         if (!walletAddress) {
             alert('Por favor, conecte sua carteira primeiro.');
@@ -473,60 +480,100 @@
         try {
             const response = await fetch(`${REPLIT_URL}/claim`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({ address: walletAddress })
             });
+
             const data = await response.json();
 
             if (response.ok) {
                 claimSuccessDiv.textContent = "Tokens enviados com sucesso!";
                 claimSuccessDiv.style.display = 'block';
-                claimHashDiv.textContent = `Tx Hash: ${data.message.split('Tx: ')[1]}`;
+                
+                // Exibe e preenche a hash da transação
+                claimHashDiv.textContent = `Tx Hash: ${data.txHash}`;
                 claimHashDiv.style.display = 'block';
+
                 cultivateTree.src = treeFullUrl;
-                await atualizarSaldos(walletAddress);
-                claimEndTime = Date.now() + (4 * 3600000);
-                localStorage.setItem('claimEndTime', claimEndTime);
-                startTimer();
+                
+                // Força a atualização do saldo após o claim
+                conectarCarteira(privateKey);
+                
+                // Atualiza o tempo de claim
+                const now = Date.now();
+                localStorage.setItem('lastClaimTime', now);
+                updateClaimButton(4 * 60 * 60 * 1000);
+
             } else {
                 claimSuccessDiv.textContent = `Erro: ${data.error}`;
                 claimSuccessDiv.style.display = 'block';
-                const timeLeft = data.timeLeft || 0;
-                claimEndTime = Date.now() + timeLeft;
-                localStorage.setItem('claimEndTime', claimEndTime);
-                startTimer();
+                updateClaimButton(data.timeLeft || 0);
             }
         } catch (error) {
             console.error('Erro na chamada da API:', error);
-            claimSuccessDiv.textContent = 'Erro ao tentar cultivar. Tente novamente mais tarde.';
-            claimSuccessDiv.style.display = 'block';
+            alert('Erro ao tentar cultivar. Tente novamente mais tarde.');
         } finally {
             claimButton.textContent = "Cultivar Balbi";
+            
+            // Inicia o timer com o tempo restante correto
+            const storedTime = localStorage.getItem('lastClaimTime');
+            if(storedTime) {
+                const timeLeft = storedTime + (4 * 60 * 60 * 1000) - Date.now();
+                updateClaimButton(timeLeft);
+            }
         }
     });
 
-    logoutButton.addEventListener('click', () => {
-        clearInterval(updateInterval);
+    function startTimer() {
         clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            const storedTime = localStorage.getItem('lastClaimTime');
+            if (storedTime) {
+                const now = Date.now();
+                const timeLeft = parseInt(storedTime) + (4 * 60 * 60 * 1000) - now;
+                updateClaimButton(timeLeft);
+            } else {
+                updateClaimButton(0); // se não há tempo salvo, o botão está pronto
+            }
+        }, 1000);
+    }
+
+    logoutButton.addEventListener('click', () => {
+        // Limpa o intervalo de atualização e o localStorage
+        clearInterval(updateInterval);
         localStorage.removeItem('balbiPrivateKey');
-        localStorage.removeItem('claimEndTime');
+        
+        // Esconde as informações da carteira e mostra a tela de login
         walletAddressDiv.style.display = 'none';
         walletInfoDiv.style.display = 'none';
         loginSection.style.display = 'block';
-        privateKeyInput.value = '';
-        updateClaimButton(0);
+        privateKeyInput.value = ''; // Limpa o campo de chave privada
     });
 
-    window.onload = async () => {
+    // Função para checar o localStorage ao carregar a página
+    window.onload = () => {
         const savedPrivateKey = localStorage.getItem('balbiPrivateKey');
         if (savedPrivateKey) {
             privateKeyInput.value = savedPrivateKey;
-            await conectarCarteira(savedPrivateKey);
-            updateInterval = setInterval(() => atualizarSaldos(addressDisplay.textContent), 10000);
+            conectarCarteira(savedPrivateKey);
+            
+            // Inicia a atualização de saldo
+            updateInterval = setInterval(() => {
+                conectarCarteira(savedPrivateKey);
+            }, 10000);
+            
+            // Inicia o timer do claim
+            startTimer();
+
         } else {
-            updateClaimButton(0);
+            updateClaimButton(0); // A tela de login está visível, o botão está liberado
         }
     };
+
+    startTimer();
 </script>
+
 </body>
 </html>
