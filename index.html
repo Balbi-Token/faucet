@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balbi Faucet</title>
+    <title>Balbi Wallet</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -188,7 +188,6 @@
             display: none;
         }
 
-        /* Novo estilo para a hash no rodapé */
         .claim-hash {
             font-size: 12px;
             color: #666;
@@ -207,7 +206,6 @@
             background-color: #e9ecef;
         }
 
-        /* --- FAQ Section --- */
         .faq-section {
             width: 90%;
             max-width: 450px;
@@ -240,7 +238,6 @@
             color: #666;
         }
 
-        /* --- Footer --- */
         .full-footer {
             width: 100%;
             background-color: #e9ecef;
@@ -280,7 +277,7 @@
 <body>
 
 <div class="wallet-container">
-    <img src="https://i.ibb.co/6P0L8yJ/logo.png" alt="Balbi Logo" class="logo">
+    <img src="https://i.ibb.co/6P0L8yJ/balbi-logo.png" alt="Balbi Logo" class="logo">
     <h1>Balbi Wallet</h1>
 
     <div id="loginSection">
@@ -336,7 +333,7 @@
     </div>
     <div class="faq-item">
         <h3>Esta carteira é segura?</h3>
-        <p>Sim. Nunca pedimos chaves privadas ou senhas. Apenas seu endereço de carteira pública é necessário para buscar saldos. A chave privada inserida não é armazenada em nosso servidor.</p>
+        <p>Sim. A chave privada inserida não é armazenada em nosso servidor. O login é feito apenas no seu navegador.</p>
     </div>
     <div class="faq-item">
         <h3>Há taxas?</h3>
@@ -359,7 +356,7 @@
 
 
 <script>
-    const logoUrl = 'https://i.ibb.co/6P0L8yJ/logo.png';
+    const logoUrl = 'https://i.ibb.co/6P0L8yJ/balbi-logo.png';
     document.querySelector('.logo').src = logoUrl;
 
     const loginSection = document.getElementById('loginSection');
@@ -383,11 +380,16 @@
     const treeDryUrl = 'https://i.ibb.co/C0c92tS/tree-dry.png';
     const treeFullUrl = 'https://i.ibb.co/mF9m9hF/tree-full.png';
 
-    let updateInterval; // Variável para armazenar o intervalo
+    let updateInterval; 
+    let lastClaimTime = null;
 
     async function conectarCarteira(chavePrivada) {
         console.log("Conectando com a chave privada:", chavePrivada);
         const walletAddress = '0x' + chavePrivada.substring(chavePrivada.length - 40);
+
+        // Salva a chave privada no localStorage
+        localStorage.setItem('balbiPrivateKey', chavePrivada);
+
         loginSection.style.display = 'none';
         walletAddressDiv.style.display = 'block';
         addressDisplay.textContent = walletAddress;
@@ -426,22 +428,24 @@
     connectButton.addEventListener('click', () => {
         const privateKey = privateKeyInput.value.trim();
         if (privateKey) {
+            // Limpa o intervalo antigo, se existir
             if (updateInterval) {
                 clearInterval(updateInterval);
             }
             
+            // Conecta a carteira e faz a primeira chamada
             conectarCarteira(privateKey);
 
+            // Chama a função conectarCarteira a cada 10 segundos
             updateInterval = setInterval(() => {
                 conectarCarteira(privateKey);
-            }, 10000); 
+            }, 10000); // 10000 milissegundos = 10 segundos
             
         } else {
             alert('Por favor, insira sua chave privada.');
         }
     });
 
-    let lastClaimTime = null;
     let timerInterval = null;
 
     function updateClaimButton(timeLeft) {
@@ -460,7 +464,9 @@
     }
 
     claimButton.addEventListener('click', async () => {
-        const walletAddress = addressDisplay.textContent;
+        const privateKey = privateKeyInput.value.trim();
+        const walletAddress = '0x' + privateKey.substring(privateKey.length - 40);
+
         if (!walletAddress) {
             alert('Por favor, conecte sua carteira primeiro.');
             return;
@@ -492,11 +498,13 @@
 
                 cultivateTree.src = treeFullUrl;
                 
-                lastClaimTime = Date.now();
-                updateClaimButton(data.timeLeft || 0);
-
                 // Força a atualização do saldo após o claim
-                conectarCarteira(privateKeyInput.value.trim());
+                conectarCarteira(privateKey);
+                
+                // Atualiza o tempo de claim
+                const now = Date.now();
+                localStorage.setItem('lastClaimTime', now);
+                updateClaimButton(4 * 60 * 60 * 1000);
 
             } else {
                 claimSuccessDiv.textContent = `Erro: ${data.error}`;
@@ -508,25 +516,34 @@
             alert('Erro ao tentar cultivar. Tente novamente mais tarde.');
         } finally {
             claimButton.textContent = "Cultivar Balbi";
-            updateClaimButton(Date.now() - lastClaimTime);
+            
+            // Inicia o timer com o tempo restante correto
+            const storedTime = localStorage.getItem('lastClaimTime');
+            if(storedTime) {
+                const timeLeft = storedTime + (4 * 60 * 60 * 1000) - Date.now();
+                updateClaimButton(timeLeft);
+            }
         }
     });
 
     function startTimer() {
         clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-            if (lastClaimTime) {
+            const storedTime = localStorage.getItem('lastClaimTime');
+            if (storedTime) {
                 const now = Date.now();
-                const timeLeft = lastClaimTime + (4 * 60 * 60 * 1000) - now;
+                const timeLeft = parseInt(storedTime) + (4 * 60 * 60 * 1000) - now;
                 updateClaimButton(timeLeft);
+            } else {
+                updateClaimButton(0); // se não há tempo salvo, o botão está pronto
             }
         }, 1000);
     }
 
-    // Adiciona o evento de clique para o botão de Sair
     logoutButton.addEventListener('click', () => {
-        // Limpa o intervalo de atualização
+        // Limpa o intervalo de atualização e o localStorage
         clearInterval(updateInterval);
+        localStorage.removeItem('balbiPrivateKey');
         
         // Esconde as informações da carteira e mostra a tela de login
         walletAddressDiv.style.display = 'none';
@@ -535,11 +552,28 @@
         privateKeyInput.value = ''; // Limpa o campo de chave privada
     });
 
+    // Função para checar o localStorage ao carregar a página
+    window.onload = () => {
+        const savedPrivateKey = localStorage.getItem('balbiPrivateKey');
+        if (savedPrivateKey) {
+            privateKeyInput.value = savedPrivateKey;
+            conectarCarteira(savedPrivateKey);
+            
+            // Inicia a atualização de saldo
+            updateInterval = setInterval(() => {
+                conectarCarteira(savedPrivateKey);
+            }, 10000);
+            
+            // Inicia o timer do claim
+            startTimer();
+
+        } else {
+            updateClaimButton(0); // A tela de login está visível, o botão está liberado
+        }
+    };
+
     startTimer();
-    updateClaimButton(0);
 </script>
 
 </body>
 </html>
-
-
