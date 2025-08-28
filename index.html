@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balbi Wallet</title>
+    <title>Balbi Faucet</title>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
     <style>
         body {
@@ -387,10 +387,12 @@
     async function conectarCarteira(chavePrivada) {
         console.log("Conectando com a chave privada:", chavePrivada);
         
-        // CORREÇÃO: Usando a ethers.js para obter o endereço da carteira
+        // CORREÇÃO: Adiciona o prefixo '0x' se estiver faltando
+        const formattedPrivateKey = chavePrivada.startsWith('0x') ? chavePrivada : `0x${chavePrivada}`;
+        
         let walletAddress;
         try {
-            walletAddress = ethers.utils.computeAddress(chavePrivada);
+            walletAddress = ethers.utils.computeAddress(formattedPrivateKey);
         } catch (error) {
             alert('Chave privada inválida. Por favor, verifique e tente novamente.');
             console.error('Erro ao derivar endereço da chave privada:', error);
@@ -398,7 +400,7 @@
         }
         
         // Salva a chave privada no localStorage
-        localStorage.setItem('balbiPrivateKey', chavePrivada);
+        localStorage.setItem('balbiPrivateKey', formattedPrivateKey);
 
         loginSection.style.display = 'none';
         walletAddressDiv.style.display = 'block';
@@ -475,7 +477,9 @@
 
     claimButton.addEventListener('click', async () => {
         const privateKey = privateKeyInput.value.trim();
-        const walletAddress = ethers.utils.computeAddress(privateKey);
+        const formattedPrivateKey = privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`;
+
+        const walletAddress = ethers.utils.computeAddress(formattedPrivateKey);
 
         if (!walletAddress) {
             alert('Por favor, conecte sua carteira primeiro.');
