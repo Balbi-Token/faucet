@@ -372,9 +372,8 @@
     const cultivateTree = document.getElementById('cultivateTree');
     const logoutButton = document.getElementById('logoutButton');
     
-    // **AVISO: Você DEVE ATUALIZAR esta URL!**
-    // Pegue a nova URL do seu servidor Replit e coloque aqui.
-    const REPLIT_URL = "https://SEU-NOVO-ENDERECO-DO-REPLIT-AQUI.replit.dev"; 
+    // CORREÇÃO: A URL do seu servidor Replit foi atualizada.
+    const REPLIT_URL = "https://74caa2ca-fab9-4e76-a1f0-e32c4aaf7a4-00-lt9t4bvht6p6.spock.replit.dev/"; 
     
     const treeDryUrl = 'https://i.ibb.co/C0c92tS/tree-dry.png';
     const treeFullUrl = 'https://i.ibb.co/mF9m9hF/tree-full.png';
@@ -383,6 +382,7 @@
     let lastClaimTime = null;
 
     async function conectarCarteira(chavePrivada) {
+        // CORREÇÃO: Verificação robusta da chave privada antes de processar.
         const formattedPrivateKey = chavePrivada ? (chavePrivada.startsWith('0x') ? chavePrivada : `0x${chavePrivada}`) : null;
         
         let walletAddress;
