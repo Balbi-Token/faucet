@@ -365,23 +365,48 @@
     const claimSuccessDiv = document.getElementById('claimSuccess');
     const cultivateTree = document.getElementById('cultivateTree');
     
+    // **SUA URL DO REPLIT AQUI**
     const REPLIT_URL = "https://fe7420f2-5fc8-4d85-993e-b0a058809c2e-00-1oqqsiotszdke.riker.replit.dev"; 
     
     const treeDryUrl = 'https://i.ibb.co/C0c92tS/tree-dry.png';
     const treeFullUrl = 'https://i.ibb.co/mF9m9hF/tree-full.png';
 
-    // Apenas busca os saldos, sem armazenar a chave privada
-    function conectarCarteira(chavePrivada) {
+    async function conectarCarteira(chavePrivada) {
         console.log("Conectando com a chave privada:", chavePrivada);
         const walletAddress = '0x' + chavePrivada.substring(chavePrivada.length - 40);
         loginSection.style.display = 'none';
         walletAddressDiv.style.display = 'block';
         addressDisplay.textContent = walletAddress;
         walletInfoDiv.style.display = 'block';
-        
-        // Em um projeto real, você buscaria os saldos aqui
-        balbiBalanceSpan.textContent = '...';
-        usdcBalanceSpan.textContent = '...';
+
+        balbiBalanceSpan.textContent = 'Carregando...';
+        usdcBalanceSpan.textContent = 'Carregando...';
+
+        try {
+            const response = await fetch(`${REPLIT_URL}/balance`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ address: walletAddress })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                balbiBalanceSpan.textContent = `${parseFloat(data.balbi).toFixed(2)} BALBI`;
+                usdcBalanceSpan.textContent = `${parseFloat(data.usdc).toFixed(2)} USDC`;
+            } else {
+                console.error('Erro ao buscar saldos:', data.error);
+                balbiBalanceSpan.textContent = 'Erro';
+                usdcBalanceSpan.textContent = 'Erro';
+            }
+
+        } catch (error) {
+            console.error('Erro de conexão ao buscar saldos:', error);
+            balbiBalanceSpan.textContent = 'Erro';
+            usdcBalanceSpan.textContent = 'Erro';
+        }
     }
 
     connectButton.addEventListener('click', () => {
@@ -438,7 +463,6 @@
                 claimSuccessDiv.style.display = 'block';
                 cultivateTree.src = treeFullUrl;
                 
-                // Reinicia o timer do front-end com base no tempo de resposta
                 lastClaimTime = Date.now();
                 updateClaimButton(data.timeLeft || 0);
             } else {
@@ -454,9 +478,8 @@
         }
     });
 
-    // Função para manter o timer em exibição
     function startTimer() {
-        clearInterval(timerInterval); // Limpa o timer anterior
+        clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             if (lastClaimTime) {
                 const now = Date.now();
@@ -466,9 +489,8 @@
         }, 1000);
     }
 
-    // Inicializa o timer quando a página carrega
     startTimer();
-    updateClaimButton(0); // Garante que o botão comece pronto
+    updateClaimButton(0);
 </script>
 
 </body>
