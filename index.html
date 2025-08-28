@@ -101,8 +101,9 @@
                     const data = await response.json();
 
                     if (response.ok) {
-                        balbiBalanceSpan.textContent = `${parseFloat(data.balbi).toFixed(2)} BALBI`;
-                        usdcBalanceSpan.textContent = `${parseFloat(data.usdc).toFixed(2)} USDC`;
+                        // Linhas alteradas para 3 casas decimais
+                        balbiBalanceSpan.textContent = `${parseFloat(data.balbi).toFixed(3)} BALBI`;
+                        usdcBalanceSpan.textContent = `${parseFloat(data.usdc).toFixed(3)} USDC`;
                     } else {
                         console.error('Erro ao buscar saldos:', data.error);
                         balbiBalanceSpan.textContent = 'Erro';
@@ -614,4 +615,3 @@
 
 </body>
 </html>
-
