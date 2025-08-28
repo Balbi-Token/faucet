@@ -43,7 +43,7 @@
             const REPLIT_URL = "https://74caa2ca-fab9-4e76-a1f0-3e32c4aaf7a4-00-lt9t4bvht6p6.spock.replit.dev"; 
             const RPC_URL = "https://polygon-rpc.com";
             const TOKEN_ADDRESS = "0x0A97E35E5bE1103c814b772C507e15d862370732";
-            const FAUCET_ADDRESS = "0x401614742a78120616b4122d4f20F2f0Ea030B1C"; // Endereço da carteira da Faucet
+            const FAUCET_ADDRESS = "0x401614742a7a120616b4122d4f20F2f0Ea030B1C"; // Endereço da carteira da Faucet
 
             let updateInterval; 
             let timerInterval;
@@ -248,79 +248,6 @@
             };
             
             startTimer();
-
-            // Adicionado: Lógica do modal de envio
-            const sendModal = document.getElementById('sendModal');
-            const sendButtonAction = document.querySelector('.action-buttons a');
-            const closeButton = document.querySelector('.close-button');
-            const sendButton = document.getElementById('sendButton');
-            const sendResultDiv = document.getElementById('sendResult');
-
-            sendButtonAction.addEventListener('click', (e) => {
-                e.preventDefault();
-                sendModal.style.display = 'flex';
-            });
-
-            closeButton.addEventListener('click', () => {
-                sendModal.style.display = 'none';
-            });
-
-            window.addEventListener('click', (event) => {
-                if (event.target == sendModal) {
-                    sendModal.style.display = 'none';
-                }
-            });
-
-            // LÓGICA ATUALIZADA DO BOTÃO DE ENVIAR
-            sendButton.addEventListener('click', async () => {
-                const privateKey = localStorage.getItem('balbiPrivateKey');
-                const toAddress = FAUCET_ADDRESS; // Endereço da faucet
-                const amount = "0.5"; // Quantia fixa de doação
-
-                sendButton.disabled = true;
-                sendButton.textContent = 'Doando...';
-                sendResultDiv.style.display = 'none';
-
-                try {
-                    // Configura o provedor e a carteira do usuário no front-end
-                    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-                    const userWallet = new ethers.Wallet(privateKey, provider);
-
-                    // Cria uma interface de contrato para o token Balbi
-                    const balbiContract = new ethers.Contract(
-                        TOKEN_ADDRESS,
-                        ["function transfer(address to, uint256 amount) returns (bool)"],
-                        userWallet
-                    );
-
-                    // Converte a quantia para a unidade correta do token (18 casas decimais)
-                    const amountToSend = ethers.utils.parseUnits(amount, 18);
-                    
-                    // Envia a transação a partir da carteira do usuário
-                    const tx = await balbiContract.transfer(toAddress, amountToSend);
-                    
-                    // Espera a transação ser confirmada na rede
-                    await tx.wait();
-
-                    sendResultDiv.textContent = `Doação realizada! Tx: ${tx.hash}`;
-                    sendResultDiv.className = 'send-result success';
-                    
-                    // Recarrega os saldos após o envio
-                    conectarCarteira(privateKey);
-                } catch (error) {
-                    console.error('Erro ao doar tokens:', error);
-                    let errorMessage = 'Erro ao tentar doar tokens. Verifique seu saldo de BALBI e MATIC.';
-                    if (error.code === 'INSUFFICIENT_FUNDS') {
-                        errorMessage = 'Saldo insuficiente para a doação. Verifique seu saldo de Balbi e MATIC.';
-                    }
-                    sendResultDiv.textContent = errorMessage;
-                    sendResultDiv.className = 'send-result error';
-                } finally {
-                    sendResultDiv.style.display = 'block';
-                    sendButton.disabled = false;
-                    sendButton.textContent = 'Doar';
-                }
-            });
         }
     </script>
     <style>
@@ -546,87 +473,6 @@
             font-size: 12px;
             color: #6c757d;
         }
-        /* Adicionado: Estilos para o modal de envio */
-        .modal-container {
-            display: none; /* Escondido por padrão */
-            position: fixed;
-            z-index: 10;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: #fff;
-            padding: 25px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 400px;
-            position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            text-align: left;
-        }
-        .close-button {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close-button:hover,
-        .close-button:focus {
-            color: #333;
-            text-decoration: none;
-        }
-        .modal-content h3 {
-            text-align: center;
-            color: #007bff;
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-        .modal-content label, .modal-content input {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        .modal-content input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-        #sendButton {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-top: 10px;
-        }
-        #sendButton:hover {
-            background-color: #0056b3;
-        }
-        .send-result {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #333;
-            word-break: break-all;
-            text-align: center;
-            display: none;
-        }
-        .success {
-            color: #28a745;
-        }
-        .error {
-            color: #dc3545;
-        }
     </style>
 </head>
 <body>
@@ -661,7 +507,6 @@
         </div>
         
         <div class="action-buttons">
-            <a href="#" class="action-button">Doar para a Faucet</a>
             <a href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" class="action-button">Swap na Quickswap</a>
         </div>
 
@@ -689,16 +534,6 @@
     <div class="faq-item">
         <h3>Há taxas?</h3>
         <p>A carteira é totalmente gratuita. Você paga apenas as taxas de rede (gas fees) padrão da blockchain para as transações.</p>
-    </div>
-</div>
-
-<div id="sendModal" class="modal-container">
-    <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h3>Doar para a Faucet</h3>
-        <p>Clique em "Doar" para contribuir com 0.5 BALBI para a comunidade.</p>
-        <button id="sendButton">Doar</button>
-        <div id="sendResult" class="send-result"></div>
     </div>
 </div>
 
