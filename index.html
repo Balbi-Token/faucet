@@ -144,37 +144,6 @@
             color: #155724;
         }
         
-        .tree-container {
-            margin-bottom: 15px;
-        }
-
-        .tree-image {
-            width: 100px;
-            height: auto;
-        }
-
-        #claimButton {
-            width: 100%;
-            padding: 12px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        #claimButton:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-        }
-
-        #claimButton:hover:not(:disabled) {
-            background-color: #218838;
-        }
-
         .claim-timer {
             margin-top: 10px;
             font-size: 14px;
@@ -314,9 +283,6 @@
         <div class="faucet-card">
             <h3>Cultive o Ecossistema BalbiCO2!</h3>
             <p>Cultive Balbi a cada 4 horas e ajude o ecossistema a crescer.</p>
-            <div class="tree-container">
-                <img id="cultivateTree" src="https://i.ibb.co/C0c92tS/tree-dry.png" alt="Árvore Seca" class="tree-image">
-            </div>
             <button id="claimButton">Cultivar Balbi</button>
             <div id="claimTimer" class="claim-timer"></div>
             <div id="claimSuccess" class="claim-success">Tokens enviados com sucesso!</div>
@@ -369,15 +335,11 @@
     const claimTimerDiv = document.getElementById('claimTimer');
     const claimSuccessDiv = document.getElementById('claimSuccess');
     const claimHashDiv = document.getElementById('claimHash');
-    const cultivateTree = document.getElementById('cultivateTree');
     const logoutButton = document.getElementById('logoutButton');
     
     // URL do servidor Replit que você me forneceu.
     const REPLIT_URL = "https://74caa2ca-fab9-4e76-a1f0-3e32c4aaf7a4-00-lt9t4bvht6p6.spock.replit.dev/"; 
     
-    const treeDryUrl = 'https://i.ibb.co/C0c92tS/tree-dry.png';
-    const treeFullUrl = 'https://i.ibb.co/mF9m9hF/tree-full.png';
-
     let updateInterval; 
     let lastClaimTime = null;
 
@@ -461,14 +423,12 @@
         if (timeLeft <= 0) {
             claimButton.disabled = false;
             claimTimerDiv.textContent = 'Pronto para cultivar!';
-            cultivateTree.src = treeDryUrl;
         } else {
             claimButton.disabled = true;
             const hours = Math.floor(timeLeft / (1000 * 60 * 60));
             const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
             claimTimerDiv.textContent = `Próximo cultivo em: ${hours}h ${minutes}m ${seconds}s`;
-            cultivateTree.src = treeDryUrl;
         }
     }
 
@@ -507,11 +467,9 @@
                 claimHashDiv.textContent = `Tx Hash: ${data.txHash}`;
                 claimHashDiv.style.display = 'block';
 
-                cultivateTree.src = treeFullUrl;
-                
                 conectarCarteira(privateKey);
                 
-                const now = Date.24;
+                const now = Date.now();
                 localStorage.setItem('lastClaimTime', now);
                 updateClaimButton(4 * 60 * 60 * 1000);
 
