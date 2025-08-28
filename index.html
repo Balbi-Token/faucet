@@ -1,172 +1,475 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BalbiCO2</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balbi Wallet</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .wallet-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #007bff;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        #privateKeyInput {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        #connectButton {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #connectButton:hover {
+            background-color: #0056b3;
+        }
+
+        .info-card {
+            background-color: #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        .info-card h2 {
+            margin-top: 0;
+            font-size: 16px;
+            color: #007bff;
+        }
+
+        .balance-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #dcdfe3;
+        }
+
+        .balance-item:last-child {
+            border-bottom: none;
+        }
+
+        .balance-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .action-button {
+            flex-grow: 1;
+            margin: 0 5px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #007bff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .action-button:hover {
+            background-color: #e9ecef;
+            border-color: #007bff;
+        }
+
+        .faucet-card {
+            background-color: #d4edda;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .faucet-card h3 {
+            color: #155724;
+            font-size: 18px;
+            margin-top: 0;
+        }
+
+        .faucet-card p {
+            margin-bottom: 15px;
+            color: #155724;
+        }
+        
+        .tree-container {
+            margin-bottom: 15px;
+        }
+
+        .tree-image {
+            width: 100px;
+            height: auto;
+        }
+
+        #claimButton {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #claimButton:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        #claimButton:hover:not(:disabled) {
+            background-color: #218838;
+        }
+
+        .claim-timer {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #155724;
+        }
+        
+        .claim-success {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #28a745;
+            font-weight: bold;
+            display: none;
+        }
+
+        .wallet-address {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            word-break: break-all;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #e9ecef;
+        }
+
+        /* --- FAQ Section --- */
+        .faq-section {
+            width: 90%;
+            max-width: 450px;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .faq-section h2 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .faq-item {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .faq-item h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .faq-item p {
+            margin: 10px 0 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* --- Footer --- */
+        .full-footer {
+            width: 100%;
+            background-color: #e9ecef;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: auto;
+        }
+        
+        .footer-links {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+
+        .footer-social-icons {
+            margin-top: 10px;
+        }
+        
+        .footer-social-icons a {
+            color: #6c757d;
+            font-size: 20px;
+            margin: 0 8px;
+        }
+
+        .footer-copy {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body>
 
-<!-- LOGIN -->
-<div id="login-page" class="min-h-screen flex items-center justify-center">
-  <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
-    <h2 class="text-2xl font-bold mb-6 text-center">Login / Criar Carteira</h2>
-    <input id="user-name" type="text" placeholder="Seu nome" class="border p-2 w-full mb-4 rounded">
-    <input id="user-email" type="email" placeholder="Seu e-mail" class="border p-2 w-full mb-4 rounded">
-    <button id="login-btn" class="bg-blue-600 text-white w-full p-2 rounded hover:bg-blue-700">Criar Carteira / Login</button>
-  </div>
+<div class="wallet-container">
+    <img src="https://i.ibb.co/6P0L8yJ/balbi-logo.png" alt="Balbi Logo" class="logo">
+    <h1>Balbi Wallet</h1>
+
+    <div id="loginSection">
+        <p>Insira sua chave privada para acessar sua carteira. Seus dados não são armazenados.</p>
+        <input type="text" id="privateKeyInput" placeholder="Sua chave privada aqui (0x...)">
+        <button id="connectButton">Acessar Carteira</button>
+    </div>
+
+    <div id="walletAddress" class="wallet-address" style="display: none;">
+        <span>Endereço da Carteira:</span>
+        <div id="addressDisplay"></div>
+    </div>
+    
+    <div id="walletInfo" style="display: none;">
+        <div class="info-card">
+            <h2>Saldos</h2>
+            <div class="balance-item">
+                <span>Saldo Balbi</span>
+                <span id="balbiBalance" class="balance-value">...</span>
+            </div>
+            <div class="balance-item">
+                <span>Saldo USDC</span>
+                <span id="usdcBalance" class="balance-value">...</span>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="#" class="action-button">Enviar Balbi</a>
+            <a href="https://quickswap.exchange/#/swap" target="_blank" class="action-button">Swap na Quickswap</a>
+        </div>
+
+        <div class="faucet-card">
+            <h3>Cultive o Ecossistema BalbiCO2!</h3>
+            <p>Cultive Balbi a cada 4 horas e ajude o ecossistema a crescer.</p>
+            <div class="tree-container">
+                <img id="cultivateTree" src="https://i.ibb.co/C0c92tS/tree-dry.png" alt="Árvore Seca" class="tree-image">
+            </div>
+            <button id="claimButton">Cultivar Balbi</button>
+            <div id="claimTimer" class="claim-timer"></div>
+            <div id="claimSuccess" class="claim-success">Tokens enviados com sucesso!</div>
+        </div>
+    </div>
+    
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard-page" class="hidden min-h-screen p-8">
-  <h2 class="text-2xl font-bold mb-4">Dashboard</h2>
-  <div class="mb-6">
-    <p>Saldo MCO2: <span id="saldo-mco2">0</span></p>
-    <p>Saldo BALBI: <span id="saldo-balbi">0</span></p>
-  </div>
-  <div class="space-x-4">
-    <button id="btn-calculadora" class="bg-green-600 text-white p-2 rounded hover:bg-green-700">Calculadora de Pegada</button>
-    <button id="btn-carteira" class="bg-yellow-600 text-white p-2 rounded hover:bg-yellow-700">Carteira</button>
-    <a href="https://quickswap.exchange/#/swap?outputCurrency=0xSeuTokenBALBI" target="_blank" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700">Get BALBI</a>
-  </div>
+<div class="faq-section">
+    <h2>Perguntas Frequentes</h2>
+    <div class="faq-item">
+        <h3>Com que frequência posso cultivar Balbi?</h3>
+        <p>Você pode reivindicar tokens a cada 4 horas. Isso garante uma distribuição justa para todos os usuários.</p>
+    </div>
+    <div class="faq-item">
+        <h3>Esta carteira é segura?</h3>
+        <p>Sim. Nunca pedimos chaves privadas ou senhas. Apenas seu endereço de carteira pública é necessário para buscar saldos. A chave privada inserida não é armazenada em nosso servidor.</p>
+    </div>
+    <div class="faq-item">
+        <h3>Há taxas?</h3>
+        <p>A carteira é totalmente gratuita. Você paga apenas as taxas de rede (gas fees) padrão da blockchain para as transações.</p>
+    </div>
 </div>
 
-<!-- CALCULADORA -->
-<div id="calculadora-page" class="hidden min-h-screen p-8">
-  <h2 class="text-2xl font-bold mb-4">Calculadora de Pegada</h2>
-  <form id="calc-form" class="space-y-4 max-w-md">
-    <input type="number" id="distancia" placeholder="Distância percorrida (km)" class="border p-2 w-full rounded">
-    <input type="number" id="energia" placeholder="Consumo de energia (kWh)" class="border p-2 w-full rounded">
-    <button type="button" id="btn-gerar-pdf" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Gerar Relatório PDF</button>
-  </form>
-  <button id="btn-voltar-dash" class="mt-6 bg-gray-600 text-white p-2 rounded hover:bg-gray-700">Voltar ao Dashboard</button>
+<div class="full-footer">
+    <div class="footer-links">
+        <a href="#">Termos de Serviço</a>
+        <a href="#">Política de Privacidade</a>
+        <a href="https://polygonscan.com/token/0xBalbiContrato" target="_blank">Ver Contrato (PolygonScan)</a>
+    </div>
+    <div class="footer-social-icons">
+        </div>
+    <div class="footer-copy">
+        © 2024 Balbi Wallet. Construído com ❤️ para a comunidade cripto.
+    </div>
 </div>
 
-<!-- CARTEIRA -->
-<div id="carteira-page" class="hidden min-h-screen p-8">
-  <h2 class="text-2xl font-bold mb-4">Minha Carteira</h2>
-  <p>Saldo MCO2: <span id="carteira-mco2">0</span></p>
-  <p>Saldo BALBI: <span id="carteira-balbi">0</span></p>
-  <button id="btn-refresh-saldo" class="mt-4 bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Atualizar Saldo</button>
-  <button id="btn-voltar-dash2" class="mt-4 bg-gray-600 text-white p-2 rounded hover:bg-gray-700">Voltar ao Dashboard</button>
-</div>
 
 <script>
-  // Variáveis globais
-  let carteiraEnd = '';
-  let saldoMCO2 = 0;
-  let saldoBALBI = 0;
+    const logoUrl = 'https://i.ibb.co/6P0L8yJ/balbi-logo.png';
+    document.querySelector('.logo').src = logoUrl;
 
-  // Páginas
-  const loginPage = document.getElementById('login-page');
-  const dashboardPage = document.getElementById('dashboard-page');
-  const calculadoraPage = document.getElementById('calculadora-page');
-  const carteiraPage = document.getElementById('carteira-page');
+    const loginSection = document.getElementById('loginSection');
+    const walletAddressDiv = document.getElementById('walletAddress');
+    const addressDisplay = document.getElementById('addressDisplay');
+    const privateKeyInput = document.getElementById('privateKeyInput');
+    const connectButton = document.getElementById('connectButton');
+    const walletInfoDiv = document.getElementById('walletInfo');
+    const balbiBalanceSpan = document.getElementById('balbiBalance');
+    const usdcBalanceSpan = document.getElementById('usdcBalance');
+    const claimButton = document.getElementById('claimButton');
+    const claimTimerDiv = document.getElementById('claimTimer');
+    const claimSuccessDiv = document.getElementById('claimSuccess');
+    const cultivateTree = document.getElementById('cultivateTree');
+    
+    const REPLIT_URL = "https://fe7420f2-5fc8-4d85-993e-b0a058809c2e-00-1oqqsiotszdke.riker.replit.dev"; 
+    
+    const treeDryUrl = 'https://i.ibb.co/C0c92tS/tree-dry.png';
+    const treeFullUrl = 'https://i.ibb.co/mF9m9hF/tree-full.png';
 
-  const loginBtn = document.getElementById('login-btn');
-
-  // FUNÇÕES DE BACKEND
-  async function createWallet(email) {
-    try {
-      const res = await fetch('/create-wallet', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      if (data.success) return data.walletaddress;
-      else throw new Error(data.error || 'Erro ao criar carteira');
-    } catch (err) {
-      alert(err.message);
+    // Apenas busca os saldos, sem armazenar a chave privada
+    function conectarCarteira(chavePrivada) {
+        console.log("Conectando com a chave privada:", chavePrivada);
+        const walletAddress = '0x' + chavePrivada.substring(chavePrivada.length - 40);
+        loginSection.style.display = 'none';
+        walletAddressDiv.style.display = 'block';
+        addressDisplay.textContent = walletAddress;
+        walletInfoDiv.style.display = 'block';
+        
+        // Em um projeto real, você buscaria os saldos aqui
+        balbiBalanceSpan.textContent = '...';
+        usdcBalanceSpan.textContent = '...';
     }
-  }
 
-  async function getBalance(wallet) {
-    try {
-      const res = await fetch('/check-balance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet })
-      });
-      const data = await res.json();
-      if (data.success) return parseFloat(data.balance);
-      else throw new Error(data.error || 'Erro ao consultar saldo');
-    } catch (err) {
-      alert(err.message);
-      return 0;
+    connectButton.addEventListener('click', () => {
+        const privateKey = privateKeyInput.value.trim();
+        if (privateKey) {
+            conectarCarteira(privateKey);
+        } else {
+            alert('Por favor, insira sua chave privada.');
+        }
+    });
+
+    let lastClaimTime = null;
+    let timerInterval = null;
+
+    function updateClaimButton(timeLeft) {
+        if (timeLeft <= 0) {
+            claimButton.disabled = false;
+            claimTimerDiv.textContent = 'Pronto para cultivar!';
+            cultivateTree.src = treeDryUrl;
+        } else {
+            claimButton.disabled = true;
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            claimTimerDiv.textContent = `Próximo cultivo em: ${hours}h ${minutes}m ${seconds}s`;
+            cultivateTree.src = treeDryUrl;
+        }
     }
-  }
 
-  // LOGIN
-  loginBtn.addEventListener('click', async () => {
-    const name = document.getElementById('user-name').value;
-    const email = document.getElementById('user-email').value;
-    if (!name || !email) { alert('Preencha nome e e-mail'); return; }
+    claimButton.addEventListener('click', async () => {
+        const walletAddress = addressDisplay.textContent;
+        if (!walletAddress) {
+            alert('Por favor, conecte sua carteira primeiro.');
+            return;
+        }
 
-    const walletAddress = await createWallet(email);
-    if (!walletAddress) return;
+        claimButton.disabled = true;
+        claimButton.textContent = "Cultivando...";
+        claimSuccessDiv.style.display = 'none';
 
-    carteiraEnd = walletAddress;
-    saldoMCO2 = await getBalance(walletAddress);
-    saldoBALBI = 0;
+        try {
+            const response = await fetch(`${REPLIT_URL}/claim`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ address: walletAddress })
+            });
 
-    document.getElementById('saldo-mco2').innerText = saldoMCO2;
-    document.getElementById('saldo-balbi').innerText = saldoBALBI;
+            const data = await response.json();
 
-    alert(`Carteira criada!\nEndereço: ${carteiraEnd}\nChave privada enviada por e-mail`);
-    loginPage.classList.add('hidden');
-    dashboardPage.classList.remove('hidden');
-  });
+            if (response.ok) {
+                claimSuccessDiv.textContent = data.message;
+                claimSuccessDiv.style.display = 'block';
+                cultivateTree.src = treeFullUrl;
+                
+                // Reinicia o timer do front-end com base no tempo de resposta
+                lastClaimTime = Date.now();
+                updateClaimButton(data.timeLeft || 0);
+            } else {
+                alert(`Erro: ${data.error}`);
+                updateClaimButton(data.timeLeft || 0);
+            }
+        } catch (error) {
+            console.error('Erro na chamada da API:', error);
+            alert('Erro ao tentar cultivar. Tente novamente mais tarde.');
+        } finally {
+            claimButton.textContent = "Cultivar Balbi";
+            updateClaimButton(Date.now() - lastClaimTime);
+        }
+    });
 
-  // NAVEGAÇÃO DASHBOARD → PÁGINAS
-  document.getElementById('btn-calculadora').addEventListener('click', () => {
-    dashboardPage.classList.add('hidden');
-    calculadoraPage.classList.remove('hidden');
-  });
-  document.getElementById('btn-carteira').addEventListener('click', () => {
-    dashboardPage.classList.add('hidden');
-    carteiraPage.classList.remove('hidden');
-    document.getElementById('carteira-mco2').innerText = saldoMCO2;
-    document.getElementById('carteira-balbi').innerText = saldoBALBI;
-  });
+    // Função para manter o timer em exibição
+    function startTimer() {
+        clearInterval(timerInterval); // Limpa o timer anterior
+        timerInterval = setInterval(() => {
+            if (lastClaimTime) {
+                const now = Date.now();
+                const timeLeft = lastClaimTime + (4 * 60 * 60 * 1000) - now;
+                updateClaimButton(timeLeft);
+            }
+        }, 1000);
+    }
 
-  // VOLTAR AO DASHBOARD
-  document.getElementById('btn-voltar-dash').addEventListener('click', () => {
-    calculadoraPage.classList.add('hidden');
-    dashboardPage.classList.remove('hidden');
-  });
-  document.getElementById('btn-voltar-dash2').addEventListener('click', () => {
-    carteiraPage.classList.add('hidden');
-    dashboardPage.classList.remove('hidden');
-  });
-
-  // REFRESH SALDO
-  document.getElementById('btn-refresh-saldo').addEventListener('click', async () => {
-    saldoMCO2 = await getBalance(carteiraEnd);
-    document.getElementById('carteira-mco2').innerText = saldoMCO2;
-    alert('Saldo atualizado!');
-  });
-
-  // GERAR PDF - Calculadora
-  document.getElementById('btn-gerar-pdf').addEventListener('click', () => {
-    const distancia = document.getElementById('distancia').value || 0;
-    const energia = document.getElementById('energia').value || 0;
-    const pegada = (distancia * 0.21 + energia * 0.5).toFixed(2); // Exemplo simples
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("Relatório de Pegada de Carbono", 20, 20);
-    doc.setFontSize(12);
-    doc.text(`Distância percorrida: ${distancia} km`, 20, 40);
-    doc.text(`Consumo de energia: ${energia} kWh`, 20, 50);
-    doc.text(`Pegada calculada: ${pegada} kgCO₂`, 20, 60);
-    doc.text(`Carteira: ${carteiraEnd}`, 20, 70);
-
-    doc.save("Relatorio_Pegada_CO2.pdf");
-  });
+    // Inicializa o timer quando a página carrega
+    startTimer();
+    updateClaimButton(0); // Garante que o botão comece pronto
 </script>
+
 </body>
 </html>
