@@ -473,6 +473,42 @@
             font-size: 12px;
             color: #6c757d;
         }
+        /* Novo estilo para o banner de cookies */
+        #cookieConsent {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 15px 20px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none; /* Inicia escondido, a lógica JS o mostra */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #cookieConsent p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #f8f9fa;
+        }
+        #acceptCookiesButton {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #acceptCookiesButton:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -549,6 +585,32 @@
         © 2025 Balbi Faucet. Construído com ❤️ para a comunidade cripto.
     </div>
 </div>
+
+<div id="cookieConsent">
+    <p>Utilizamos cookies para armazenar sua chave privada localmente e melhorar a sua experiência. Ao continuar, você concorda com nossa Política de Privacidade.</p>
+    <button id="acceptCookiesButton">Aceitar</button>
+</div>
+
+<script>
+    // Lógica para o banner de cookies
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const consentBanner = document.getElementById('cookieConsent');
+        const acceptButton = document.getElementById('acceptCookiesButton');
+
+        // Se o consentimento já foi dado, não exibe o banner
+        if (localStorage.getItem('cookieConsent')) {
+            consentBanner.style.display = 'none';
+        } else {
+            consentBanner.style.display = 'flex';
+        }
+
+        // Ao clicar em Aceitar, esconde o banner e salva o consentimento
+        acceptButton.addEventListener('click', () => {
+            localStorage.setItem('cookieConsent', 'true');
+            consentBanner.style.display = 'none';
+        });
+    });
+</script>
 
 </body>
 </html>
