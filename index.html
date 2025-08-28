@@ -371,6 +371,8 @@
     const treeDryUrl = 'https://i.ibb.co/C0c92tS/tree-dry.png';
     const treeFullUrl = 'https://i.ibb.co/mF9m9hF/tree-full.png';
 
+    let updateInterval; // Variável para armazenar o intervalo
+
     async function conectarCarteira(chavePrivada) {
         console.log("Conectando com a chave privada:", chavePrivada);
         const walletAddress = '0x' + chavePrivada.substring(chavePrivada.length - 40);
@@ -412,7 +414,19 @@
     connectButton.addEventListener('click', () => {
         const privateKey = privateKeyInput.value.trim();
         if (privateKey) {
+            // Limpa o intervalo antigo, se existir
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+            
+            // Conecta a carteira e faz a primeira chamada
             conectarCarteira(privateKey);
+
+            // Chama a função conectarCarteira a cada 10 segundos
+            updateInterval = setInterval(() => {
+                conectarCarteira(privateKey);
+            }, 10000); // 10000 milissegundos = 10 segundos
+            
         } else {
             alert('Por favor, insira sua chave privada.');
         }
