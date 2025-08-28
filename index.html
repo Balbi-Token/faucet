@@ -17,6 +17,7 @@
             margin: 0;
             color: #333;
         }
+
         .wallet-container {
             background-color: #ffffff;
             border-radius: 12px;
@@ -26,20 +27,24 @@
             max-width: 450px;
             text-align: center;
         }
+
         .logo {
             width: 80px;
             margin-bottom: 20px;
         }
+
         h1 {
             color: #007bff;
             font-size: 24px;
             margin-bottom: 10px;
         }
+
         p {
             color: #666;
             font-size: 14px;
             margin-bottom: 25px;
         }
+
         #privateKeyInput {
             width: calc(100% - 20px);
             padding: 10px;
@@ -48,6 +53,7 @@
             border-radius: 8px;
             font-size: 14px;
         }
+
         #connectButton {
             width: 100%;
             padding: 12px;
@@ -60,9 +66,11 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         #connectButton:hover {
             background-color: #0056b3;
         }
+
         .info-card {
             background-color: #e9ecef;
             border-radius: 8px;
@@ -70,11 +78,13 @@
             margin-top: 25px;
             text-align: left;
         }
+
         .info-card h2 {
             margin-top: 0;
             font-size: 16px;
             color: #007bff;
         }
+
         .balance-item {
             display: flex;
             justify-content: space-between;
@@ -82,18 +92,22 @@
             padding: 8px 0;
             border-bottom: 1px solid #dcdfe3;
         }
+
         .balance-item:last-child {
             border-bottom: none;
         }
+
         .balance-value {
             font-size: 18px;
             font-weight: bold;
         }
+        
         .action-buttons {
             display: flex;
             justify-content: space-between;
             margin-top: 20px;
         }
+
         .action-button {
             flex-grow: 1;
             margin: 0 5px;
@@ -106,32 +120,39 @@
             text-decoration: none;
             transition: all 0.3s ease;
         }
+
         .action-button:hover {
             background-color: #e9ecef;
             border-color: #007bff;
         }
+
         .faucet-card {
             background-color: #d4edda;
             border-radius: 8px;
             padding: 20px;
             margin-top: 20px;
         }
+
         .faucet-card h3 {
             color: #155724;
             font-size: 18px;
             margin-top: 0;
         }
+
         .faucet-card p {
             margin-bottom: 15px;
             color: #155724;
         }
+        
         .tree-container {
             margin-bottom: 15px;
         }
+
         .tree-image {
             width: 100px;
             height: auto;
         }
+
         #claimButton {
             width: 100%;
             padding: 12px;
@@ -144,18 +165,22 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         #claimButton:disabled {
             background-color: #6c757d;
             cursor: not-allowed;
         }
+
         #claimButton:hover:not(:disabled) {
             background-color: #218838;
         }
+
         .claim-timer {
             margin-top: 10px;
             font-size: 14px;
             color: #155724;
         }
+        
         .claim-success {
             margin-top: 10px;
             font-size: 14px;
@@ -163,12 +188,14 @@
             font-weight: bold;
             display: none;
         }
+
         .claim-hash {
             font-size: 12px;
             color: #666;
             margin-top: 5px;
             word-break: break-all;
         }
+
         .wallet-address {
             margin-top: 10px;
             font-size: 14px;
@@ -179,17 +206,20 @@
             border-radius: 4px;
             background-color: #e9ecef;
         }
+
         .faq-section {
             width: 90%;
             max-width: 450px;
             margin-top: 40px;
             margin-bottom: 40px;
         }
+
         .faq-section h2 {
             text-align: center;
             color: #007bff;
             margin-bottom: 20px;
         }
+
         .faq-item {
             background-color: #ffffff;
             border-radius: 8px;
@@ -197,15 +227,18 @@
             padding: 20px;
             margin-bottom: 15px;
         }
+
         .faq-item h3 {
             margin: 0;
             font-size: 16px;
         }
+
         .faq-item p {
             margin: 10px 0 0;
             font-size: 14px;
             color: #666;
         }
+
         .full-footer {
             width: 100%;
             background-color: #e9ecef;
@@ -213,20 +246,28 @@
             text-align: center;
             margin-top: auto;
         }
+        
+        .footer-links {
+            margin-bottom: 10px;
+        }
+        
         .footer-links a {
             color: #007bff;
             text-decoration: none;
             margin: 0 10px;
             font-size: 14px;
         }
+
         .footer-social-icons {
             margin-top: 10px;
         }
+        
         .footer-social-icons a {
             color: #6c757d;
             font-size: 20px;
             margin: 0 8px;
         }
+
         .footer-copy {
             margin-top: 15px;
             font-size: 12px;
@@ -235,19 +276,23 @@
     </style>
 </head>
 <body>
+
 <div class="wallet-container">
     <img src="logo.png" alt="Balbi Logo" class="logo">
     <h1>Balbi Faucet</h1>
+
     <div id="loginSection">
         <p>Insira sua chave privada para acessar sua carteira. Seus dados não são armazenados.</p>
         <input type="text" id="privateKeyInput" placeholder="Sua chave privada aqui (0x...)">
         <button id="connectButton">Acessar Carteira</button>
     </div>
+
     <div id="walletAddress" class="wallet-address" style="display: none;">
         <span>Endereço da Carteira:</span>
         <div id="addressDisplay"></div>
         <button id="logoutButton" style="margin-top:10px; padding: 5px 10px; font-size: 12px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Sair</button>
     </div>
+    
     <div id="walletInfo" style="display: none;">
         <div class="info-card">
             <h2>Saldos</h2>
@@ -260,10 +305,12 @@
                 <span id="usdcBalance" class="balance-value">...</span>
             </div>
         </div>
+        
         <div class="action-buttons">
             <a href="#" class="action-button">Enviar Balbi</a>
             <a href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" class="action-button">Swap na Quickswap</a>
         </div>
+
         <div class="faucet-card">
             <h3>Cultive o Ecossistema BalbiCO2!</h3>
             <p>Cultive Balbi a cada 4 horas e ajude o ecossistema a crescer.</p>
@@ -276,7 +323,9 @@
             <div id="claimHash" class="claim-hash" style="display: none;"></div>
         </div>
     </div>
+    
 </div>
+
 <div class="faq-section">
     <h2>Perguntas Frequentes</h2>
     <div class="faq-item">
@@ -292,6 +341,7 @@
         <p>A carteira é totalmente gratuita. Você paga apenas as taxas de rede (gas fees) padrão da blockchain para as transações.</p>
     </div>
 </div>
+
 <div class="full-footer">
     <div class="footer-links">
         <a href="#">Termos de Serviço</a>
@@ -304,6 +354,8 @@
         © 2024 Balbi Faucet. Construído com ❤️ para a comunidade cripto.
     </div>
 </div>
+
+
 <script>
     const loginSection = document.getElementById('loginSection');
     const walletAddressDiv = document.getElementById('walletAddress');
@@ -320,7 +372,8 @@
     const cultivateTree = document.getElementById('cultivateTree');
     const logoutButton = document.getElementById('logoutButton');
     
-    const REPLIT_URL = "https://74caa2ca-fab9-4e76-a1f0-e32c4aaf7a4-00-lt9t4bvht6p6.spock.replit.dev/"; 
+    // URL do servidor Replit que você me forneceu.
+    const REPLIT_URL = "https://74caa2ca-fab9-4e76-a1f0-3e32c4aaf7a4-00-lt9t4bvht6p6.spock.replit.dev/"; 
     
     const treeDryUrl = 'https://i.ibb.co/C0c92tS/tree-dry.png';
     const treeFullUrl = 'https://i.ibb.co/mF9m9hF/tree-full.png';
@@ -331,7 +384,6 @@
     async function conectarCarteira(chavePrivada) {
         const formattedPrivateKey = chavePrivada ? (chavePrivada.startsWith('0x') ? chavePrivada : `0x${chavePrivada}`) : null;
         
-        // NOVO: Adicionei esta linha para ajudar a depurar o problema
         console.log(`Chave recebida (sem o 0x e espaços): ${formattedPrivateKey.slice(2)} | Tamanho: ${formattedPrivateKey.slice(2).length}`);
 
         let walletAddress;
@@ -459,7 +511,7 @@
                 
                 conectarCarteira(privateKey);
                 
-                const now = Date.now();
+                const now = Date.24;
                 localStorage.setItem('lastClaimTime', now);
                 updateClaimButton(4 * 60 * 60 * 1000);
 
@@ -524,5 +576,6 @@
 
     startTimer();
 </script>
+
 </body>
 </html>
