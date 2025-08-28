@@ -1,3 +1,24 @@
+Você identificou um erro crítico no seu código HTML. O problema não está no seu servidor Replit, mas sim na forma como o seu site está **derivando o endereço da carteira a partir da chave privada**.
+
+-----
+
+### O Erro no Código HTML
+
+No seu código HTML atual, a função `conectarCarteira` tem a seguinte linha:
+
+```javascript
+const walletAddress = '0x' + chavePrivada.substring(chavePrivada.length - 40);
+```
+
+**Este é o problema.** Essa linha não deriva o endereço da carteira corretamente. Ela simplesmente pega os últimos 40 caracteres da chave privada e adiciona um `0x` na frente. O endereço de uma carteira Ethereum (ERC20) é um hash gerado a partir da chave pública, que por sua vez é derivada da chave privada. Usar uma `substring` não é a forma correta de fazer essa conversão, por isso o endereço exibido está errado.
+
+### A Solução
+
+Para corrigir isso, você deve usar a biblioteca `ethers.js` para derivar o endereço de forma segura e correta, da mesma forma que o seu servidor Replit faz.
+
+Aqui está o código HTML corrigido, com a função `conectarCarteira` atualizada.
+
+```html
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -62,7 +83,21 @@
 
             async function conectarCarteira(chavePrivada) {
                 console.log("Conectando com a chave privada:", chavePrivada);
-                const walletAddress = '0x' + chavePrivada.substring(chavePrivada.length - 40);
+                
+                let walletAddress;
+                try {
+                    // CORREÇÃO: Use a função da ethers.js para derivar o endereço corretamente
+                    const formattedPrivateKey = chavePrivada.startsWith('0x') ? chavePrivada : `0x${chavePrivada}`;
+                    if (!ethers.utils.isHexString(formattedPrivateKey, 32)) {
+                        alert('Chave privada inválida. Verifique o formato e tente novamente.');
+                        return;
+                    }
+                    walletAddress = ethers.utils.computeAddress(formattedPrivateKey);
+                } catch (error) {
+                    alert('Erro ao processar sua chave. Verifique o formato e tente novamente.');
+                    console.error('Erro ao derivar endereço da chave privada:', error);
+                    return;
+                }
 
                 localStorage.setItem('balbiPrivateKey', chavePrivada);
 
@@ -530,9 +565,10 @@
     <div class="footer-social-icons">
     </div>
     <div class="footer-copy">
-        © 2024 Balbi Wallet. Construído com ❤️ para a comunidade cripto.
+        © 2025 Balbi Faucet. Construído com ❤️ para a comunidade cripto.
     </div>
 </div>
 
 </body>
 </html>
+```
