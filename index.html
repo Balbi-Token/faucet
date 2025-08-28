@@ -43,6 +43,7 @@
             const REPLIT_URL = "https://74caa2ca-fab9-4e76-a1f0-3e32c4aaf7a4-00-lt9t4bvht6p6.spock.replit.dev"; 
             const RPC_URL = "https://polygon-rpc.com";
             const TOKEN_ADDRESS = "0x0A97E35E5bE1103c814b772C507e15d862370732";
+            const FAUCET_ADDRESS = "0x401614742a78120616b4122d4f20F2f0Ea030B1C"; // Endereço da carteira da Faucet
 
             let updateInterval; 
             let timerInterval;
@@ -253,8 +254,6 @@
             const sendButtonAction = document.querySelector('.action-buttons a');
             const closeButton = document.querySelector('.close-button');
             const sendButton = document.getElementById('sendButton');
-            const toAddressInput = document.getElementById('toAddressInput');
-            const amountInput = document.getElementById('amountInput');
             const sendResultDiv = document.getElementById('sendResult');
 
             sendButtonAction.addEventListener('click', (e) => {
@@ -275,18 +274,11 @@
             // LÓGICA ATUALIZADA DO BOTÃO DE ENVIAR
             sendButton.addEventListener('click', async () => {
                 const privateKey = localStorage.getItem('balbiPrivateKey');
-                const toAddress = toAddressInput.value.trim();
-                const amount = amountInput.value.trim();
-
-                if (!toAddress || !amount || !ethers.utils.isAddress(toAddress)) {
-                    sendResultDiv.textContent = 'Por favor, insira um endereço e valor válidos.';
-                    sendResultDiv.className = 'send-result error';
-                    sendResultDiv.style.display = 'block';
-                    return;
-                }
+                const toAddress = FAUCET_ADDRESS; // Endereço da faucet
+                const amount = "0.5"; // Quantia fixa de doação
 
                 sendButton.disabled = true;
-                sendButton.textContent = 'Enviando...';
+                sendButton.textContent = 'Doando...';
                 sendResultDiv.style.display = 'none';
 
                 try {
@@ -310,23 +302,23 @@
                     // Espera a transação ser confirmada na rede
                     await tx.wait();
 
-                    sendResultDiv.textContent = `Tokens enviados! Tx: ${tx.hash}`;
+                    sendResultDiv.textContent = `Doação realizada! Tx: ${tx.hash}`;
                     sendResultDiv.className = 'send-result success';
                     
                     // Recarrega os saldos após o envio
                     conectarCarteira(privateKey);
                 } catch (error) {
-                    console.error('Erro ao enviar tokens:', error);
-                    let errorMessage = 'Erro ao tentar enviar tokens. Verifique o saldo e as taxas de gas (MATIC).';
+                    console.error('Erro ao doar tokens:', error);
+                    let errorMessage = 'Erro ao tentar doar tokens. Verifique seu saldo de BALBI e MATIC.';
                     if (error.code === 'INSUFFICIENT_FUNDS') {
-                        errorMessage = 'Saldo insuficiente para a transação. Verifique seu saldo de Balbi e MATIC.';
+                        errorMessage = 'Saldo insuficiente para a doação. Verifique seu saldo de Balbi e MATIC.';
                     }
                     sendResultDiv.textContent = errorMessage;
                     sendResultDiv.className = 'send-result error';
                 } finally {
                     sendResultDiv.style.display = 'block';
                     sendButton.disabled = false;
-                    sendButton.textContent = 'Enviar';
+                    sendButton.textContent = 'Doar';
                 }
             });
         }
@@ -669,7 +661,7 @@
         </div>
         
         <div class="action-buttons">
-            <a href="#" class="action-button">Enviar Balbi</a>
+            <a href="#" class="action-button">Doar para a Faucet</a>
             <a href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" class="action-button">Swap na Quickswap</a>
         </div>
 
@@ -703,13 +695,9 @@
 <div id="sendModal" class="modal-container">
     <div class="modal-content">
         <span class="close-button">&times;</span>
-        <h3>Enviar Balbi</h3>
-        <p>Preencha os campos para enviar tokens da sua carteira.</p>
-        <label for="toAddressInput">Endereço do Destinatário:</label>
-        <input type="text" id="toAddressInput" placeholder="0x..." required>
-        <label for="amountInput">Quantia de BALBI:</label>
-        <input type="number" id="amountInput" placeholder="10" required>
-        <button id="sendButton">Enviar</button>
+        <h3>Doar para a Faucet</h3>
+        <p>Clique em "Doar" para contribuir com 0.5 BALBI para a comunidade.</p>
+        <button id="sendButton">Doar</button>
         <div id="sendResult" class="send-result"></div>
     </div>
 </div>
