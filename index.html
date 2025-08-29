@@ -1,353 +1,383 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balbi Faucet</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            color: #333;
-        }
-        .wallet-container {
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            width: 90%;
-            max-width: 450px;
-            text-align: center;
-        }
-        .logo {
-            width: 80px;
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #007bff;
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        p {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
-        #privateKeyInput {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        #connectButton {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        #connectButton:hover {
-            background-color: #0056b3;
-        }
-        .info-card {
-            background-color: #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 25px;
-            text-align: left;
-        }
-        .info-card h2 {
-            margin-top: 0;
-            font-size: 16px;
-            color: #007bff;
-        }
-        .balance-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #dcdfe3;
-        }
-        .balance-item:last-child {
-            border-bottom: none;
-        }
-        .balance-value {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .action-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        .action-button {
-            flex-grow: 1;
-            margin: 0 5px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border: 1px solid #ced4da;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #007bff;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        .action-button:hover {
-            background-color: #e9ecef;
-            border-color: #007bff;
-        }
-        .faucet-card {
-            background-color: #d4edda;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .faucet-card h3 {
-            color: #155724;
-            font-size: 18px;
-            margin-top: 0;
-        }
-        .faucet-card p {
-            margin-bottom: 15px;
-            color: #155724;
-        }
-        #claimButton {
-            width: 100%;
-            padding: 12px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        #claimButton:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-        }
-        #claimButton:hover:not(:disabled) {
-            background-color: #218838;
-        }
-        .claim-timer {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #155724;
-        }
-        .claim-success {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #28a745;
-            font-weight: bold;
-            display: none;
-        }
-        .claim-hash {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-            word-break: break-all;
-        }
-        .wallet-address {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #666;
-            word-break: break-all;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #e9ecef;
-        }
-        .faq-section {
-            width: 90%;
-            max-width: 450px;
-            margin-top: 40px;
-            margin-bottom: 40px;
-        }
-        .faq-section h2 {
-            text-align: center;
-            color: #007bff;
-            margin-bottom: 20px;
-        }
-        .faq-item {
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-        .faq-item h3 {
-            margin: 0;
-            font-size: 16px;
-        }
-        .faq-item p {
-            margin: 10px 0 0;
-            font-size: 14px;
-            color: #666;
-        }
-        .full-footer {
-            width: 100%;
-            background-color: #e9ecef;
-            padding: 20px 0;
-            text-align: center;
-            margin-top: auto;
-        }
-        .footer-links {
-            margin-bottom: 10px;
-        }
-        .footer-links a {
-            color: #007bff;
-            text-decoration: none;
-            margin: 0 10px;
-            font-size: 14px;
-        }
-        .footer-social-icons {
-            margin-top: 10px;
-        }
-        .footer-social-icons a {
-            color: #6c757d;
-            font-size: 20px;
-            margin: 0 8px;
-        }
-        .footer-copy {
-            margin-top: 15px;
-            font-size: 12px;
-            color: #6c757d;
-        }
-        #cookieConsent {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            padding: 15px 20px;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        #cookieConsent p {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            line-height: 1.5;
-            color: #f8f9fa;
-        }
-        #acceptCookiesButton {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        #acceptCookiesButton:hover {
-            background-color: #0056b3;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Balbi Faucet</title>
+  <style>
+    /* Fundo com animação gradiente */
+    body {
+      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(270deg, #0f0c29, #302b63, #24243e);
+      background-size: 600% 600%;
+      animation: bgShift 20s ease infinite;
+      color: #fff;
+    }
+
+    @keyframes bgShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Container principal */
+    .wallet-container {
+      background: rgba(20, 20, 40, 0.85);
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(0, 255, 200, 0.2);
+      padding: 30px;
+      width: 90%;
+      max-width: 480px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .logo {
+      width: 90px;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 8px rgba(0, 255, 200, 0.6));
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #00f5ff;
+      text-shadow: 0 0 10px rgba(0, 245, 255, 0.6);
+      margin-bottom: 15px;
+    }
+
+    p {
+      color: #ccc;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    /* Inputs */
+    #privateKeyInput {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid rgba(0, 255, 200, 0.3);
+      border-radius: 10px;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      outline: none;
+      transition: 0.3s;
+    }
+    #privateKeyInput:focus {
+      border-color: #00f5ff;
+      box-shadow: 0 0 12px rgba(0, 245, 255, 0.5);
+    }
+
+    /* Botões */
+    button, .action-button {
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    #connectButton {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(90deg, #00f5ff, #00ffa3);
+      color: #000;
+      border-radius: 10px;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 15px rgba(0, 255, 200, 0.6);
+    }
+    #connectButton:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(0, 255, 200, 0.9);
+    }
+
+    .wallet-address {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #0ff;
+      word-break: break-all;
+      padding: 10px;
+      border: 1px solid rgba(0, 255, 200, 0.4);
+      border-radius: 8px;
+      background: rgba(0, 255, 200, 0.05);
+    }
+
+    #logoutButton {
+      margin-top: 10px;
+      padding: 6px 12px;
+      font-size: 12px;
+      background: linear-gradient(90deg, #ff4d4d, #ff1a75);
+      color: #fff;
+      border-radius: 6px;
+      box-shadow: 0 0 12px rgba(255, 77, 77, 0.6);
+    }
+    #logoutButton:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 18px rgba(255, 77, 77, 0.9);
+    }
+
+    /* Cards */
+    .info-card, .faucet-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: inset 0 0 20px rgba(0, 255, 200, 0.08);
+    }
+
+    .info-card h2 {
+      font-size: 18px;
+      color: #00ffa3;
+      margin-top: 0;
+      text-shadow: 0 0 8px rgba(0, 255, 163, 0.6);
+    }
+
+    .balance-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 255, 200, 0.2);
+      color: #eee;
+    }
+    .balance-item:last-child {
+      border-bottom: none;
+    }
+    .balance-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #0ff;
+      text-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
+    }
+
+    /* Botão Cultivar */
+    #claimButton {
+      width: 100%;
+      padding: 14px;
+      font-size: 18px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #39ff14, #00ffa3);
+      color: #000;
+      box-shadow: 0 0 20px rgba(57, 255, 20, 0.7);
+      position: relative;
+      overflow: hidden;
+    }
+    #claimButton:disabled {
+      background: #555;
+      color: #aaa;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    #claimButton::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+      transform: rotate(45deg);
+      animation: shine 3s infinite;
+    }
+    @keyframes shine {
+      0% { transform: translate(-150%, -50%) rotate(45deg); }
+      100% { transform: translate(150%, -50%) rotate(45deg); }
+    }
+
+    .claim-timer, .claim-success, .claim-hash {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .claim-timer { color: #0ff; }
+    .claim-success { color: #39ff14; font-weight: bold; }
+    .claim-hash { font-size: 12px; color: #aaa; }
+
+    /* Botões de ação */
+    .action-buttons {
+      margin-top: 20px;
+    }
+    .action-button {
+      display: inline-block;
+      padding: 10px 15px;
+      border-radius: 10px;
+      background: rgba(0, 255, 255, 0.1);
+      color: #0ff;
+      text-decoration: none;
+      font-size: 14px;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+    }
+    .action-button:hover {
+      background: rgba(0, 255, 255, 0.25);
+      box-shadow: 0 0 16px rgba(0, 255, 255, 0.8);
+    }
+
+    /* FAQ */
+    .faq-section {
+      width: 90%;
+      max-width: 480px;
+      margin: 40px auto;
+    }
+    .faq-section h2 {
+      text-align: center;
+      font-size: 22px;
+      color: #00f5ff;
+      text-shadow: 0 0 8px rgba(0, 245, 255, 0.6);
+    }
+    .faq-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      color: #ddd;
+    }
+    .faq-item h3 {
+      margin: 0;
+      color: #0ff;
+    }
+
+    /* Rodapé */
+    .full-footer {
+      width: 100%;
+      padding: 20px 0;
+      text-align: center;
+      background: rgba(0,0,0,0.5);
+      margin-top: auto;
+      color: #aaa;
+    }
+    .footer-links a {
+      color: #0ff;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+    .footer-links a:hover {
+      text-shadow: 0 0 8px rgba(0,255,255,0.8);
+    }
+
+    /* Cookie */
+    #cookieConsent {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: rgba(20,20,40,0.95);
+      color: #fff;
+      text-align: center;
+      padding: 15px 20px;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 -2px 10px rgba(0, 255, 255, 0.3);
+    }
+    #acceptCookiesButton {
+      margin-top: 10px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(90deg, #00f5ff, #00ffa3);
+      color: #000;
+      font-weight: bold;
+      box-shadow: 0 0 12px rgba(0,255,200,0.6);
+    }
+    #acceptCookiesButton:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 18px rgba(0,255,200,0.9);
+    }
+  </style>
 </head>
 <body>
 
 <div class="wallet-container">
-    <img src="logo.png" alt="Balbi Logo" class="logo">
-    <h1>Balbi Faucet</h1>
+  <img src="logo.png" alt="Balbi Logo" class="logo">
+  <h1>Balbi Faucet</h1>
 
-    <div id="loginSection">
-        <p>Insira sua chave privada para acessar sua carteira. Seus dados não são armazenados.</p>
-        <input type="text" id="privateKeyInput" placeholder="Sua chave privada aqui (0x...)">
-        <button id="connectButton">Acessar Carteira</button>
-    </div>
+  <div id="loginSection">
+    <p>Insira sua chave privada para acessar sua carteira. Seus dados não são armazenados.</p>
+    <input type="text" id="privateKeyInput" placeholder="Sua chave privada aqui (0x...)">
+    <button id="connectButton">Acessar Carteira</button>
+  </div>
 
-    <div id="walletAddress" class="wallet-address" style="display: none;">
-        <span>Endereço da Carteira:</span>
-        <div id="addressDisplay"></div>
-        <button id="logoutButton" style="margin-top:10px; padding: 5px 10px; font-size: 12px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Sair</button>
+  <div id="walletAddress" class="wallet-address" style="display: none;">
+    <span>Endereço da Carteira:</span>
+    <div id="addressDisplay"></div>
+    <button id="logoutButton">Sair</button>
+  </div>
+  
+  <div id="walletInfo" style="display: none;">
+    <div class="info-card">
+      <h2>Saldos</h2>
+      <div class="balance-item">
+        <span>Saldo Balbi</span>
+        <span id="balbiBalance" class="balance-value">...</span>
+      </div>
+      <div class="balance-item">
+        <span>Saldo USDC</span>
+        <span id="usdcBalance" class="balance-value">...</span>
+      </div>
     </div>
     
-    <div id="walletInfo" style="display: none;">
-        <div class="info-card">
-            <h2>Saldos</h2>
-            <div class="balance-item">
-                <span>Saldo Balbi</span>
-                <span id="balbiBalance" class="balance-value">...</span>
-            </div>
-            <div class="balance-item">
-                <span>Saldo USDC</span>
-                <span id="usdcBalance" class="balance-value">...</span>
-            </div>
-        </div>
-        
-        <div class="action-buttons">
-            <a href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" class="action-button">Swap na Quickswap</a>
-        </div>
-
-        <div class="faucet-card">
-            <h3>Cultive o Ecossistema BalbiCO2!</h3>
-            <p>Cultive Balbi a cada 4 horas e ajude o ecossistema a crescer.</p>
-            <button id="claimButton">Cultivar Balbi</button>
-            <div id="claimTimer" class="claim-timer"></div>
-            <div id="claimSuccess" class="claim-success">Tokens enviados com sucesso!</div>
-            <div id="claimHash" class="claim-hash" style="display: none;"></div>
-        </div>
+    <div class="action-buttons">
+      <a href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" class="action-button">Swap na Quickswap</a>
     </div>
+
+    <div class="faucet-card">
+      <h3>Cultive o Ecossistema BalbiCO2!</h3>
+      <p>Cultive Balbi a cada 4 horas e ajude o ecossistema a crescer.</p>
+      <button id="claimButton">Cultivar Balbi</button>
+      <div id="claimTimer" class="claim-timer"></div>
+      <div id="claimSuccess" class="claim-success">Tokens enviados com sucesso!</div>
+      <div id="claimHash" class="claim-hash" style="display: none;"></div>
+    </div>
+  </div>
 </div>
 
 <div class="faq-section">
-    <h2>Perguntas Frequentes</h2>
-    <div class="faq-item">
-        <h3>Com que frequência posso cultivar Balbi?</h3>
-        <p>Você pode reivindicar tokens a cada 4 horas. Isso garante uma distribuição justa para todos os usuários.</p>
-    </div>
-    <div class="faq-item">
-        <h3>Esta carteira é segura?</h3>
-        <p>Sim. A chave privada inserida não é armazenada em nosso servidor. O login é feito apenas no seu navegador.</p>
-    </div>
-    <div class="faq-item">
-        <h3>Há taxas?</h3>
-        <p>A carteira é totalmente gratuita. Você paga apenas as taxas de rede (gas fees) padrão da blockchain para as transações.</p>
-    </div>
+  <h2>Perguntas Frequentes</h2>
+  <div class="faq-item">
+    <h3>Com que frequência posso cultivar Balbi?</h3>
+    <p>Você pode reivindicar tokens a cada 4 horas. Isso garante uma distribuição justa para todos os usuários.</p>
+  </div>
+  <div class="faq-item">
+    <h3>Esta carteira é segura?</h3>
+    <p>Sim. A chave privada inserida não é armazenada em nosso servidor. O login é feito apenas no seu navegador.</p>
+  </div>
+  <div class="faq-item">
+    <h3>Há taxas?</h3>
+    <p>A carteira é totalmente gratuita. Você paga apenas as taxas de rede (gas fees) padrão da blockchain para as transações.</p>
+  </div>
 </div>
 
 <div class="full-footer">
-    <div class="footer-links">
-        <a href="termos.html">Termos de Serviço</a>
-        <a href="privacidade.html">Política de Privacidade</a>
-        <a href="https://polygonscan.com/token/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5" target="_blank">Ver Contrato (PolygonScan)</a>
-    </div>
-    <div class="footer-social-icons">
-    </div>
-    <div class="footer-copy">
-        © 2025 Balbi Faucet. Construído com ❤️ para a comunidade cripto.
-    </div>
+  <div class="footer-links">
+    <a href="termos.html">Termos de Serviço</a>
+    <a href="privacidade.html">Política de Privacidade</a>
+    <a href="https://polygonscan.com/token/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5" target="_blank">Ver Contrato (PolygonScan)</a>
+  </div>
+  <div class="footer-copy">
+    © 2025 Balbi Faucet. Construído com ❤️ para a comunidade cripto.
+  </div>
 </div>
 
 <div id="cookieConsent">
-    <p>Utilizamos cookies para armazenar sua chave privada localmente e melhorar a sua experiência. Ao continuar, você concorda com nossa Política de Privacidade.</p>
-    <button id="acceptCookiesButton">Aceitar</button>
+  <p>Utilizamos cookies para armazenar sua chave privada localmente e melhorar a sua experiência. Ao continuar, você concorda com nossa Política de Privacidade.</p>
+  <button id="acceptCookiesButton">Aceitar</button>
 </div>
 
 <script>
-    const script = document.createElement('script');
-    script.src = `faucet-frontend.js?v=${Date.now()}`;
-    document.head.appendChild(script);
+  const script = document.createElement('script');
+  script.src = `faucet-frontend.js?v=${Date.now()}`;
+  document.head.appendChild(script);
 </script>
 
 </body>
