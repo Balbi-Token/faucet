@@ -4,15 +4,9 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Balbi Faucet</title>
-
-  <!-- FAVICON: usa logo1.png como fallback, mas se você tiver ícones dedicados, eles serão preferidos -->
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" href="logo1.png"> <!-- fallback garantido -->
-  <meta name="theme-color" content="#0d1b34"/>
-
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- Favicon (ajuste o href se quiser usar outro arquivo) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="logo1.png">
   <style>
     :root{
       --bg1:#0a1022; --bg2:#0d1b34;
@@ -20,68 +14,57 @@
       --text:#e6eefb; --muted:#a5b4cf; --radius:18px;
       --hexOpacity:.08;
     }
-
-    /* ====== Fundo único e dinâmico (para toda a página) ====== */
-    .bg-anim{
-      position:fixed; inset:0; z-index:-2;
-      background: linear-gradient(140deg, var(--bg1), var(--bg2), var(--bg1));
-      background-size:240% 240%;
-      animation:bgMove 24s ease-in-out infinite;
-    }
-    @keyframes bgMove{
-      0%{background-position:0% 50%}
-      50%{background-position:100% 50%}
-      100%{background-position:0% 50%}
-    }
-    /* brilho radial MUITO sutil por cima do gradiente, para dar profundidade */
-    .bg-anim::after{
-      content:""; position:absolute; inset:0;
-      background:
-        radial-gradient(1100px 520px at 10% -10%, rgba(43,108,176,.10) 0%, transparent 60%),
-        radial-gradient(900px 420px at 110% 120%, rgba(99,179,237,.10) 0%, transparent 62%);
-      pointer-events:none;
-    }
-
     html,body{height:100%}
     body{
       margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       color:var(--text);
+      background:
+        radial-gradient(1100px 520px at 10% -10%, rgba(43,108,176,.10) 0%, transparent 60%),
+        radial-gradient(900px 420px at 110% 120%, rgba(99,179,237,.10) 0%, transparent 62%),
+        linear-gradient(180deg,var(--bg1),var(--bg2));
       display:flex; align-items:center; flex-direction:column; gap:16px;
       padding:24px 18px 28px; overflow-x:hidden;
     }
 
-    /* ====== INTRO (abertura) — usa o MESMO fundo e fica mais alta ====== */
+    /* INTRO (abertura) — cobre a página inteira e aparece sozinha */
     .intro{
       position:fixed; inset:0; width:100%; height:100dvh;
       display:grid; place-items:center;
-      z-index:9999; animation:introFade 1.6s ease forwards;
+      z-index:10000;
+      /* fundo próprio animado, assim a intro não mostra o site por baixo */
+      background: linear-gradient(140deg, var(--bg1), var(--bg2), var(--bg1));
+      background-size: 240% 240%;
+      animation:
+        introFade 1.8s ease forwards,   /* some ao final */
+        bgMove 24s ease-in-out infinite; /* movimento suave de fundo */
     }
-    /* só um “glow” radial, sem outro gradiente para não destoar */
     .intro::before{
       content:""; position:absolute; inset:0;
       background: radial-gradient(1200px 700px at 50% -20%, rgba(99,179,237,.12), transparent 70%);
       pointer-events:none;
     }
     @keyframes introFade{ 0%{opacity:1} 85%{opacity:1} 100%{opacity:0; visibility:hidden} }
+    @keyframes bgMove{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
     .intro-wrap{
       width:clamp(160px, 26vmin, 320px);
       aspect-ratio:1/1; position:relative;
+      transform: translateY(-16vh);            /* mais alto na tela */
       animation:introPop .9s cubic-bezier(.2,.8,.2,1) forwards;
     }
-    /* ↑ subimos a abertura aplicando translateY(-14vh) */
     @keyframes introPop{
-      0%   { opacity:0; transform:translateY(-14vh) scale(.6) rotate(-8deg) }
-      60%  { opacity:1; transform:translateY(-14vh) scale(1.06) }
-      100% {               transform:translateY(-14vh) scale(1) }
+      0%{opacity:0; transform:translateY(-16vh) scale(.6) rotate(-8deg)}
+      60%{opacity:1; transform:translateY(-16vh) scale(1.06)}
+      100%{transform:translateY(-16vh) scale(1)}
     }
     .intro svg{width:100%; height:100%}
     .intro .hx-outline{stroke:url(#introStroke); stroke-width:8; fill:none; stroke-linejoin:round; filter:drop-shadow(0 8px 28px rgba(99,179,237,.25))}
     .intro .vertex{fill:url(#introStroke)}
     .intro image{clip-path:url(#introClip)}
-    .intro .dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:20 90; animation:introDash 1.6s linear forwards}
+    .intro .dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:20 90; animation:introDash 1.8s linear forwards}
     @keyframes introDash{ to{ stroke-dashoffset:-140 } }
 
-    /* ====== HEX de fundo ====== */
+    /* HEX de fundo */
     .hex-drift{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
     .hex{position:absolute; width:220px; aspect-ratio:1/1; opacity:var(--hexOpacity)}
     .hex svg{width:100%; height:100%}
@@ -195,30 +178,26 @@
     #cookieConsent{position:fixed; bottom:0; width:100%; background:rgba(20,20,40,.95); color:#fff; text-align:center; padding:15px 20px; display:none; z-index:1000; box-shadow:0 -2px 10px rgba(0, 136, 255, .3)}
     #acceptCookiesButton{margin-top:10px; padding:8px 16px; border-radius:8px; border:none; background:linear-gradient(90deg,#2b6cb0,#63b3ed); color:#000; font-weight:bold; cursor:pointer;}
 
-    /* ====== LOADING pós-login — mais alto e levemente mais longo ====== */
+    /* LOADING overlay (pós-login): centralizado e um pouco mais alto, e um pouquinho mais longo */
     .loading{
       position:fixed; inset:0; width:100%; height:100dvh;
       z-index:9998; display:none; place-items:center;
       backdrop-filter: blur(6px);
-      animation:loadingFadeIn .15s ease-out;
-    }
-    .loading::before{
-      content:""; position:absolute; inset:0;
       background: radial-gradient(1000px 600px at 50% -10%, rgba(99,179,237,.12), transparent 70%);
-      pointer-events:none;
+      animation:loadingFadeIn .2s ease-out;
     }
     .loading.show{display:grid;}
     @keyframes loadingFadeIn{ from{opacity:0} to{opacity:1} }
 
     .loading-wrap{
       width:clamp(150px, 22vmin, 260px); aspect-ratio:1/1; position:relative;
-      transform:translateY(-12vh); /* ↑ mais alto */
-      animation:loadingPop .45s cubic-bezier(.2,.8,.2,1);
+      transform:translateY(-7vh); /* sobe um pouco mais */
+      animation:loadingPop .45s cubic-bezier(.2,.8,.2,1)
     }
     @media (max-width: 480px){
-      .loading-wrap{ transform:translateY(-10vh); }
+      .loading-wrap{ transform:translateY(-5vh); }
     }
-    @keyframes loadingPop{ from{transform:translateY(-12vh) scale(.92); opacity:.6} to{transform:translateY(-12vh) scale(1); opacity:1} }
+    @keyframes loadingPop{ from{transform:translateY(-7vh) scale(.92); opacity:.6} to{transform:translateY(-7vh) scale(1); opacity:1} }
     .loading svg{width:100%; height:100%}
     .loading .outline{stroke:url(#loadStroke); stroke-width:7; fill:none; stroke-linejoin:round; filter:drop-shadow(0 8px 20px rgba(99,179,237,.25))}
     .loading .dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:18 70; animation:loadDash 1.9s linear infinite}
@@ -234,9 +213,6 @@
   </style>
 </head>
 <body>
-
-<!-- Fundo único animado -->
-<div class="bg-anim" aria-hidden="true"></div>
 
 <!-- INTRO -->
 <div class="intro" id="intro" aria-hidden="true">
@@ -446,7 +422,7 @@
   document.head.appendChild(s);
 </script>
 
-<!-- Mostra loading ao clicar e mantém ~1s; esconde ao logar -->
+<!-- Mostra loading ao clicar e mantém por ~1.2s; esconde ao logar -->
 <script>
   (function(){
     const overlay = document.getElementById('loadingOverlay');
@@ -462,7 +438,7 @@
     function hideOverlay(){
       if (!overlay) return;
       const start = Number(overlay.dataset.start || Date.now());
-      const minShow = 1000; // 1s mínimo visível
+      const minShow = 1200; // ~1.2s mínimo
       const elapsed = Date.now() - start;
       setTimeout(()=> overlay.classList.remove('show'), Math.max(0, minShow - elapsed));
     }
@@ -470,7 +446,7 @@
     if (connectBtn){
       connectBtn.addEventListener('click', ()=>{
         showOverlay();
-        // fallback: some no máx. em 12s
+        // segurança: garante que some em até 12s, mesmo se algo travar
         setTimeout(()=> overlay.classList.remove('show'), 12000);
       });
     }
@@ -478,7 +454,9 @@
     const obs = new MutationObserver(()=>{
       const hasAddr = addrBox && addrBox.textContent && addrBox.textContent.trim().length > 0;
       const isShown = walletBox && getComputedStyle(walletBox).display !== 'none';
-      if (hasAddr && isShown){ hideOverlay(); }
+      if (hasAddr && isShown){
+        hideOverlay();
+      }
     });
     if (addrBox) obs.observe(addrBox, { childList:true, subtree:true, characterData:true });
     if (walletBox) obs.observe(walletBox, { attributes:true, attributeFilter:['style','class'] });
