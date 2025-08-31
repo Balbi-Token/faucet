@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -309,75 +309,75 @@
   <h1>Balbi Faucet</h1>
 
   <div id="loginSection">
-    <p>Insira sua chave privada para acessar sua carteira. Seus dados não são armazenados.</p>
-    <input type="text" id="privateKeyInput" placeholder="Sua chave privada aqui (0x...)">
-    <button id="connectButton">Acessar Carteira</button>
+    <p>Enter your private key to access your wallet. Your data is not stored.</p>
+    <input type="text" id="privateKeyInput" placeholder="Your private key here (0x...)">
+    <button id="connectButton">Access Wallet</button>
   </div>
 
   <div id="walletAddress" class="wallet-address" style="display: none;">
-    <span>Endereço da Carteira:</span>
+    <span>Wallet Address:</span>
     <div id="addressDisplay"></div>
-    <button id="logoutButton">Sair</button>
+    <button id="logoutButton">Log Out</button>
   </div>
   
   <div id="walletInfo" style="display: none;">
     <div class="info-card">
-      <h2>Saldos</h2>
+      <h2>Balances</h2>
       <div class="balance-item">
-        <span>Saldo BALBI</span>
+        <span>BALBI Balance</span>
         <span id="balbiBalance" class="balance-value">...</span>
       </div>
       <div class="balance-item">
-        <span>Saldo USDC</span>
+        <span>USDC Balance</span>
         <span id="usdcBalance" class="balance-value">...</span>
       </div>
     </div>
     
     <div class="action-buttons">
-      <a href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" class="action-button">Swap na Quickswap</a>
+      <a href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" class="action-button">Swap on Quickswap</a>
     </div>
 
     <div class="faucet-card">
-      <h3>Cultive o Ecossistema BalbiCO2!</h3>
-      <p>Cultive Balbi a cada 4 horas e ajude o ecossistema a crescer.</p>
-      <button id="claimButton">Cultivar Balbi</button>
+      <h3>Grow the BalbiCO2 Ecosystem!</h3>
+      <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
+      <button id="claimButton">Claim Balbi</button>
       <div id="claimTimer" class="claim-timer"></div>
-      <div id="claimSuccess" class="claim-success">Tokens enviados com sucesso!</div>
+      <div id="claimSuccess" class="claim-success">Tokens sent successfully!</div>
       <div id="claimHash" class="claim-hash" style="display: none;"></div>
     </div>
   </div>
 </div>
 
 <div class="faq-section">
-  <h2>Perguntas Frequentes</h2>
+  <h2>Frequently Asked Questions</h2>
   <div class="faq-item">
-    <h3>Com que frequência posso cultivar Balbi?</h3>
-    <p>Você pode reivindicar tokens a cada 4 horas. Isso garante uma distribuição justa para todos os usuários.</p>
+    <h3>How often can I claim Balbi?</h3>
+    <p>You can claim tokens every 4 hours. This ensures fair distribution for all users.</p>
   </div>
   <div class="faq-item">
-    <h3>Esta carteira é segura?</h3>
-    <p>Sim. A chave privada inserida não é armazenada em nosso servidor. O login é feito apenas no seu navegador.</p>
+    <h3>Is this wallet secure?</h3>
+    <p>Yes. The entered private key is not stored on our server. Login is performed only in your browser.</p>
   </div>
   <div class="faq-item">
-    <h3>Há taxas?</h3>
-    <p>A carteira é totalmente gratuita. Você paga apenas as taxas de rede (gas fees) padrão da blockchain para as transações.</p>
+    <h3>Are there any fees?</h3>
+    <p>The wallet is completely free. You only pay the standard blockchain network fees (gas fees) for transactions.</p>
   </div>
 </div>
 
 <div class="full-footer">
   <div class="footer-links">
-    <a href="termos.html">Termos de Serviço</a>
-    <a href="privacidade.html">Política de Privacidade</a>
-    <a href="https://polygonscan.com/token/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5" target="_blank">Ver Contrato (PolygonScan)</a>
+    <a href="termos.html">Terms of Service</a>
+    <a href="privacidade.html">Privacy Policy</a>
+    <a href="https://polygonscan.com/token/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5" target="_blank">View Contract (PolygonScan)</a>
   </div>
   <div class="footer-copy">
-    © 2025 Balbi Faucet. Construído com ❤️ para a comunidade cripto.
+    © 2025 Balbi Faucet. Built with ❤️ for the crypto community.
   </div>
 </div>
 
 <div id="cookieConsent">
-  <p>Utilizamos cookies para armazenar sua chave privada localmente e melhorar a sua experiência. Ao continuar, você concorda com nossa Política de Privacidade.</p>
-  <button id="acceptCookiesButton">Aceitar</button>
+  <p>We use cookies to store your private key locally and improve your experience. By continuing, you agree to our Privacy Policy.</p>
+  <button id="acceptCookiesButton">Accept</button>
 </div>
 
 <script>
