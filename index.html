@@ -10,7 +10,7 @@
       --bg1:#0a1022; --bg2:#0d1b34;
       --accent:#2b6cb0; --accent2:#63b3ed; --accent3:#8ec7ff;
       --text:#e6eefb; --muted:#a5b4cf; --radius:18px;
-      --hexOpacity:.08; /* ligeiramente mais visível */
+      --hexOpacity:.08;
     }
     html,body{height:100%}
     body{
@@ -24,10 +24,10 @@
       padding:24px 18px 28px; overflow-x:hidden;
     }
 
-    /* INTRO (abertura inicial) – responsivo em mobile */
+    /* INTRO (abertura) — centrado real em qualquer tela */
     .intro{
-      position:fixed; inset:0; height:100dvh; width:100%;
-      display:flex; align-items:center; justify-content:center;
+      position:fixed; inset:0; width:100%; height:100dvh;
+      display:grid; place-items:center; /* garante centralização perfeita */
       background:
         radial-gradient(1200px 700px at 50% -20%, rgba(99,179,237,.12), transparent 70%),
         linear-gradient(180deg,var(--bg1),var(--bg2));
@@ -35,8 +35,8 @@
     }
     @keyframes introFade{ 0%{opacity:1} 85%{opacity:1} 100%{opacity:0; visibility:hidden} }
     .intro-wrap{
-      width:min(220px, 58vw, 42dvh);
-      aspect-ratio:1/1; position:relative; transform:scale(.9);
+      width:clamp(160px, 26vmin, 320px); /* responsivo desktop e mobile */
+      aspect-ratio:1/1; position:relative;
       animation:introPop .9s cubic-bezier(.2,.8,.2,1) forwards
     }
     @keyframes introPop{ 0%{opacity:0; transform:scale(.6) rotate(-8deg)} 60%{opacity:1; transform:scale(1.06)} 100%{transform:scale(1)} }
@@ -120,7 +120,7 @@
     .balance-item:last-child{border-bottom:0}
     .balance-value{font-weight:800; color:#8ec7ff}
 
-    /* Claim: cinza inativo (disabled), verde ativo (enabled) */
+    /* Claim: cinza inativo, verde ativo */
     #claimButton{
       width:100%; margin-top:6px; padding:14px; font-size:18px; border-radius:12px; border:none;
       position:relative; overflow:hidden; box-sizing:border-box;
@@ -139,8 +139,7 @@
     #claimButton::before{
       content:""; position:absolute; top:-60%; left:-60%; width:220%; height:220%;
       background:radial-gradient(circle,rgba(255,255,255,.22) 0%, transparent 60%);
-      transform:rotate(35deg); animation:shine 3s infinite;
-      pointer-events:none;
+      transform:rotate(35deg); animation:shine 3s infinite; pointer-events:none;
     }
     @keyframes shine{0%{transform:translate(-60%,-60%) rotate(35deg)}100%{transform:translate(60%,60%) rotate(35deg)}}
 
@@ -154,7 +153,7 @@
 
     .footer{
       width:100%; text-align:center; color:#a9b8d8; font-size:12px;
-      margin-top:24px; padding-bottom:64px; /* mais espaço embaixo */
+      margin-top:24px; padding-bottom:72px; /* + espaço extra no fim */
     }
     .links a{color:#8ec7ff; text-decoration:none; margin:0 10px}
     .links a:hover{text-shadow:0 0 8px rgba(142,199,255,.8)}
@@ -162,9 +161,9 @@
     #cookieConsent{position:fixed; bottom:0; width:100%; background:rgba(20,20,40,.95); color:#fff; text-align:center; padding:15px 20px; display:none; z-index:1000; box-shadow:0 -2px 10px rgba(0, 136, 255, .3)}
     #acceptCookiesButton{margin-top:10px; padding:8px 16px; border-radius:8px; border:none; background:linear-gradient(90deg,#2b6cb0,#63b3ed); color:#000; font-weight:bold; cursor:pointer;}
 
-    /* LOADING overlay após clicar em Access Wallet */
+    /* LOADING overlay (pós-login): centralizado e levemente mais alto na tela */
     .loading{
-      position:fixed; inset:0; height:100dvh; width:100%;
+      position:fixed; inset:0; width:100%; height:100dvh;
       z-index:9998; display:none; place-items:center;
       backdrop-filter: blur(6px);
       background: radial-gradient(1000px 600px at 50% -10%, rgba(99,179,237,.12), transparent 70%);
@@ -173,15 +172,20 @@
     .loading.show{display:grid;}
     @keyframes loadingFadeIn{ from{opacity:0} to{opacity:1} }
 
-    .loading-wrap{width:min(180px,60vw,40dvh); aspect-ratio:1/1; position:relative; animation:loadingPop .35s cubic-bezier(.2,.8,.2,1)}
-    @keyframes loadingPop{ from{transform:scale(.92); opacity:.5} to{transform:scale(1); opacity:1} }
+    .loading-wrap{
+      width:clamp(150px, 22vmin, 260px); aspect-ratio:1/1; position:relative;
+      transform:translateY(-6vh); /* sobe um pouco na tela */
+      animation:loadingPop .35s cubic-bezier(.2,.8,.2,1)
+    }
+    @media (max-width: 480px){
+      .loading-wrap{ transform:translateY(-4vh); }
+    }
+    @keyframes loadingPop{ from{transform:translateY(-6vh) scale(.92); opacity:.6} to{transform:translateY(-6vh) scale(1); opacity:1} }
     .loading svg{width:100%; height:100%}
     .loading .outline{stroke:url(#loadStroke); stroke-width:7; fill:none; stroke-linejoin:round; filter:drop-shadow(0 8px 20px rgba(99,179,237,.25))}
     .loading .dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:18 70; animation:loadDash 1.8s linear infinite}
     @keyframes loadDash{ to{ stroke-dashoffset:-120 } }
-    .loading .v{fill:url(#loadStroke)}
-    .loading image{clip-path:url(#loadClip)}
-    .loading .v{animation:pulse 1.8s ease-in-out infinite}
+    .loading .v{fill:url(#loadStroke); animation:pulse 1.8s ease-in-out infinite}
     .loading .v:nth-child(1){animation-delay:0s}
     .loading .v:nth-child(2){animation-delay:.15s}
     .loading .v:nth-child(3){animation-delay:.3s}
@@ -193,7 +197,7 @@
 </head>
 <body>
 
-<!-- INTRO (abertura responsiva) -->
+<!-- INTRO -->
 <div class="intro" id="intro" aria-hidden="true">
   <svg width="0" height="0" aria-hidden="true">
     <defs>
@@ -220,7 +224,7 @@
   </div>
 </div>
 
-<!-- LOADING após clicar em Access Wallet -->
+<!-- LOADING pós-login -->
 <div class="loading" id="loadingOverlay" aria-hidden="true">
   <svg width="0" height="0" aria-hidden="true">
     <defs>
@@ -385,7 +389,7 @@
   <button id="acceptCookiesButton" type="button">Accept</button>
 </div>
 
-<!-- 1) Garante input vazio e evita autofill de PK -->
+<!-- Garante input vazio -->
 <script>
   try { localStorage.removeItem('balbiPrivateKey'); } catch(e) {}
   document.addEventListener('DOMContentLoaded', ()=>{
@@ -394,14 +398,14 @@
   });
 </script>
 
-<!-- 2) Carrega seu front-end com cache-buster sem conflitar -->
+<!-- Carrega seu front-end -->
 <script>
   const s=document.createElement('script');
   s.src='faucet-frontend.js?v=' + Date.now();
   document.head.appendChild(s);
 </script>
 
-<!-- 3) Loading overlay: mostra ao clicar, esconde quando o endereço aparecer -->
+<!-- Mostra loading ao clicar e mantém por pelo menos 1s; esconde ao logar -->
 <script>
   (function(){
     const overlay = document.getElementById('loadingOverlay');
@@ -417,21 +421,19 @@
     function hideOverlay(){
       if (!overlay) return;
       const start = Number(overlay.dataset.start || Date.now());
-      const minShow = 700; // exibe pelo menos ~0.7s
+      const minShow = 1000; // 1 segundo mínimo
       const elapsed = Date.now() - start;
       setTimeout(()=> overlay.classList.remove('show'), Math.max(0, minShow - elapsed));
     }
 
-    // Ao clicar em Access Wallet, iniciamos o loading
     if (connectBtn){
       connectBtn.addEventListener('click', ()=>{
         showOverlay();
-        // fallback de segurança: some em até 10s
-        setTimeout(()=> overlay.classList.remove('show'), 10000);
+        // segurança: garante que some em até 12s, mesmo se algo travar
+        setTimeout(()=> overlay.classList.remove('show'), 12000);
       });
     }
 
-    // Observa quando o endereço for preenchido / container exibido
     const obs = new MutationObserver(()=>{
       const hasAddr = addrBox && addrBox.textContent && addrBox.textContent.trim().length > 0;
       const isShown = walletBox && getComputedStyle(walletBox).display !== 'none';
@@ -444,7 +446,7 @@
   })();
 </script>
 
-<!-- 4) Defs reutilizados -->
+<!-- Defs reutilizados -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <linearGradient id="hexStroke" x1="0" y1="0" x2="1" y2="1">
