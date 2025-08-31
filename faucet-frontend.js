@@ -96,8 +96,8 @@ function initializeApp() {
 
             if (response.ok) {
                 // Linhas alteradas para 3 casas decimais
-                balbiBalanceSpan.textContent = `${parseFloat(data.balbi).toFixed(3)} BALBI`;
-                usdcBalanceSpan.textContent = `${parseFloat(data.usdc).toFixed(3)} USDC`;
+                balbiBalanceSpan.textContent = `${parseFloat(data.balbi).toFixed(4)} BALBI`;
+                usdcBalanceSpan.textContent = `${parseFloat(data.usdc).toFixed(4)} USDC`;
             } else {
                 console.error('Erro ao buscar saldos:', data.error);
                 balbiBalanceSpan.textContent = 'Erro';
@@ -262,4 +262,5 @@ document.addEventListener('DOMContentLoaded', (event) => {
         localStorage.setItem('cookieConsent', 'true');
         consentBanner.style.display = 'none';
     });
+
 });
