@@ -24,7 +24,7 @@
       padding:24px 18px 28px; overflow-x:hidden;
     }
 
-    /* INTRO (abertura) — centrado e mais para cima */
+    /* INTRO (abertura) — centrado e mais alto */
     .intro{
       position:fixed; inset:0; width:100%; height:100dvh;
       display:grid; place-items:center;
@@ -39,11 +39,11 @@
       aspect-ratio:1/1; position:relative;
       animation:introPop .9s cubic-bezier(.2,.8,.2,1) forwards;
     }
-    /* SUBI bastante a intro: -22vh */
+    /* ↑ subimos a abertura aplicando translateY(-14vh) em toda a animação */
     @keyframes introPop{
-      0%  {opacity:0; transform:translateY(-22vh) scale(.6) rotate(-8deg)}
-      60% {opacity:1; transform:translateY(-22vh) scale(1.06)}
-      100%{            transform:translateY(-22vh) scale(1)}
+      0%   { opacity:0; transform:translateY(-14vh) scale(.6) rotate(-8deg) }
+      60%  { opacity:1; transform:translateY(-14vh) scale(1.06) }
+      100% {               transform:translateY(-14vh) scale(1) }
     }
     .intro svg{width:100%; height:100%}
     .intro .hx-outline{stroke:url(#introStroke); stroke-width:8; fill:none; stroke-linejoin:round; filter:drop-shadow(0 8px 28px rgba(99,179,237,.25))}
@@ -166,7 +166,7 @@
     #cookieConsent{position:fixed; bottom:0; width:100%; background:rgba(20,20,40,.95); color:#fff; text-align:center; padding:15px 20px; display:none; z-index:1000; box-shadow:0 -2px 10px rgba(0, 136, 255, .3)}
     #acceptCookiesButton{margin-top:10px; padding:8px 16px; border-radius:8px; border:none; background:linear-gradient(90deg,#2b6cb0,#63b3ed); color:#000; font-weight:bold; cursor:pointer;}
 
-    /* LOADING overlay (pós-login): mais alto e mínimo 1.5s */
+    /* LOADING pós-login: mais alto e ligeiramente mais longo */
     .loading{
       position:fixed; inset:0; width:100%; height:100dvh;
       z-index:9998; display:none; place-items:center;
@@ -179,21 +179,18 @@
 
     .loading-wrap{
       width:clamp(150px, 22vmin, 260px); aspect-ratio:1/1; position:relative;
-      transform:translateY(-16vh); /* SUBI de -10vh para -16vh */
-      animation:loadingPop .35s cubic-bezier(.2,.8,.2,1)
+      transform:translateY(-12vh); /* ↑ mais alto que antes */
+      animation:loadingPop .45s cubic-bezier(.2,.8,.2,1);
     }
     @media (max-width: 480px){
-      .loading-wrap{ transform:translateY(-14vh); }
+      .loading-wrap{ transform:translateY(-10vh); }
     }
-    @keyframes loadingPop{
-      from{transform:translateY(-16vh) scale(.92); opacity:.6}
-      to  {transform:translateY(-16vh) scale(1);   opacity:1}
-    }
+    @keyframes loadingPop{ from{transform:translateY(-12vh) scale(.92); opacity:.6} to{transform:translateY(-12vh) scale(1); opacity:1} }
     .loading svg{width:100%; height:100%}
     .loading .outline{stroke:url(#loadStroke); stroke-width:7; fill:none; stroke-linejoin:round; filter:drop-shadow(0 8px 20px rgba(99,179,237,.25))}
-    .loading .dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:18 70; animation:loadDash 1.8s linear infinite}
+    .loading .dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:18 70; animation:loadDash 1.9s linear infinite}
     @keyframes loadDash{ to{ stroke-dashoffset:-120 } }
-    .loading .v{fill:url(#loadStroke); animation:pulse 1.8s ease-in-out infinite}
+    .loading .v{fill:url(#loadStroke); animation:pulse 1.9s ease-in-out infinite}
     .loading .v:nth-child(1){animation-delay:0s}
     .loading .v:nth-child(2){animation-delay:.15s}
     .loading .v:nth-child(3){animation-delay:.3s}
@@ -413,7 +410,7 @@
   document.head.appendChild(s);
 </script>
 
-<!-- Loading pós-login: mínimo 1.5s e fecha após logar -->
+<!-- Mostra loading ao clicar e mantém ~1s; esconde ao logar -->
 <script>
   (function(){
     const overlay = document.getElementById('loadingOverlay');
@@ -429,7 +426,7 @@
     function hideOverlay(){
       if (!overlay) return;
       const start = Number(overlay.dataset.start || Date.now());
-      const minShow = 1500; // 1.5s mínimo
+      const minShow = 1000; // 1s mínimo visível
       const elapsed = Date.now() - start;
       setTimeout(()=> overlay.classList.remove('show'), Math.max(0, minShow - elapsed));
     }
@@ -437,16 +434,15 @@
     if (connectBtn){
       connectBtn.addEventListener('click', ()=>{
         showOverlay();
-        setTimeout(()=> overlay.classList.remove('show'), 12000); // failsafe
+        // segurança: some no máx. em 12s mesmo se algo travar
+        setTimeout(()=> overlay.classList.remove('show'), 12000);
       });
     }
 
     const obs = new MutationObserver(()=>{
       const hasAddr = addrBox && addrBox.textContent && addrBox.textContent.trim().length > 0;
       const isShown = walletBox && getComputedStyle(walletBox).display !== 'none';
-      if (hasAddr && isShown){
-        hideOverlay();
-      }
+      if (hasAddr && isShown){ hideOverlay(); }
     });
     if (addrBox) obs.observe(addrBox, { childList:true, subtree:true, characterData:true });
     if (walletBox) obs.observe(walletBox, { attributes:true, attributeFilter:['style','class'] });
