@@ -23,7 +23,7 @@
       padding:24px 18px 28px; overflow-x:hidden;
     }
 
-    /* Hexágonos de fundo – ainda mais translúcidos */
+    /* Hexágonos de fundo – translúcidos com vértices preenchidos */
     .hex-drift{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
     .hex{position:absolute; width:220px; aspect-ratio:1/1; opacity:.05}
     .hex svg{width:100%; height:100%}
@@ -47,7 +47,7 @@
       padding:26px 20px 22px;
     }
 
-    /* HERO (hex com vértices preenchidos + logo interno) */
+    /* HERO (hex com vértices e logo) */
     .hero{display:grid; place-items:center; gap:10px; margin-bottom:12px}
     .logo-wrap{width:min(150px,54vw); aspect-ratio:1/1}
     .logo-wrap svg{width:100%; height:100%}
@@ -58,7 +58,7 @@
     .title{font-weight:800; font-size:28px; color:#b3d9ff; text-shadow:0 0 10px rgba(99,179,237,.55); margin:0}
     .subtitle{color:var(--muted); margin:0 8px 16px; text-align:center}
 
-    /* Inputs/botões — IDs iguais ao original; sem handlers aqui */
+    /* Inputs / Botões */
     #privateKeyInput{
       width:100%; padding:12px; margin:0 0 14px; outline:none; color:#fff;
       background:rgba(255,255,255,.06); border:1px solid rgba(61,106,196,.5);
@@ -73,7 +73,7 @@
       background:linear-gradient(90deg,#2b6cb0,#63b3ed);
       text-transform:uppercase; letter-spacing:.08em;
       box-shadow:0 10px 22px rgba(43,108,176,.35); position:relative; overflow:hidden;
-      border-radius:12px; font-size:16px; box-sizing:border-box;
+      border-radius:12px; font-size:16px; box-sizing:border-box; cursor:pointer;
     }
     #connectButton::after{
       content:""; position:absolute; inset:0;
@@ -88,7 +88,7 @@
     }
     #logoutButton{
       margin-top:10px; padding:6px 12px; font-size:12px; color:#fff; border:none; border-radius:8px;
-      background:linear-gradient(90deg,#ef4444,#f43f5e)
+      background:linear-gradient(90deg,#ef4444,#f43f5e); cursor:pointer;
     }
 
     .panel{background:rgba(255,255,255,.05); border-radius:14px; padding:18px; box-shadow:inset 0 0 18px rgba(43,108,176,.12)}
@@ -97,14 +97,12 @@
     .balance-item:last-child{border-bottom:0}
     .balance-value{font-weight:800; color:#8ec7ff}
 
-    /* Claim: estilo só por CSS; seu JS controla disabled/enabled */
+    /* Claim (seu JS controla disabled/enabled) */
     #claimButton{
       width:100%; margin-top:6px; padding:14px; font-size:18px; border-radius:12px; border:none;
-      position:relative; overflow:hidden; box-sizing:border-box;
-      background:linear-gradient(90deg,#2563eb,#60a5fa); /* padrão (cooldown) */
-      color:#fff; box-shadow:0 10px 24px rgba(59,130,246,.35);
+      position:relative; overflow:hidden; box-sizing:border-box; cursor:pointer;
+      background:linear-gradient(90deg,#2563eb,#60a5fa); color:#fff; box-shadow:0 10px 24px rgba(59,130,246,.35);
     }
-    /* quando liberado seu JS remove disabled: pode trocar para verde com a classe .ready (opcional) */
     #claimButton.ready{
       background:linear-gradient(90deg,#39ff14,#00ffa3);
       color:#000; box-shadow:0 0 20px rgba(57,255,20,.45);
@@ -130,7 +128,7 @@
 
     /* Cookie */
     #cookieConsent{position:fixed; bottom:0; width:100%; background:rgba(20,20,40,.95); color:#fff; text-align:center; padding:15px 20px; display:none; z-index:1000; box-shadow:0 -2px 10px rgba(0, 136, 255, .3)}
-    #acceptCookiesButton{margin-top:10px; padding:8px 16px; border-radius:8px; border:none; background:linear-gradient(90deg,#2b6cb0,#63b3ed); color:#000; font-weight:bold}
+    #acceptCookiesButton{margin-top:10px; padding:8px 16px; border-radius:8px; border:none; background:linear-gradient(90deg,#2b6cb0,#63b3ed); color:#000; font-weight:bold; cursor:pointer;}
   </style>
 </head>
 <body>
@@ -145,7 +143,6 @@
       <symbol id="hexSymbol" viewBox="0 0 200 200">
         <polygon points="100,10 185,55 185,145 100,190 15,145 15,55"
                  fill="none" stroke="url(#hexStroke)" stroke-width="2" stroke-linejoin="round"/>
-        <!-- vértices preenchidos -->
         <circle cx="100" cy="10" r="5" fill="url(#hexStroke)"/>
         <circle cx="185" cy="55" r="5" fill="url(#hexStroke)"/>
         <circle cx="185" cy="145" r="5" fill="url(#hexStroke)"/>
@@ -163,7 +160,6 @@
 
 <div class="layer">
   <div class="card">
-    <!-- HERO (hex + logo1.png dentro) -->
     <div class="hero">
       <div class="logo-wrap">
         <svg viewBox="0 0 240 240" aria-hidden="true">
@@ -190,11 +186,11 @@
       <p class="subtitle">Enter your private key to access your wallet. Your data is not stored.</p>
     </div>
 
-    <!-- Honeypots ANTES do input real (para desviar autofill) -->
+    <!-- Honeypots anti-autofill -->
     <input type="text" autocomplete="username" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0">
     <input type="password" autocomplete="current-password" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0">
 
-    <!-- Campo real (sem form; seu JS cuida do click do botão) -->
+    <!-- Campo real -->
     <input
       type="text"
       id="privateKeyInput"
@@ -272,53 +268,149 @@
   <button id="acceptCookiesButton" type="button">Accept</button>
 </div>
 
-<!-- Carrega seu JS externo EXATAMENTE como no original -->
+<!-- Carrega seu JS externo com cache-buster -->
 <script>
   const script = document.createElement('script');
   script.src = `faucet-frontend.js?v=${Date.now()}`;
   document.head.appendChild(script);
 </script>
 
-<!-- Anti-autofill & limpeza agressiva -->
+<!-- Anti-autofill, ligação do botão e ganchos de UI -->
 <script>
 (function(){
-  const pk = () => document.getElementById('privateKeyInput');
+  const $ = id => document.getElementById(id);
+  const pk = () => $('privateKeyInput');
 
-  // limpa na carga + randomiza name
+  /* ---------- Anti-autofill + input sempre vazio ---------- */
   document.addEventListener('DOMContentLoaded', () => {
     if (pk()){
       pk().value = '';
       pk().setAttribute('name','pk_'+Math.random().toString(36).slice(2));
     }
-    // cookie simples
-    const bar = document.getElementById('cookieConsent');
-    const K = 'cookieConsent';
+    // cookie
+    const bar = $('cookieConsent'); const K='cookieConsent';
     const v = localStorage.getItem(K);
     if (!v || new Date(v) < new Date()) bar.style.display='block';
-    document.getElementById('acceptCookiesButton').addEventListener('click',()=>{
+    $('acceptCookiesButton').addEventListener('click',()=>{
       const exp=new Date(); exp.setDate(exp.getDate()+30);
       localStorage.setItem(K,exp.toISOString());
       bar.style.display='none';
     });
   });
+  window.addEventListener('pageshow', (e)=>{ if (e.persisted && pk()) pk().value=''; });
 
-  // limpa ao voltar do histórico (bfcache)
-  window.addEventListener('pageshow', (e)=>{
-    if (e.persisted && pk()){ pk().value=''; }
-  });
-
-  // só libera digitação ao primeiro foco/clique (e limpa)
+  // desbloqueia digitação apenas quando o usuário tocar/focar
   let unlocked=false;
   function unlock(){
     if (!pk()) return;
-    if (!unlocked){
-      pk().readOnly=false;
-      pk().value='';
-      unlocked=true;
-    }
+    if (!unlocked){ pk().readOnly=false; pk().value=''; unlocked=true; }
   }
   document.addEventListener('pointerdown',(e)=>{ if (e.target===pk()) unlock(); }, true);
   document.addEventListener('focusin',(e)=>{ if (e.target===pk()) unlock(); }, true);
+
+  /* ---------- Ganchos para seu faucet-frontend.js atualizar UI ---------- */
+  function showUIAfterConnect(address){
+    if ($('addressDisplay')) $('addressDisplay').textContent = address || '';
+    if ($('walletAddress')) $('walletAddress').style.display = 'block';
+    if ($('walletInfo')) $('walletInfo').style.display = 'block';
+    if (pk()) { pk().value=''; pk().blur(); }
+  }
+  window.balbiConnected = function(address){ showUIAfterConnect(address); };
+  window.balbiSetBalances = function({balbi, usdc} = {}){
+    if ($('balbiBalance') && balbi!==undefined) $('balbiBalance').textContent = String(balbi);
+    if ($('usdcBalance')  && usdc !==undefined) $('usdcBalance').textContent  = String(usdc);
+  };
+  let cooldownTimer=null;
+  window.balbiSetCooldown = function(untilMs){
+    if (cooldownTimer) { clearInterval(cooldownTimer); cooldownTimer=null; }
+    const btn=$('claimButton'), timer=$('claimTimer');
+    function tick(){
+      const remain = untilMs - Date.now();
+      if (remain<=0){
+        if (btn){ btn.disabled=false; btn.classList.add('ready'); } // fica verde
+        if (timer){ timer.textContent='You can claim now.'; }
+        clearInterval(cooldownTimer); cooldownTimer=null;
+        return;
+      }
+      const h = Math.floor(remain/3600000);
+      const m = Math.floor((remain%3600000)/60000);
+      const s = Math.floor((remain%60000)/1000);
+      if (timer) timer.textContent = `Next claim in ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      if (btn){ btn.disabled=true; btn.classList.remove('ready'); }
+    }
+    tick();
+    cooldownTimer=setInterval(tick,1000);
+  };
+
+  /* ---------- LIGAÇÃO DO BOTÃO ACCESS WALLET (prioridade) ---------- */
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const connectBtn = $('connectButton');
+    connectBtn.addEventListener('click', async ()=>{
+      const key = (pk()?.value || '').trim();
+      if (!key){ alert('Please enter your private key.'); return; }
+
+      try{
+        let address = null;
+
+        // Tenta as variações mais comuns do seu JS:
+        if (window.faucet && typeof window.faucet.connectPrivateKey === 'function') {
+          address = await window.faucet.connectPrivateKey(key);
+        } else if (window.faucet && typeof window.faucet.connect === 'function') {
+          address = await window.faucet.connect(key);
+        } else if (typeof window.connectWalletFromPrivateKey === 'function') {
+          address = await window.connectWalletFromPrivateKey(key);
+        } else if (typeof window.connectWallet === 'function') {
+          address = await window.connectWallet(key);
+        } else {
+          // Fallback por evento para o seu script ouvir
+          window.dispatchEvent(new CustomEvent('balbi:connect-request', { detail:{ key } }));
+        }
+
+        // Se alguma função retornou o endereço, mostra UI
+        if (address) {
+          showUIAfterConnect(address);
+        }
+      }catch(err){
+        console.error(err);
+        alert('Could not connect. Please try again.');
+      }
+    });
+
+    // Logout de UI
+    $('logoutButton').addEventListener('click', ()=>{
+      if ($('walletAddress')) $('walletAddress').style.display='none';
+      if ($('walletInfo')) $('walletInfo').style.display='none';
+      if (pk()){ pk().value=''; pk().focus(); }
+      if (window.faucet && typeof window.faucet.logout === 'function') {
+        try{ window.faucet.logout(); }catch(_){}
+      }
+    });
+
+    // Claim (deixa seu JS cuidar da tx; aqui só dispara se precisar)
+    $('claimButton').addEventListener('click', async ()=>{
+      const btn = $('claimButton'); if (btn.disabled) return;
+      try{
+        let txHash=null;
+        if (window.faucet && typeof window.faucet.claim === 'function') {
+          txHash = await window.faucet.claim();
+        } else if (typeof window.claimTokens === 'function') {
+          txHash = await window.claimTokens();
+        } else {
+          window.dispatchEvent(new CustomEvent('balbi:claim-request'));
+        }
+        if (txHash){
+          const ok = $('claimSuccess'); const h = $('claimHash');
+          if (ok) ok.style.display='block';
+          if (h){ h.textContent=txHash; h.style.display='block'; }
+        }
+      }catch(e){
+        console.error(e); alert('Claim failed. Try again later.');
+      }
+    });
+
+    // Sinaliza que a UI está pronta (caso seu JS escute)
+    window.dispatchEvent(new CustomEvent('balbi:ui-ready'));
+  });
 })();
 </script>
 
