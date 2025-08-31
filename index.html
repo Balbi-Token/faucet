@@ -1,80 +1,5 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Balbi Faucet</title>
-  <style>
-    /* Fundo com animação gradiente */
-    body {
-      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(270deg, #0f0c29, #302b63, #24243e);
-      background-size: 600% 600%;
-      animation: bgShift 20s ease infinite;
-      color: #fff;
-    }
-
-    @keyframes bgShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    /* Container principal */
-    .wallet-container {
-      background: rgba(20, 20, 40, 0.85);
-      border-radius: 20px;
-      box-shadow: 0 0 25px rgba(0, 255, 200, 0.2);
-      padding: 30px;
-      width: 90%;
-      max-width: 480px;
-      text-align: center;
-      backdrop-filter: blur(10px);
-      animation: fadeIn 1s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    .logo {
-      width: 90px;
-      margin-bottom: 20px;
-      filter: drop-shadow(0 0 8px rgba(0, 255, 200, 0.6));
-    }
-
-    h1 {
-      font-size: 28px;
-      color: #00f5ff;
-      text-shadow: 0 0 10px rgba(0, 245, 255, 0.6);
-      margin-bottom: 15px;
-    }
-
-    p {
-      color: #ccc;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    /* Inputs */
-    #privateKeyInput {
-      widthPara ajustar o código e exibir os saldos com o formato de casas decimais "0.0000" sem alterar absolutamente mais nada, precisamos modificar apenas a parte do JavaScript que manipula a exibição dos saldos (`balbiBalance` e `usdcBalance`). Como o JavaScript está em um arquivo externo (`faucet-frontend.js`), não podemos editá-lo diretamente com base no código fornecido, mas podemos inferir que os elementos `<span id="balbiBalance">` e `<span id="usdcBalance">` são atualizados pelo script externo para exibir os saldos.
-
-Dado que a instrução é clara para ajustar apenas o formato dos saldos para "0.0000" e não alterar nada no código HTML fornecido, a abordagem correta seria modificar o JavaScript externo. No entanto, como o JavaScript não foi fornecido, vou assumir que você deseja uma solução que não dependa de alterações no arquivo externo, mas sim uma maneira de formatar os saldos diretamente no HTML ou com um script inline, mantendo o código HTML intacto exceto pela formatação dos saldos.
-
-Como a única maneira de garantir o formato "0.0000" sem alterar o HTML é adicionar um script inline que formate os valores exibidos nos elementos `balbiBalance` e `usdcBalance`, vou propor a adição de um pequeno script no HTML que observa esses elementos e aplica o formato desejado. Isso respeita a restrição de não alterar nada além do formato dos saldos.
-
-Aqui está o código ajustado com a adição de um script inline para formatar os saldos para "0.0000":
-
-```html
+ajuste esse codigo para que exiba os saldos com esse formato de casas decimais "0.0000" sem alterar absolutamente mais nada no codigo alpem disso. so corrija as casas decimais dos saldos. codigo a ser corrigido:
+"
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -455,28 +380,7 @@ Aqui está o código ajustado com a adição de um script inline para formatar o
   const script = document.createElement('script');
   script.src = `faucet-frontend.js?v=${Date.now()}`;
   document.head.appendChild(script);
-
-  // Script para formatar os saldos com 4 casas decimais
-  function formatBalances() {
-    const balbiBalance = document.getElementById('balbiBalance');
-    const usdcBalance = document.getElementById('usdcBalance');
-    
-    const observer = new MutationObserver(() => {
-      if (balbiBalance.textContent !== '...' && !isNaN(parseFloat(balbiBalance.textContent))) {
-        balbiBalance.textContent = parseFloat(balbiBalance.textContent).toFixed(4);
-      }
-      if (usdcBalance.textContent !== '...' && !isNaN(parseFloat(usdcBalance.textContent))) {
-        usdcBalance.textContent = parseFloat(usdcBalance.textContent).toFixed(4);
-      }
-    });
-
-    observer.observe(balbiBalance, { childList: true, characterData: true, subtree: true });
-    observer.observe(usdcBalance, { childList: true, characterData: true, subtree: true });
-  }
-
-  // Iniciar formatação após o carregamento do DOM
-  document.addEventListener('DOMContentLoaded', formatBalances);
 </script>
 
 </body>
-</html>
+</html>  "
