@@ -10,6 +10,7 @@
       --bg1:#0a1022; --bg2:#0d1b34;
       --accent:#2b6cb0; --accent2:#63b3ed; --accent3:#8ec7ff;
       --text:#e6eefb; --muted:#a5b4cf; --radius:18px;
+      --hexOpacity:.05; /* ligeiramente mais visível */
     }
     html,body{height:100%}
     body{
@@ -22,14 +23,31 @@
       display:flex; align-items:center; flex-direction:column; gap:16px;
       padding:24px 18px 28px; overflow-x:hidden;
     }
-    /* Hex bg (mais translúcido) */
+
+    /* Intro (abertura) */
+    .intro{
+      position:fixed; inset:0; background:radial-gradient(1200px 700px at 50% -20%, rgba(99,179,237,.12), transparent 70%), linear-gradient(180deg,var(--bg1),var(--bg2));
+      z-index:9999; display:grid; place-items:center; animation:introFade 1.6s ease forwards;
+    }
+    @keyframes introFade{ 0%{opacity:1} 85%{opacity:1} 100%{opacity:0; visibility:hidden} }
+    .intro-wrap{width:min(220px,58vw); aspect-ratio:1/1; position:relative; transform:scale(.9); animation:introPop .9s cubic-bezier(.2,.8,.2,1) forwards}
+    @keyframes introPop{ 0%{opacity:0; transform:scale(.6) rotate(-8deg)} 60%{opacity:1; transform:scale(1.06)} 100%{transform:scale(1)} }
+    .intro svg{width:100%; height:100%}
+    .intro .hx-outline{stroke:url(#introStroke); stroke-width:8; fill:none; stroke-linejoin:round; filter:drop-shadow(0 8px 28px rgba(99,179,237,.25))}
+    .intro .vertex{fill:url(#introStroke)}
+    .intro image{clip-path:url(#introClip)}
+    /* linha de brilho correndo no contorno */
+    .intro .dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:20 90; animation:introDash 1.6s linear forwards}
+    @keyframes introDash{ to{ stroke-dashoffset:-140 } }
+
+    /* Hex bg (mais visível que antes, sem exagero) */
     .hex-drift{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
-    .hex{position:absolute; width:220px; aspect-ratio:1/1; opacity:.03}
+    .hex{position:absolute; width:220px; aspect-ratio:1/1; opacity:var(--hexOpacity)}
     .hex svg{width:100%; height:100%}
-    .hex use{stroke:url(#hexStroke); stroke-width:2; fill:none; filter:drop-shadow(0 0 4px rgba(99,179,237,.08))}
+    .hex use{stroke:url(#hexStroke); stroke-width:2; fill:none; filter:drop-shadow(0 0 6px rgba(99,179,237,.07))}
     .h1{top:10%; left:-20%; animation:float 28s linear infinite}
     .h2{top:60%; left:80%;  animation:float 32s linear infinite reverse}
-    .h3{top:20%; left:45%;  animation:float 36s linear infinite}
+    .h3{top:22%; left:45%;  animation:float 36s linear infinite}
     .h4{top:78%; left:-10%; animation:float 30s linear infinite reverse}
     @keyframes float{
       0%{transform:translateX(-10vw) translateY(0) rotate(0deg) scale(.92)}
@@ -95,15 +113,24 @@
     .balance-item:last-child{border-bottom:0}
     .balance-value{font-weight:800; color:#8ec7ff}
 
-    /* Claim: azul quando bloqueado, verde quando liberado (sem precisar classe extra) */
+    /* Claim: CINZA quando bloqueado, VERDE quando liberado */
     #claimButton{
       width:100%; margin-top:6px; padding:14px; font-size:18px; border-radius:12px; border:none;
       position:relative; overflow:hidden; box-sizing:border-box; cursor:pointer;
-      background:linear-gradient(90deg,#2563eb,#60a5fa); color:#fff; box-shadow:0 10px 24px rgba(59,130,246,.35);
+      /* estado padrão (também usado quando JS coloca disabled) */
+      background:linear-gradient(90deg,#6b7280,#9ca3af); /* cinza */
+      color:#eee; box-shadow:none; cursor:not-allowed; opacity:.9;
     }
+    #claimButton[disabled]{
+      background:linear-gradient(90deg,#6b7280,#9ca3af); /* cinza */
+      color:#eee; box-shadow:none; cursor:not-allowed; opacity:.9;
+      pointer-events:none;
+    }
+    /* quando o botão estiver ATIVO (seu JS remove 'disabled'), fica verde */
     #claimButton:not([disabled]){
       background:linear-gradient(90deg,#39ff14,#00ffa3);
       color:#000; box-shadow:0 0 20px rgba(57,255,20,.35);
+      cursor:pointer;
     }
     #claimButton::before{
       content:""; position:absolute; top:-60%; left:-60%; width:220%; height:220%;
@@ -130,7 +157,34 @@
 </head>
 <body>
 
-<!-- BG hex com vértices -->
+<!-- INTRO (abertura) -->
+<div class="intro" id="intro" aria-hidden="true">
+  <svg width="0" height="0">
+    <defs>
+      <linearGradient id="introStroke" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
+      </linearGradient>
+      <clipPath id="introClip">
+        <path id="introHex" d="M120 36 L193 78 L193 162 L120 204 L47 162 L47 78 Z"/>
+      </clipPath>
+    </defs>
+  </svg>
+  <div class="intro-wrap">
+    <svg viewBox="0 0 240 240" role="img" aria-label="Balbi hex introduction">
+      <use href="#introHex" class="hx-outline"></use>
+      <use href="#introHex" class="dash"></use>
+      <circle class="vertex" cx="120" cy="36" r="6"/>
+      <circle class="vertex" cx="193" cy="78" r="6"/>
+      <circle class="vertex" cx="193" cy="162" r="6"/>
+      <circle class="vertex" cx="120" cy="204" r="6"/>
+      <circle class="vertex" cx="47"  cy="162" r="6"/>
+      <circle class="vertex" cx="47"  cy="78"  r="6"/>
+      <image href="logo1.png" x="72" y="70" width="96" height="96" preserveAspectRatio="xMidYMid meet" clip-path="url(#introClip)"/>
+    </svg>
+  </div>
+</div>
+
+<!-- BG hex com vértices (mais visível, sem exagero) -->
 <div class="hex-drift" aria-hidden="true">
   <svg width="0" height="0">
     <defs>
@@ -140,8 +194,9 @@
       <symbol id="hexSymbol" viewBox="0 0 200 200">
         <polygon points="100,10 185,55 185,145 100,190 15,145 15,55"
                  fill="none" stroke="url(#hexStroke)" stroke-width="2" stroke-linejoin="round"/>
-        <circle cx="100" cy="10" r="5" fill="url(#hexStroke)"/>
-        <circle cx="185" cy="55" r="5" fill="url(#hexStroke)"/>
+        <!-- bolinhas preenchidas nos vértices -->
+        <circle cx="100" cy="10"  r="5" fill="url(#hexStroke)"/>
+        <circle cx="185" cy="55"  r="5" fill="url(#hexStroke)"/>
         <circle cx="185" cy="145" r="5" fill="url(#hexStroke)"/>
         <circle cx="100" cy="190" r="5" fill="url(#hexStroke)"/>
         <circle cx="15"  cy="145" r="5" fill="url(#hexStroke)"/>
@@ -223,6 +278,7 @@
       <div class="panel" style="margin-top:14px;">
         <h2>Faucet</h2>
         <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
+        <!-- começa desabilitado; seu JS liga/desliga -->
         <button id="claimButton" type="button" disabled>Claim Balbi</button>
         <div id="claimTimer" class="claim-timer"></div>
         <div id="claimSuccess" class="claim-success">Tokens sent successfully!</div>
@@ -271,17 +327,19 @@
 <!-- 1) Limpa qualquer PK salva ANTES de carregar seu JS -->
 <script>
   try { localStorage.removeItem('balbiPrivateKey'); } catch(e) {}
-  // também garante input vazio ao montar
   document.addEventListener('DOMContentLoaded', ()=>{
     const pk=document.getElementById('privateKeyInput');
     if (pk) pk.value='';
+    // remove o overlay da intro após a animação
+    const intro = document.getElementById('intro');
+    setTimeout(()=>{ if(intro){ intro.style.display='none'; } }, 1700);
   });
 </script>
 
-<!-- 2) Carrega SEU front-end (não adiciono listeners próprios pra não conflitar) -->
+<!-- 2) Carrega SEU front-end (mantive exatamente como você usa) -->
 <script src="faucet-frontend.js?v=<?=Date.now?Date.now():''?>"></script>
 
-<!-- 3) Hex stroke gradient def reutilizado -->
+<!-- Gradiente reutilizado para BG hex -->
 <svg width="0" height="0" style="position:absolute">
   <defs>
     <linearGradient id="hexStroke" x1="0" y1="0" x2="1" y2="1">
