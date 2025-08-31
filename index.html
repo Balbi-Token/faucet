@@ -31,7 +31,7 @@
     .wallet-container {
       background: rgba(20, 20, 40, 0.85);
       border-radius: 20px;
-      box-shadow: 0 0 25px rgba(0, 255, 200, 0.2);
+      box-shadow: 0 0 25px rgba(43, 108, 176, 0.25); /* azul */
       padding: 30px;
       width: 90%;
       max-width: 480px;
@@ -53,8 +53,8 @@
 
     h1 {
       font-size: 28px;
-      color: #00f5ff;
-      text-shadow: 0 0 10px rgba(0, 245, 255, 0.6);
+      color: #63b3ed; /* azul claro */
+      text-shadow: 0 0 10px rgba(99, 179, 237, 0.6);
       margin-bottom: 15px;
     }
 
@@ -64,22 +64,23 @@
       margin-bottom: 20px;
     }
 
-    /* Inputs */
+    /* Inputs (mesmo tamanho do botão e paleta azul) */
     #privateKeyInput {
+      box-sizing: border-box;  /* impede “sobrar” */
       width: 100%;
-      padding: 12px;
+      padding: 12px;           /* igual ao botão */
       margin-bottom: 15px;
-      border: 1px solid rgba(0, 255, 200, 0.3);
-      border-radius: 10px;
-      font-size: 14px;
+      border: 1px solid rgba(99, 179, 237, 0.35);
+      border-radius: 10px;     /* igual ao botão */
+      font-size: 16px;         /* igual ao botão */
       background: rgba(255, 255, 255, 0.05);
       color: #fff;
       outline: none;
       transition: 0.3s;
     }
     #privateKeyInput:focus {
-      border-color: #00f5ff;
-      box-shadow: 0 0 12px rgba(0, 245, 255, 0.5);
+      border-color: #63b3ed;
+      box-shadow: 0 0 12px rgba(99, 179, 237, 0.5);
     }
 
     /* Botões */
@@ -91,44 +92,45 @@
     }
 
     #connectButton {
+      box-sizing: border-box;  /* garante mesma largura do input */
       width: 100%;
       padding: 12px;
-      background: linear-gradient(90deg, #00f5ff, #00ffa3);
-      color: #000;
+      background: linear-gradient(90deg, #2b6cb0, #63b3ed); /* azul -> azul claro */
+      color: #fff;
       border-radius: 10px;
       font-size: 16px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      box-shadow: 0 0 15px rgba(0, 255, 200, 0.6);
+      box-shadow: 0 0 15px rgba(43, 108, 176, 0.6);
     }
     #connectButton:hover {
       transform: scale(1.05);
-      box-shadow: 0 0 25px rgba(0, 255, 200, 0.9);
+      box-shadow: 0 0 25px rgba(99, 179, 237, 0.9);
     }
 
     .wallet-address {
       margin-top: 15px;
       font-size: 14px;
-      color: #0ff;
+      color: #63b3ed;
       word-break: break-all;
       padding: 10px;
-      border: 1px solid rgba(0, 255, 200, 0.4);
+      border: 1px solid rgba(99, 179, 237, 0.35);
       border-radius: 8px;
-      background: rgba(0, 255, 200, 0.05);
+      background: rgba(99, 179, 237, 0.08);
     }
 
     #logoutButton {
       margin-top: 10px;
       padding: 6px 12px;
       font-size: 12px;
-      background: linear-gradient(90deg, #ff4d4d, #ff1a75);
+      background: linear-gradient(90deg, #ef4444, #f43f5e); /* mantém aviso em vermelho */
       color: #fff;
       border-radius: 6px;
-      box-shadow: 0 0 12px rgba(255, 77, 77, 0.6);
+      box-shadow: 0 0 12px rgba(244, 63, 94, 0.6);
     }
     #logoutButton:hover {
       transform: scale(1.05);
-      box-shadow: 0 0 18px rgba(255, 77, 77, 0.9);
+      box-shadow: 0 0 18px rgba(244, 63, 94, 0.9);
     }
 
     /* Cards */
@@ -137,21 +139,21 @@
       border-radius: 12px;
       padding: 20px;
       margin-top: 20px;
-      box-shadow: inset 0 0 20px rgba(0, 255, 200, 0.08);
+      box-shadow: inset 0 0 20px rgba(43, 108, 176, 0.15); /* azul */
     }
 
     .info-card h2 {
       font-size: 18px;
-      color: #00ffa3;
+      color: #63b3ed;
       margin-top: 0;
-      text-shadow: 0 0 8px rgba(0, 255, 163, 0.6);
+      text-shadow: 0 0 8px rgba(99, 179, 237, 0.6);
     }
 
     .balance-item {
       display: flex;
       justify-content: space-between;
       padding: 8px 0;
-      border-bottom: 1px solid rgba(0, 255, 200, 0.2);
+      border-bottom: 1px solid rgba(99, 179, 237, 0.25);
       color: #eee;
     }
     .balance-item:last-child {
@@ -160,25 +162,25 @@
     .balance-value {
       font-size: 18px;
       font-weight: bold;
-      color: #0ff;
-      text-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
+      color: #63b3ed;
+      text-shadow: 0 0 6px rgba(99, 179, 237, 0.6);
     }
 
-    /* Botão Claim */
+    /* Botão Claim (azul) */
     #claimButton {
       width: 100%;
       padding: 14px;
       font-size: 18px;
       border-radius: 12px;
-      background: linear-gradient(90deg, #39ff14, #00ffa3);
-      color: #000;
-      box-shadow: 0 0 20px rgba(57, 255, 20, 0.7);
+      background: linear-gradient(90deg, #2563eb, #60a5fa);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
       position: relative;
       overflow: hidden;
     }
     #claimButton:disabled {
-      background: #555;
-      color: #aaa;
+      background: #4b5563;
+      color: #cbd5e1;
       box-shadow: none;
       cursor: not-allowed;
     }
@@ -189,7 +191,7 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
       transform: rotate(45deg);
       animation: shine 3s infinite;
     }
@@ -198,13 +200,9 @@
       100% { transform: translate(150%, -50%) rotate(45deg); }
     }
 
-    .claim-timer, .claim-success, .claim-hash {
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    .claim-timer { color: #0ff; }
-    .claim-success { color: #39ff14; font-weight: bold; }
-    .claim-hash { font-size: 12px; color: #aaa; }
+    .claim-timer { margin-top: 10px; font-size: 14px; color: #63b3ed; }
+    .claim-success { margin-top: 10px; font-size: 14px; color: #93c5fd; font-weight: bold; }
+    .claim-hash { margin-top: 10px; font-size: 12px; color: #aaa; }
 
     /* Botões de ação */
     .action-buttons { margin-top: 20px; }
@@ -212,15 +210,15 @@
       display: inline-block;
       padding: 10px 15px;
       border-radius: 10px;
-      background: rgba(0, 255, 255, 0.1);
-      color: #0ff;
+      background: rgba(43, 108, 176, 0.15);
+      color: #63b3ed;
       text-decoration: none;
       font-size: 14px;
-      box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+      box-shadow: 0 0 10px rgba(99, 179, 237, 0.35);
     }
     .action-button:hover {
-      background: rgba(0, 255, 255, 0.25);
-      box-shadow: 0 0 16px rgba(0, 255, 255, 0.8);
+      background: rgba(99, 179, 237, 0.25);
+      box-shadow: 0 0 16px rgba(99, 179, 237, 0.8);
     }
 
     /* FAQ */
@@ -232,8 +230,8 @@
     .faq-section h2 {
       text-align: center;
       font-size: 22px;
-      color: #00f5ff;
-      text-shadow: 0 0 8px rgba(0, 245, 255, 0.6);
+      color: #63b3ed;
+      text-shadow: 0 0 8px rgba(99, 179, 237, 0.6);
     }
     .faq-item {
       background: rgba(255, 255, 255, 0.05);
@@ -244,7 +242,7 @@
     }
     .faq-item h3 {
       margin: 0;
-      color: #0ff;
+      color: #63b3ed;
     }
 
     /* Rodapé */
@@ -258,12 +256,12 @@
     }
     .footer-links { margin-bottom: 5px; }
     .footer-links a {
-      color: #0ff;
+      color: #63b3ed;
       text-decoration: none;
       margin: 0 10px;
     }
     .footer-links a:hover {
-      text-shadow: 0 0 8px rgba(0,255,255,0.8);
+      text-shadow: 0 0 8px rgba(99,179,237,0.8);
     }
     .footer-copy { font-size: 12px; }
 
@@ -278,21 +276,21 @@
       padding: 15px 20px;
       display: none;
       z-index: 1000;
-      box-shadow: 0 -2px 10px rgba(0, 255, 255, 0.3);
+      box-shadow: 0 -2px 10px rgba(99, 179, 237, 0.35);
     }
     #acceptCookiesButton {
       margin-top: 10px;
       padding: 8px 16px;
       border-radius: 8px;
       border: none;
-      background: linear-gradient(90deg, #00f5ff, #00ffa3);
-      color: #000;
+      background: linear-gradient(90deg, #2b6cb0, #63b3ed);
+      color: #fff;
       font-weight: bold;
-      box-shadow: 0 0 12px rgba(0,255,200,0.6);
+      box-shadow: 0 0 12px rgba(99,179,237,0.6);
     }
     #acceptCookiesButton:hover {
       transform: scale(1.05);
-      box-shadow: 0 0 18px rgba(0,255,200,0.9);
+      box-shadow: 0 0 18px rgba(99,179,237,0.9);
     }
   </style>
 </head>
@@ -332,7 +330,7 @@
     </div>
 
     <div class="faucet-card">
-      <h3>Grow the BalbiCO2 Ecosystem!</h3>
+      <h3 style="color:#93c5fd">Grow the BalbiCO2 Ecosystem!</h3>
       <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
       <button id="claimButton">Claim Balbi</button>
       <div id="claimTimer" class="claim-timer"></div>
