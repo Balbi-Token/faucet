@@ -1,139 +1,266 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Balbi Faucet</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg1:#0a1022; --bg2:#0d1b34;
-      --accent:#2b6cb0; --accent2:#63b3ed; --accent3:#8ec7ff;
-      --text:#e6eefb; --muted:#a5b4cf; --radius:18px;
-    }
-    html,body{height:100%}
-    body{
-      margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(1100px 520px at 10% -10%, rgba(43,108,176,.12) 0%, transparent 60%),
-        radial-gradient(900px 420px at 110% 120%, rgba(99,179,237,.10) 0%, transparent 62%),
-        linear-gradient(180deg,var(--bg1),var(--bg2));
-      display:flex; align-items:center; flex-direction:column; gap:16px;
-      padding:24px 18px 28px; overflow-x:hidden;
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Balbi Faucet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#0a1022; --bg2:#0d1b34;
+    --accent:#2b6cb0; --accent2:#63b3ed; --accent3:#8ec7ff;
+    --text:#e6eefb; --muted:#a5b4cf; --radius:18px;
+    --btn-blue1:#2563eb; --btn-blue2:#60a5fa;
+    --btn-green1:#39ff14; --btn-green2:#00ffa3;
+  }
+  html,body{height:100%}
+  body{
+    margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(1100px 520px at 10% -10%, rgba(43,108,176,.22) 0%, transparent 60%),
+      radial-gradient(900px 420px at 110% 120%, rgba(99,179,237,.20) 0%, transparent 62%),
+      linear-gradient(180deg,var(--bg1),var(--bg2));
+    display:flex; align-items:center; flex-direction:column; gap:16px;
+    padding:24px 18px 28px; overflow-x:hidden;
+  }
+  /* hex drift de fundo (mais translúcidos) */
+  .hex-drift{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
+  .hex{position:absolute; width:220px; aspect-ratio:1/1; opacity:.10} /* <— mais transparente */
+  .hex svg{width:100%; height:100%}
+  .hex use{stroke:url(#hexStroke); stroke-width:2.4; fill:none; filter:drop-shadow(0 0 8px rgba(99,179,237,.16))}
+  .h1{top:10%; left:-20%; animation:float 28s linear infinite}
+  .h2{top:60%; left:80%;  animation:float 32s linear infinite reverse}
+  .h3{top:20%; left:45%;  animation:float 36s linear infinite}
+  .h4{top:78%; left:-10%; animation:float 30s linear infinite reverse}
+  @keyframes float{
+    0%{transform:translateX(-10vw) translateY(0) rotate(0deg) scale(.92)}
+    50%{transform:translateX(20vw) translateY(-8vh) rotate(180deg) scale(1)}
+    100%{transform:translateX(60vw) translateY(4vh) rotate(360deg) scale(.92)}
+  }
+  .layer{position:relative; z-index:1; width:min(520px,94vw); margin:0 auto}
+  .card{
+    border-radius:var(--radius);
+    background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+    border:1px solid rgba(47,82,152,.35);
+    box-shadow:0 16px 44px rgba(8,14,35,.55), inset 0 1px 0 rgba(255,255,255,.05);
+    padding:26px 20px 22px;
+  }
+  /* hero hex com vértices preenchidos + logo1.png */
+  .hero{display:grid; place-items:center; gap:10px; margin-bottom:12px}
+  .logo-wrap{width:min(150px,54vw); aspect-ratio:1/1}
+  .logo-wrap svg{width:100%; height:100%}
+  .hx-main{stroke:url(#stroke); stroke-width:7; fill:none; stroke-linejoin:round}
+  .hx-dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:22 82; opacity:.9; animation:dash 9s linear infinite}
+  @keyframes dash{to{stroke-dashoffset:-104}}
+  .vertex{fill:url(#stroke)}
+  .title{font-weight:800; font-size:28px; color:#b3d9ff; text-shadow:0 0 10px rgba(99,179,237,.55); margin:0}
+  .subtitle{color:var(--muted); margin:0 8px 16px; text-align:center}
+  .input,.btn{width:100%; border-radius:12px; font-size:16px; box-sizing:border-box}
+  #privateKeyInput{
+    padding:12px; margin:0 0 14px; outline:none; color:#fff;
+    background:rgba(255,255,255,.06); border:1px solid rgba(61,106,196,.5);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+  }
+  #privateKeyInput::placeholder{color:#c7d6f0aa}
+  #privateKeyInput:focus{border-color:#63b3ed; box-shadow:0 0 0 3px #63b3ed33, inset 0 0 0 1px rgba(255,255,255,.06)}
 
-    /* Hexágonos de fundo – translúcidos com vértices preenchidos */
-    .hex-drift{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
-    .hex{position:absolute; width:220px; aspect-ratio:1/1; opacity:.05}
-    .hex svg{width:100%; height:100%}
-    .hex use{stroke:url(#hexStroke); stroke-width:2; fill:none; filter:drop-shadow(0 0 5px rgba(99,179,237,.1))}
-    .h1{top:10%; left:-20%; animation:float 28s linear infinite}
-    .h2{top:60%; left:80%;  animation:float 32s linear infinite reverse}
-    .h3{top:20%; left:45%;  animation:float 36s linear infinite}
-    .h4{top:78%; left:-10%; animation:float 30s linear infinite reverse}
-    @keyframes float{
-      0%{transform:translateX(-10vw) translateY(0) rotate(0deg) scale(.92)}
-      50%{transform:translateX(20vw) translateY(-8vh) rotate(180deg) scale(1)}
-      100%{transform:translateX(60vw) translateY(4vh) rotate(360deg) scale(.92)}
-    }
+  /* Botão Access Wallet ajustado para funcionar como antigo visual em português */
+  #connectButton{
+    padding:12px;
+    border:none;
+    font-weight:800;
+    background:linear-gradient(90deg, #00f5ff, #00ffa3);
+    color:#000;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    box-shadow: 0 0 15px rgba(0,255,200,0.6);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position:relative;
+    overflow:hidden;
+    border-radius: 12px;
+    font-size: 16px;
+  }
+  #connectButton:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(0,255,200,0.9);
+  }
+  #connectButton::after {
+    display:none;
+  }
 
-    .layer{position:relative; z-index:1; width:min(520px,94vw); margin:0 auto}
-    .card{
-      border-radius:var(--radius);
-      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
-      border:1px solid rgba(47,82,152,.35);
-      box-shadow:0 16px 44px rgba(8,14,35,.55), inset 0 1px 0 rgba(255,255,255,.05);
-      padding:26px 20px 22px;
-    }
+  /* Exibição dos saldos com estilização da versão antiga */
+  .balance-item {
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px solid rgba(0,255,200,0.2);
+    color:#eee;
+  }
+  .balance-item:last-child {
+    border-bottom:none;
+  }
+  .balance-value {
+    font-size:18px;
+    font-weight:bold;
+    color:#0ff;
+    text-shadow: 0 0 6px rgba(0,255,255,0.6);
+  }
 
-    /* HERO (hex com vértices e logo) */
-    .hero{display:grid; place-items:center; gap:10px; margin-bottom:12px}
-    .logo-wrap{width:min(150px,54vw); aspect-ratio:1/1}
-    .logo-wrap svg{width:100%; height:100%}
-    .hx-main{stroke:url(#stroke); stroke-width:7; fill:none; stroke-linejoin:round}
-    .hx-dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:22 82; opacity:.9; animation:dash 9s linear infinite}
-    @keyframes dash{to{stroke-dashoffset:-104}}
-    .vertex{fill:url(#stroke)}
-    .title{font-weight:800; font-size:28px; color:#b3d9ff; text-shadow:0 0 10px rgba(99,179,237,.55); margin:0}
-    .subtitle{color:var(--muted); margin:0 8px 16px; text-align:center}
+  /* Painel dos saldos com aparência moderna */
+  .panel {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: inset 0 0 18px rgba(43,108,176,.12);
+  }
+  .panel h2 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: #00ffa3;
+    text-shadow: 0 0 8px rgba(0, 255, 163, 0.6);
+  }
 
-    /* Inputs / Botões */
-    #privateKeyInput{
-      width:100%; padding:12px; margin:0 0 14px; outline:none; color:#fff;
-      background:rgba(255,255,255,.06); border:1px solid rgba(61,106,196,.5);
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
-      border-radius:12px; font-size:16px; box-sizing:border-box;
-    }
-    #privateKeyInput::placeholder{color:#c7d6f0aa}
-    #privateKeyInput:focus{border-color:#63b3ed; box-shadow:0 0 0 3px #63b3ed33, inset 0 0 0 1px rgba(255,255,255,.06)}
+  /* Botão Claim Balbi ajustado para verde constante com animação similar à antiga */
+  #claimButton {
+    width: 100%;
+    margin-top: 6px;
+    padding: 14px;
+    font-size: 18px;
+    border-radius: 12px;
+    border: none;
+    color: #000;
+    background: linear-gradient(90deg, var(--btn-green1), var(--btn-green2));
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.7);
+    position: relative;
+    overflow: hidden;
+  }
+  #claimButton:disabled {
+    background: #555;
+    color: #aaa;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+  #claimButton::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    transform: rotate(45deg);
+    animation: shine 3s infinite;
+  }
+  @keyframes shine {
+    0% { transform: translate(-150%, -50%) rotate(45deg); }
+    100% { transform: translate(150%, -50%) rotate(45deg); }
+  }
 
-    #connectButton{
-      width:100%; padding:12px; border:none; color:#fff; font-weight:800;
-      background:linear-gradient(90deg,#2b6cb0,#63b3ed);
-      text-transform:uppercase; letter-spacing:.08em;
-      box-shadow:0 10px 22px rgba(43,108,176,.35); position:relative; overflow:hidden;
-      border-radius:12px; font-size:16px; box-sizing:border-box; cursor:pointer;
-    }
-    #connectButton::after{
-      content:""; position:absolute; inset:0;
-      background:linear-gradient(120deg,transparent 0 32%, rgba(255,255,255,.22) 50%, transparent 70%);
-      transform:translateX(-100%); transition:transform .65s ease;
-    }
-    #connectButton:hover::after{transform:translateX(100%)}
+  .claim-timer {
+    color: #0ff;
+    margin-top: 10px;
+  }
+  .claim-success {
+    color: #39ff14;
+    margin-top: 10px;
+    font-weight: 700;
+    display: none;
+  }
+  .claim-hash {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 8px;
+    display: none;
+    word-break: break-all;
+  }
 
-    .wallet-address{
-      display:none; margin-top:14px; font-size:14px; color:#cfe4ff; word-break:break-all;
-      padding:10px; border-radius:10px; border:1px solid #335aa8cc; background:rgba(255,255,255,.05)
-    }
-    #logoutButton{
-      margin-top:10px; padding:6px 12px; font-size:12px; color:#fff; border:none; border-radius:8px;
-      background:linear-gradient(90deg,#ef4444,#f43f5e); cursor:pointer;
-    }
-
-    .panel{background:rgba(255,255,255,.05); border-radius:14px; padding:18px; box-shadow:inset 0 0 18px rgba(43,108,176,.12)}
-    .panel h2{margin:0 0 10px; font-size:18px; color:#8ec7ff}
-    .balance-item{display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #2f529833}
-    .balance-item:last-child{border-bottom:0}
-    .balance-value{font-weight:800; color:#8ec7ff}
-
-    /* Claim (seu JS controla disabled/enabled) */
-    #claimButton{
-      width:100%; margin-top:6px; padding:14px; font-size:18px; border-radius:12px; border:none;
-      position:relative; overflow:hidden; box-sizing:border-box; cursor:pointer;
-      background:linear-gradient(90deg,#2563eb,#60a5fa); color:#fff; box-shadow:0 10px 24px rgba(59,130,246,.35);
-    }
-    #claimButton.ready{
-      background:linear-gradient(90deg,#39ff14,#00ffa3);
-      color:#000; box-shadow:0 0 20px rgba(57,255,20,.45);
-    }
-    #claimButton::before{
-      content:""; position:absolute; top:-60%; left:-60%; width:220%; height:220%;
-      background:radial-gradient(circle,rgba(255,255,255,.22) 0%, transparent 60%);
-      transform:rotate(35deg); animation:shine 3s infinite;
-    }
-    @keyframes shine{0%{transform:translate(-60%,-60%) rotate(35deg)}100%{transform:translate(60%,60%) rotate(35deg)}}
-
-    .claim-timer{color:#8ec7ff; margin-top:10px}
-    .claim-success{color:#bfe0ff; margin-top:10px; font-weight:700; display:none}
-    .claim-hash{color:#aab3c9; margin-top:8px; font-size:12px; display:none; word-break:break-all}
-
-    .faq{width:min(520px,94vw); margin:34px auto 12px}
-    .faq h2{text-align:center; font-size:22px; color:#8ec7ff; text-shadow:0 0 8px rgba(99,179,237,.4); margin-bottom:14px}
-    .faq-item{background:rgba(255,255,255,.05); border-radius:12px; padding:16px 18px; color:#dde6ff; margin-bottom:12px}
-
-    .footer{width:100%; text-align:center; color:#a9b8d8; font-size:12px; margin-top:24px}
-    .links a{color:#8ec7ff; text-decoration:none; margin:0 10px}
-    .links a:hover{text-shadow:0 0 8px rgba(142,199,255,.8)}
-
-    /* Cookie */
-    #cookieConsent{position:fixed; bottom:0; width:100%; background:rgba(20,20,40,.95); color:#fff; text-align:center; padding:15px 20px; display:none; z-index:1000; box-shadow:0 -2px 10px rgba(0, 136, 255, .3)}
-    #acceptCookiesButton{margin-top:10px; padding:8px 16px; border-radius:8px; border:none; background:linear-gradient(90deg,#2b6cb0,#63b3ed); color:#000; font-weight:bold; cursor:pointer;}
-  </style>
+  /* Demais estilos gerais mantidos */
+  .wallet-address {
+    display:none;
+    margin-top:14px;
+    font-size:14px;
+    color:#0ff;
+    word-break:break-all;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid rgba(0,255,200,0.4);
+    background:rgba(0,255,200,0.05);
+  }
+  #logoutButton {
+    margin-top:10px;
+    padding:6px 12px;
+    font-size:12px;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    background:linear-gradient(90deg,#ef4444,#f43f5e);
+    box-shadow: 0 0 12px rgba(255, 68, 68, 0.6);
+    cursor: pointer;
+  }
+  #logoutButton:hover {
+    box-shadow: 0 0 18px rgba(255, 68, 68, 0.9);
+    transform: scale(1.05);
+  }
+  .faq {
+    width: min(520px, 94vw);
+    margin: 34px auto 12px;
+  }
+  .faq h2 {
+    text-align: center;
+    font-size: 22px;
+    color: #8ec7ff;
+    text-shadow: 0 0 8px rgba(99,179,237,.4);
+    margin-bottom: 14px;
+  }
+  .faq-item {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 16px 18px;
+    color: #dde6ff;
+    margin-bottom: 12px;
+  }
+  .footer {
+    width: 100%;
+    text-align: center;
+    color: #a9b8d8;
+    font-size: 12px;
+    margin-top: 24px;
+  }
+  .links a {
+    color:#8ec7ff;
+    text-decoration:none;
+    margin:0 10px;
+  }
+  .links a:hover {
+    text-shadow: 0 0 8px rgba(142,199,255,.8);
+  }
+  /* cookie */
+  #cookieConsent {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: rgba(20,20,40,0.95);
+    color: #fff;
+    text-align: center;
+    padding: 15px 20px;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 136, 255, .3);
+  }
+  #acceptCookiesButton {
+    margin-top: 10px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(90deg,#2b6cb0,#63b3ed);
+    color: #000;
+    font-weight: bold;
+  }
+</style>
 </head>
 <body>
-
-<!-- BG hex -->
+<!-- hex drift background -->
 <div class="hex-drift" aria-hidden="true">
   <svg width="0" height="0">
     <defs>
@@ -142,13 +269,14 @@
       </linearGradient>
       <symbol id="hexSymbol" viewBox="0 0 200 200">
         <polygon points="100,10 185,55 185,145 100,190 15,145 15,55"
-                 fill="none" stroke="url(#hexStroke)" stroke-width="2" stroke-linejoin="round"/>
-        <circle cx="100" cy="10" r="5" fill="url(#hexStroke)"/>
-        <circle cx="185" cy="55" r="5" fill="url(#hexStroke)"/>
-        <circle cx="185" cy="145" r="5" fill="url(#hexStroke)"/>
-        <circle cx="100" cy="190" r="5" fill="url(#hexStroke)"/>
-        <circle cx="15" cy="145" r="5" fill="url(#hexStroke)"/>
-        <circle cx="15" cy="55" r="5" fill="url(#hexStroke)"/>
+                 fill="none" stroke="url(#hexStroke)" stroke-width="2.4" stroke-linejoin="round"/>
+        <!-- vértices preenchidos -->
+        <circle cx="100" cy="10" r="5.2" fill="url(#hexStroke)"/>
+        <circle cx="185" cy="55" r="5.2" fill="url(#hexStroke)"/>
+        <circle cx="185" cy="145" r="5.2" fill="url(#hexStroke)"/>
+        <circle cx="100" cy="190" r="5.2" fill="url(#hexStroke)"/>
+        <circle cx="15" cy="145" r="5.2" fill="url(#hexStroke)"/>
+        <circle cx="15" cy="55" r="5.2" fill="url(#hexStroke)"/>
       </symbol>
     </defs>
   </svg>
@@ -157,9 +285,9 @@
   <div class="hex h3"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
   <div class="hex h4"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
 </div>
-
 <div class="layer">
   <div class="card">
+    <!-- HERO LOGO -->
     <div class="hero">
       <div class="logo-wrap">
         <svg viewBox="0 0 240 240" aria-hidden="true">
@@ -171,6 +299,7 @@
           </defs>
           <use href="#hexPath" class="hx-main"></use>
           <use href="#hexPath" class="hx-dash"></use>
+          <!-- vértices preenchidos -->
           <g>
             <circle class="vertex" cx="120" cy="36" r="6"/>
             <circle class="vertex" cx="193" cy="78" r="6"/>
@@ -179,242 +308,203 @@
             <circle class="vertex" cx="47"  cy="162" r="6"/>
             <circle class="vertex" cx="47"  cy="78"  r="6"/>
           </g>
+          <!-- logo dentro -->
           <image href="logo1.png" x="72" y="70" width="96" height="96" preserveAspectRatio="xMidYMid meet" clip-path="url(#clipHex)"/>
         </svg>
       </div>
       <h1 class="title">Balbi Faucet</h1>
-      <p class="subtitle">Enter your private key to access your wallet. Your data is not stored.</p>
+      <p class="subtitle">Insira sua chave privada para acessar sua carteira. Seus dados não são armazenados.</p>
     </div>
-
-    <!-- Honeypots anti-autofill -->
-    <input type="text" autocomplete="username" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0">
-    <input type="password" autocomplete="current-password" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0">
-
-    <!-- Campo real -->
-    <input
-      type="text"
-      id="privateKeyInput"
-      placeholder="Your private key here (0x...)"
-      inputmode="text"
-      autocomplete="off"
-      autocapitalize="off"
-      spellcheck="false"
-      readonly
-    >
-    <button id="connectButton" type="button">Access Wallet</button>
-
-    <div id="walletAddress" class="wallet-address" style="display:none;">
-      <span>Wallet Address:</span>
+    <!-- FORM -->
+    <input type="text" id="privateKeyInput" class="input" placeholder="Sua chave privada aqui (0x...)">
+    <button id="connectButton" type="button" class="btn">Acessar Carteira</button>
+    <div id="walletAddress" class="wallet-address">
+      <span>Endereço da Carteira:</span>
       <div id="addressDisplay"></div>
-      <button id="logoutButton" type="button">Log Out</button>
+      <button id="logoutButton" type="button">Sair</button>
     </div>
-
-    <div id="walletInfo" style="display:none;">
+    <div class="section" id="walletInfo" style="display:none;">
       <div class="panel">
-        <h2>Balances</h2>
-        <div class="balance-item">
-          <span>BALBI Balance</span>
-          <span id="balbiBalance" class="balance-value">...</span>
-        </div>
-        <div class="balance-item">
-          <span>USDC Balance</span>
-          <span id="usdcBalance" class="balance-value">...</span>
-        </div>
+        <h2>Saldos</h2>
+        <div class="balance-item"><span>Saldo Balbi</span><span id="balbiBalance" class="balance-value">...</span></div>
+        <div class="balance-item"><span>Saldo USDC</span><span id="usdcBalance" class="balance-value">...</span></div>
       </div>
-
       <div class="panel" style="margin-top:14px;">
         <h2>Faucet</h2>
-        <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
-        <button id="claimButton" type="button">Claim Balbi</button>
+        <p>Cultive Balbi a cada 4 horas e ajude o ecossistema a crescer.</p>
+        <button id="claimButton" type="button">Cultivar Balbi</button>
         <div id="claimTimer" class="claim-timer"></div>
-        <div id="claimSuccess" class="claim-success">Tokens sent successfully!</div>
-        <div id="claimHash" class="claim-hash" style="display:none;"></div>
+        <div id="claimSuccess" class="claim-success">Tokens enviados com sucesso!</div>
+        <div id="claimHash" class="claim-hash"></div>
       </div>
-
       <p style="margin-top:16px;">
-        <a class="links" href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" style="color:#8ec7ff;text-decoration:none;">Swap on Quickswap</a>
+        <a class="links" href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" style="color:#8ec7ff;text-decoration:none;">Swap na Quickswap</a>
       </p>
     </div>
   </div>
 </div>
-
 <div class="faq">
-  <h2>Frequently Asked Questions</h2>
+  <h2>Perguntas Frequentes</h2>
   <div class="faq-item">
-    <h3>How often can I claim Balbi?</h3>
-    <p>You can claim tokens every 4 hours. This ensures fair distribution for all users.</p>
+    <h3>Com que frequência posso cultivar Balbi?</h3>
+    <p>Você pode reivindicar tokens a cada 4 horas. Isso garante uma distribuição justa para todos os usuários.</p>
   </div>
   <div class="faq-item">
-    <h3>Is this wallet secure?</h3>
-    <p>Yes. The entered private key is not stored on our server. Login is performed only in your browser.</p>
+    <h3>Esta carteira é segura?</h3>
+    <p>Sim. A chave privada inserida não é armazenada em nosso servidor. O login é feito apenas no seu navegador.</p>
   </div>
   <div class="faq-item">
-    <h3>Are there any fees?</h3>
-    <p>The wallet is completely free. You only pay the standard blockchain network fees (gas fees) for transactions.</p>
+    <h3>Há taxas?</h3>
+    <p>A carteira é totalmente gratuita. Você paga apenas as taxas de rede (gas fees) padrão da blockchain para as transações.</p>
   </div>
 </div>
-
 <div class="footer">
   <div class="links">
-    <a href="terms.html">Terms of Service</a>
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="https://polygonscan.com/token/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5" target="_blank">View Contract</a>
+    <a href="terms.html">Termos de Serviço</a>
+    <a href="privacy.html">Política de Privacidade</a>
+    <a href="https://polygonscan.com/token/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5" target="_blank">Ver Contrato</a>
   </div>
-  <div>© 2025 Balbi Faucet. Built with ❤️ for the crypto community.</div>
+  <div>© 2025 Balbi Faucet. Construído com ❤️ para a comunidade cripto.</div>
 </div>
-
 <div id="cookieConsent">
-  <p>We use cookies to store your private key locally and improve your experience. By continuing, you agree to our Privacy Policy.</p>
-  <button id="acceptCookiesButton" type="button">Accept</button>
+  <p>Utilizamos cookies para armazenar sua chave privada localmente e melhorar a sua experiência. Ao continuar, você concorda com nossa Política de Privacidade.</p>
+  <button id="acceptCookiesButton" type="button">Aceitar</button>
 </div>
-
-<!-- Carrega seu JS externo com cache-buster -->
+<!-- Carrega seu JS externo cedo, mas sem bloquear o parse -->
+<script src="faucet-frontend.js" defer></script>
 <script>
-  const script = document.createElement('script');
-  script.src = `faucet-frontend.js?v=${Date.now()}`;
-  document.head.appendChild(script);
-</script>
-
-<!-- Anti-autofill, ligação do botão e ganchos de UI -->
-<script>
-(function(){
-  const $ = id => document.getElementById(id);
-  const pk = () => $('privateKeyInput');
-
-  /* ---------- Anti-autofill + input sempre vazio ---------- */
-  document.addEventListener('DOMContentLoaded', () => {
-    if (pk()){
-      pk().value = '';
-      pk().setAttribute('name','pk_'+Math.random().toString(36).slice(2));
+/* ============= GARANTIAS DE UI ============= */
+/* 0) Campo sempre vazio ao abrir */
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('privateKeyInput');
+  if (input) input.value = '';
+});
+/* 1) Funções que seu script pode chamar para atualizar a UI */
+window.balbiConnected = function(address){
+  // revela endereço, mostra infos, oculta login
+  const addrBox = document.getElementById('walletAddress');
+  const info    = document.getElementById('walletInfo');
+  const addrEl  = document.getElementById('addressDisplay');
+  const input   = document.getElementById('privateKeyInput');
+  const btn     = document.getElementById('connectButton');
+  if (addrEl && address) addrEl.textContent = address;
+  if (addrBox) addrBox.style.display = 'block';
+  if (info)    info.style.display = 'block';
+  if (input)   input.style.display = 'none';
+  if (btn)     btn.style.display = 'none';
+};
+window.balbiSetBalances = function({balbi, usdc} = {}){
+  const b = document.getElementById('balbiBalance');
+  const u = document.getElementById('usdcBalance');
+  if (b && typeof balbi !== 'undefined') b.textContent = String(balbi);
+  if (u && typeof usdc  !== 'undefined') u.textContent = String(usdc);
+};
+let __cooldownTimer = null;
+window.balbiSetCooldown = function(untilMs){
+  // Atualiza timer continuamente e pinta botão verde quando liberado
+  const btn   = document.getElementById('claimButton');
+  const timer = document.getElementById('claimTimer');
+  if (__cooldownTimer) { clearInterval(__cooldownTimer); __cooldownTimer = null; }
+  function upd(){
+    const now = Date.now();
+    const remain = untilMs - now;
+    if (remain <= 0){
+      if (timer) timer.textContent = 'Você pode cultivar agora.';
+      if (btn){
+        btn.disabled = false;
+        btn.classList.add('claimable'); // fica verde
+      }
+      clearInterval(__cooldownTimer); __cooldownTimer = null;
+      return;
     }
-    // cookie
-    const bar = $('cookieConsent'); const K='cookieConsent';
-    const v = localStorage.getItem(K);
-    if (!v || new Date(v) < new Date()) bar.style.display='block';
-    $('acceptCookiesButton').addEventListener('click',()=>{
-      const exp=new Date(); exp.setDate(exp.getDate()+30);
-      localStorage.setItem(K,exp.toISOString());
-      bar.style.display='none';
-    });
-  });
-  window.addEventListener('pageshow', (e)=>{ if (e.persisted && pk()) pk().value=''; });
-
-  // desbloqueia digitação apenas quando o usuário tocar/focar
-  let unlocked=false;
-  function unlock(){
-    if (!pk()) return;
-    if (!unlocked){ pk().readOnly=false; pk().value=''; unlocked=true; }
-  }
-  document.addEventListener('pointerdown',(e)=>{ if (e.target===pk()) unlock(); }, true);
-  document.addEventListener('focusin',(e)=>{ if (e.target===pk()) unlock(); }, true);
-
-  /* ---------- Ganchos para seu faucet-frontend.js atualizar UI ---------- */
-  function showUIAfterConnect(address){
-    if ($('addressDisplay')) $('addressDisplay').textContent = address || '';
-    if ($('walletAddress')) $('walletAddress').style.display = 'block';
-    if ($('walletInfo')) $('walletInfo').style.display = 'block';
-    if (pk()) { pk().value=''; pk().blur(); }
-  }
-  window.balbiConnected = function(address){ showUIAfterConnect(address); };
-  window.balbiSetBalances = function({balbi, usdc} = {}){
-    if ($('balbiBalance') && balbi!==undefined) $('balbiBalance').textContent = String(balbi);
-    if ($('usdcBalance')  && usdc !==undefined) $('usdcBalance').textContent  = String(usdc);
-  };
-  let cooldownTimer=null;
-  window.balbiSetCooldown = function(untilMs){
-    if (cooldownTimer) { clearInterval(cooldownTimer); cooldownTimer=null; }
-    const btn=$('claimButton'), timer=$('claimTimer');
-    function tick(){
-      const remain = untilMs - Date.now();
-      if (remain<=0){
-        if (btn){ btn.disabled=false; btn.classList.add('ready'); } // fica verde
-        if (timer){ timer.textContent='You can claim now.'; }
-        clearInterval(cooldownTimer); cooldownTimer=null;
-        return;
-      }
-      const h = Math.floor(remain/3600000);
-      const m = Math.floor((remain%3600000)/60000);
-      const s = Math.floor((remain%60000)/1000);
-      if (timer) timer.textContent = `Next claim in ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      if (btn){ btn.disabled=true; btn.classList.remove('ready'); }
+    const h = Math.floor(remain/3600000);
+    const m = Math.floor((remain%3600000)/60000);
+    const s = Math.floor((remain%60000)/1000);
+    if (timer) timer.textContent = `Próximo cultivo em ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (btn){
+      btn.disabled = true;
+      btn.classList.remove('claimable'); // não-claimable = azul/cinza
     }
-    tick();
-    cooldownTimer=setInterval(tick,1000);
-  };
-
-  /* ---------- LIGAÇÃO DO BOTÃO ACCESS WALLET (prioridade) ---------- */
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const connectBtn = $('connectButton');
-    connectBtn.addEventListener('click', async ()=>{
-      const key = (pk()?.value || '').trim();
-      if (!key){ alert('Please enter your private key.'); return; }
-
-      try{
-        let address = null;
-
-        // Tenta as variações mais comuns do seu JS:
-        if (window.faucet && typeof window.faucet.connectPrivateKey === 'function') {
-          address = await window.faucet.connectPrivateKey(key);
-        } else if (window.faucet && typeof window.faucet.connect === 'function') {
-          address = await window.faucet.connect(key);
-        } else if (typeof window.connectWalletFromPrivateKey === 'function') {
-          address = await window.connectWalletFromPrivateKey(key);
-        } else if (typeof window.connectWallet === 'function') {
-          address = await window.connectWallet(key);
-        } else {
-          // Fallback por evento para o seu script ouvir
-          window.dispatchEvent(new CustomEvent('balbi:connect-request', { detail:{ key } }));
-        }
-
-        // Se alguma função retornou o endereço, mostra UI
-        if (address) {
-          showUIAfterConnect(address);
-        }
-      }catch(err){
-        console.error(err);
-        alert('Could not connect. Please try again.');
+  }
+  upd();
+  __cooldownTimer = setInterval(upd, 1000);
+};
+/* 2) Eventos opcionais que seu script pode emitir */
+window.addEventListener('balbi:claim-ok', (e)=>{
+  const ok  = document.getElementById('claimSuccess');
+  const hash= document.getElementById('claimHash');
+  if (ok)  ok.style.display = 'block';
+  if (hash && e.detail?.txHash){ hash.textContent = e.detail.txHash; hash.style.display='block'; }
+});
+/* 3) Botão Access Wallet — tenta integrações do script original */
+document.addEventListener('DOMContentLoaded', () => {
+  const connectBtn = document.getElementById('connectButton');
+  const claimBtn   = document.getElementById('claimButton');
+  const logoutBtn  = document.getElementById('logoutButton');
+  async function handleConnect(){
+    try{
+      if (window.faucet && typeof window.faucet.connect === 'function') {
+        const address = await window.faucet.connect();
+        if (address) window.balbiConnected(address);
+      } else if (typeof window.connectWallet === 'function') {
+        const address = await window.connectWallet();
+        if (address) window.balbiConnected(address);
+      } else {
+        window.dispatchEvent(new CustomEvent('balbi:connect-request'));
       }
-    });
-
-    // Logout de UI
-    $('logoutButton').addEventListener('click', ()=>{
-      if ($('walletAddress')) $('walletAddress').style.display='none';
-      if ($('walletInfo')) $('walletInfo').style.display='none';
-      if (pk()){ pk().value=''; pk().focus(); }
-      if (window.faucet && typeof window.faucet.logout === 'function') {
-        try{ window.faucet.logout(); }catch(_){}
+    } catch (err){
+      console.error(err);
+      alert('Não foi possível conectar. Tente novamente.');
+    }
+  }
+  async function handleClaim(){
+    try{
+      if (claimBtn && claimBtn.disabled) return;
+      if (window.faucet && typeof window.faucet.claim === 'function') {
+        const txHash = await window.faucet.claim();
+        if (txHash) window.dispatchEvent(new CustomEvent('balbi:claim-ok',{detail:{txHash}}));
+      } else if (typeof window.claimTokens === 'function') {
+        const txHash = await window.claimTokens();
+        if (txHash) window.dispatchEvent(new CustomEvent('balbi:claim-ok',{detail:{txHash}}));
+      } else {
+        window.dispatchEvent(new CustomEvent('balbi:claim-request'));
       }
+    } catch (e){
+      console.error(e);
+      alert('Falha ao cultivar. Tente novamente mais tarde.');
+    }
+  }
+  function handleLogout(){
+    document.getElementById('walletAddress').style.display = 'none';
+    document.getElementById('walletInfo').style.display    = 'none';
+    const input = document.getElementById('privateKeyInput');
+    const btn   = document.getElementById('connectButton');
+    if (input){ input.style.display=''; input.value=''; }
+    if (btn){   btn.style.display=''; }
+    if (window.faucet && typeof window.faucet.logout === 'function') {
+      try { window.faucet.logout(); } catch(_) {}
+    }
+  }
+  if (connectBtn) connectBtn.addEventListener('click', handleConnect, {passive:true});
+  if (claimBtn)   claimBtn.addEventListener('click',   handleClaim,   {passive:true});
+  if (logoutBtn)  logoutBtn.addEventListener('click',  handleLogout,  {passive:true});
+  /* Cookie simples */
+  (function(){
+    const bar = document.getElementById('cookieConsent');
+    const k = 'cookieConsent';
+    const v = localStorage.getItem(k);
+    if (!v || new Date(v) < new Date()) bar.style.display = 'block';
+    document.getElementById('acceptCookiesButton').addEventListener('click', ()=>{
+      const exp = new Date(); exp.setDate(exp.getDate()+30);
+      localStorage.setItem(k, exp.toISOString());
+      bar.style.display = 'none';
     });
-
-    // Claim (deixa seu JS cuidar da tx; aqui só dispara se precisar)
-    $('claimButton').addEventListener('click', async ()=>{
-      const btn = $('claimButton'); if (btn.disabled) return;
-      try{
-        let txHash=null;
-        if (window.faucet && typeof window.faucet.claim === 'function') {
-          txHash = await window.faucet.claim();
-        } else if (typeof window.claimTokens === 'function') {
-          txHash = await window.claimTokens();
-        } else {
-          window.dispatchEvent(new CustomEvent('balbi:claim-request'));
-        }
-        if (txHash){
-          const ok = $('claimSuccess'); const h = $('claimHash');
-          if (ok) ok.style.display='block';
-          if (h){ h.textContent=txHash; h.style.display='block'; }
-        }
-      }catch(e){
-        console.error(e); alert('Claim failed. Try again later.');
-      }
-    });
-
-    // Sinaliza que a UI está pronta (caso seu JS escute)
-    window.dispatchEvent(new CustomEvent('balbi:ui-ready'));
-  });
-})();
+  })();
+  // Sinaliza que a UI está pronta p/ o script externo
+  window.dispatchEvent(new CustomEvent('balbi:ui-ready'));
+});
 </script>
-
-<!-- defs para os hexágonos -->
+<!-- SVG defs para o hex drift -->
 <svg width="0" height="0" style="position:absolute">
   <defs>
     <linearGradient id="hexStroke" x1="0" y1="0" x2="1" y2="1">
@@ -422,6 +512,5 @@
     </linearGradient>
   </defs>
 </svg>
-
 </body>
 </html>
