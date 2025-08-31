@@ -7,9 +7,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     :root{
+      --brand1:#2b6cb0; --brand2:#63b3ed;
+      --text:#e6eefb; --muted:#a5b4cf;
       --bg1:#0a1022; --bg2:#0d1b34;
-      --accent:#2b6cb0; --accent2:#63b3ed; --accent3:#8ec7ff;
-      --text:#e6eefb; --muted:#a5b4cf; --radius:18px;
+      --radius:18px;
     }
     html,body{height:100%}
     body{
@@ -22,9 +23,9 @@
       display:flex; align-items:center; flex-direction:column; gap:16px;
       padding:24px 18px 28px; overflow-x:hidden;
     }
-    /* Hex bg (mais translúcido) */
+    /* Hex bg (more translucent) */
     .hex-drift{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
-    .hex{position:absolute; width:220px; aspect-ratio:1/1; opacity:.03}
+    .hex{position:absolute; width:220px; aspect-ratio:1/1; opacity:.02}
     .hex svg{width:100%; height:100%}
     .hex use{stroke:url(#hexStroke); stroke-width:2; fill:none; filter:drop-shadow(0 0 4px rgba(99,179,237,.08))}
     .h1{top:10%; left:-20%; animation:float 28s linear infinite}
@@ -37,13 +38,18 @@
       100%{transform:translateX(60vw) translateY(4vh) rotate(360deg) scale(.92)}
     }
 
-    .layer{position:relative; z-index:1; width:min(520px,94vw); margin:0 auto}
+    .layer{
+      position:relative; z-index:1; width:min(520px,94vw);
+      min-height:100svh; display:flex; align-items:center; justify-content:center;
+      margin:0 auto;
+    }
     .card{
       border-radius:var(--radius);
       background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
       border:1px solid rgba(47,82,152,.35);
       box-shadow:0 16px 44px rgba(8,14,35,.55), inset 0 1px 0 rgba(255,255,255,.05);
       padding:26px 20px 22px;
+      width:100%;
     }
 
     .hero{display:grid; place-items:center; gap:10px; margin-bottom:12px}
@@ -56,7 +62,7 @@
     .title{font-weight:800; font-size:28px; color:#b3d9ff; text-shadow:0 0 10px rgba(99,179,237,.55); margin:0}
     .subtitle{color:var(--muted); margin:0 8px 16px; text-align:center}
 
-    /* Inputs (IDs exatamente como seu JS espera) */
+    /* Inputs */
     #privateKeyInput{
       width:100%; padding:12px; margin:0 0 14px; outline:none; color:#fff;
       background:rgba(255,255,255,.06); border:1px solid rgba(61,106,196,.5);
@@ -68,7 +74,7 @@
 
     #connectButton{
       width:100%; padding:12px; border:none; color:#fff; font-weight:800;
-      background:linear-gradient(90deg,#2b6cb0,#63b3ed);
+      background:linear-gradient(90deg,var(--brand1),var(--brand2));
       text-transform:uppercase; letter-spacing:.08em;
       box-shadow:0 10px 22px rgba(43,108,176,.35); position:relative; overflow:hidden;
       border-radius:12px; font-size:16px; box-sizing:border-box; cursor:pointer;
@@ -95,15 +101,14 @@
     .balance-item:last-child{border-bottom:0}
     .balance-value{font-weight:800; color:#8ec7ff}
 
-    /* Claim: azul quando bloqueado, verde quando liberado (sem precisar classe extra) */
+    /* Claim: blue when locked, green only when enabled */
     #claimButton{
       width:100%; margin-top:6px; padding:14px; font-size:18px; border-radius:12px; border:none;
       position:relative; overflow:hidden; box-sizing:border-box; cursor:pointer;
       background:linear-gradient(90deg,#2563eb,#60a5fa); color:#fff; box-shadow:0 10px 24px rgba(59,130,246,.35);
     }
     #claimButton:not([disabled]){
-      background:linear-gradient(90deg,#39ff14,#00ffa3);
-      color:#000; box-shadow:0 0 20px rgba(57,255,20,.35);
+      background:linear-gradient(90deg,#39ff14,#00ffa3); color:#000; box-shadow:0 0 20px rgba(57,255,20,.35);
     }
     #claimButton::before{
       content:""; position:absolute; top:-60%; left:-60%; width:220%; height:220%;
@@ -130,7 +135,7 @@
 </head>
 <body>
 
-<!-- BG hex com vértices -->
+<!-- Background hex with filled vertices -->
 <div class="hex-drift" aria-hidden="true">
   <svg width="0" height="0">
     <defs>
@@ -140,12 +145,12 @@
       <symbol id="hexSymbol" viewBox="0 0 200 200">
         <polygon points="100,10 185,55 185,145 100,190 15,145 15,55"
                  fill="none" stroke="url(#hexStroke)" stroke-width="2" stroke-linejoin="round"/>
-        <circle cx="100" cy="10" r="5" fill="url(#hexStroke)"/>
-        <circle cx="185" cy="55" r="5" fill="url(#hexStroke)"/>
-        <circle cx="185" cy="145" r="5" fill="url(#hexStroke)"/>
-        <circle cx="100" cy="190" r="5" fill="url(#hexStroke)"/>
-        <circle cx="15"  cy="145" r="5" fill="url(#hexStroke)"/>
-        <circle cx="15"  cy="55"  r="5" fill="url(#hexStroke)"/>
+        <circle cx="100" cy="10"  r="5" fill="url(#hexStroke)"/>
+        <circle cx="185"  cy="55"  r="5" fill="url(#hexStroke)"/>
+        <circle cx="185"  cy="145" r="5" fill="url(#hexStroke)"/>
+        <circle cx="100"  cy="190" r="5" fill="url(#hexStroke)"/>
+        <circle cx="15"   cy="145" r="5" fill="url(#hexStroke)"/>
+        <circle cx="15"   cy="55"  r="5" fill="url(#hexStroke)"/>
       </symbol>
     </defs>
   </svg>
@@ -176,6 +181,7 @@
             <circle class="vertex" cx="47"  cy="162" r="6"/>
             <circle class="vertex" cx="47"  cy="78"  r="6"/>
           </g>
+          <!-- Use your processed logo (transparent background) -->
           <image href="logo1.png" x="72" y="70" width="96" height="96" preserveAspectRatio="xMidYMid meet" clip-path="url(#clipHex)"/>
         </svg>
       </div>
@@ -183,10 +189,7 @@
       <p class="subtitle">Enter your private key to access your wallet. Your data is not stored.</p>
     </div>
 
-    <!-- Honeypots p/ evitar autofill -->
-    <input type="text" autocomplete="username" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0">
-    <input type="password" autocomplete="current-password" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0">
-
+    <!-- Login -->
     <div id="loginSection">
       <input
         type="text"
@@ -201,12 +204,14 @@
       <button id="connectButton" type="button">Access Wallet</button>
     </div>
 
+    <!-- Address -->
     <div id="walletAddress" class="wallet-address" style="display:none;">
       <span>Wallet Address:</span>
       <div id="addressDisplay"></div>
       <button id="logoutButton" type="button">Log Out</button>
     </div>
 
+    <!-- Info -->
     <div id="walletInfo" style="display:none;">
       <div class="panel">
         <h2>Balances</h2>
@@ -216,7 +221,7 @@
         </div>
         <div class="balance-item">
           <span>USDC Balance</span>
-          <span id="usdcBalance"  class="balance-value">...</span>
+          <span id="usdcBalance" class="balance-value">...</span>
         </div>
       </div>
 
@@ -268,20 +273,10 @@
   <button id="acceptCookiesButton" type="button">Accept</button>
 </div>
 
-<!-- 1) Limpa qualquer PK salva ANTES de carregar seu JS -->
-<script>
-  try { localStorage.removeItem('balbiPrivateKey'); } catch(e) {}
-  // também garante input vazio ao montar
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const pk=document.getElementById('privateKeyInput');
-    if (pk) pk.value='';
-  });
-</script>
+<!-- Load your (corrected) JS -->
+<script src="faucet-frontend.js?v=1.1.0"></script>
 
-<!-- 2) Carrega SEU front-end (não adiciono listeners próprios pra não conflitar) -->
-<script src="faucet-frontend.js?v=<?=Date.now?Date.now():''?>"></script>
-
-<!-- 3) Hex stroke gradient def reutilizado -->
+<!-- Reusable gradient for drifting hexes -->
 <svg width="0" height="0" style="position:absolute">
   <defs>
     <linearGradient id="hexStroke" x1="0" y1="0" x2="1" y2="1">
@@ -289,6 +284,5 @@
     </linearGradient>
   </defs>
 </svg>
-
 </body>
 </html>
