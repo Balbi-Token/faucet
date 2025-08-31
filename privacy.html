@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Privacy Policy - BALBI Token</title>
+  <title>Privacy Policy - Balbi Faucet</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -16,98 +16,52 @@
       --text:#e2e8f0;
       --background:#0f1a2f;
       --card-bg:#1e293b;
-      --green:#48bb78;
       --gradient:linear-gradient(135deg,var(--accent),var(--light-accent));
       --header-gradient:linear-gradient(90deg,#0d2b5a,#1e4785);
     }
-
     *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:'Inter',sans-serif;
-      background:var(--background);
-      color:var(--text);
-      line-height:1.6;
-    }
+    body{font-family:'Inter',sans-serif;background:var(--background);color:var(--text);line-height:1.6}
     .container{max-width:1200px;margin:0 auto;padding:0 20px}
 
     /* Header */
-    header{
-      background:var(--header-gradient);
-      position:sticky;top:0;z-index:1000;
-      box-shadow:0 4px 12px rgba(0,0,0,.1);
-    }
+    header{background:var(--header-gradient);position:sticky;top:0;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,.1)}
     .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
     .logo{display:flex;align-items:center;gap:12px}
-    .logo-img{
-      width:44px;height:44px;border-radius:50%;
-      display:flex;align-items:center;justify-content:center;
-      background:var(--gradient);border:2px solid var(--light-accent);overflow:hidden
-    }
+    .logo-img{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--gradient);border:2px solid var(--light-accent);overflow:hidden}
     .logo-img img{width:100%;height:100%;object-fit:cover}
-    .logo-text{
-      font-weight:700;font-size:22px;
-      background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    }
+    .logo-text{font-weight:700;font-size:22px;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .nav-links{display:flex;gap:28px;align-items:center}
     .nav-links a{color:var(--text);text-decoration:none;font-weight:500;transition:color .25s}
     .nav-links a:hover{color:var(--light-accent)}
-    .cta{
-      background:var(--gradient);color:#fff;text-decoration:none;
-      padding:10px 18px;border-radius:999px;font-weight:600;
-      transition:transform .2s, box-shadow .2s;
-    }
+    .cta{background:var(--gradient);color:#fff;text-decoration:none;padding:10px 18px;border-radius:999px;font-weight:600;transition:transform .2s,box-shadow .2s}
     .cta:hover{transform:translateY(-2px);box-shadow:0 6px 15px rgba(43,108,176,.4)}
 
-    /* Page hero */
-    .page-hero{
-      padding:72px 0 32px;
-      background:linear-gradient(to bottom,var(--primary),transparent);
-      text-align:center;
-    }
-    .page-hero h1{
-      font-size:2.4rem;margin-bottom:10px;
-      background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    }
+    /* Hero */
+    .page-hero{padding:72px 0 32px;background:linear-gradient(to bottom,var(--primary),transparent);text-align:center}
+    .page-hero h1{font-size:2.4rem;margin-bottom:10px;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .subtitle{opacity:.8}
 
     /* Card */
-    .policy-wrap{padding:40px 0 80px}
-    .card{
-      background:var(--card-bg);
-      border-radius:16px;
-      padding:32px;
-      box-shadow:0 5px 15px rgba(0,0,0,.15);
-      max-width:900px;margin:0 auto;
-    }
-    .card h2{
-      font-size:1.4rem;margin:28px 0 12px;
-      background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    }
+    .wrap{padding:40px 0 80px}
+    .card{background:var(--card-bg);border-radius:16px;padding:32px;box-shadow:0 5px 15px rgba(0,0,0,.15);max-width:900px;margin:0 auto}
+    .card h2{font-size:1.4rem;margin:28px 0 12px;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .card p{margin:10px 0;opacity:.95}
     .card ul{list-style:none;padding-left:0;margin:10px 0}
     .card li{margin:8px 0;opacity:.95}
-    .muted{opacity:.75;font-size:.95rem}
     a{color:var(--light-accent);text-decoration:none}
     a:hover{color:var(--accent)}
+    .muted{opacity:.75;font-size:.95rem}
 
     /* Footer */
     footer{background:var(--header-gradient);margin-top:60px}
-    .footer-content{
-      display:grid;gap:40px;
-      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-      padding:48px 0 28px;
-    }
-    .footer-logo{
-      font-weight:700;font-size:1.6rem;
-      background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      margin-bottom:10px;
-    }
+    .footer-content{display:grid;gap:40px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));padding:48px 0 28px}
+    .footer-logo{font-weight:700;font-size:1.6rem;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
     .footer-links,.footer-contact{display:flex;flex-direction:column;gap:10px}
     .footer-links a,.footer-contact a{color:var(--text);text-decoration:none}
     .footer-links a:hover,.footer-contact a:hover{color:var(--light-accent)}
     .copyright{text-align:center;padding:18px 0 28px;border-top:1px solid rgba(255,255,255,.1);opacity:.7}
 
-    @media(max-width:768px){
+    @media (max-width:768px){
       .nav-links{display:none}
       .page-hero{padding-top:56px}
       .card{padding:22px}
@@ -123,61 +77,59 @@
       <div class="logo-text">BALBI</div>
     </div>
     <div class="nav-links">
-      <a href="index.html#about">About</a>
-      <a href="index.html#creator">Creator</a>
-      <a href="index.html#utility">Utility</a>
-      <a href="index.html#how-to-buy">How to Get</a>
-      <a href="https://balbi-token.github.io/faucet/" target="_blank" rel="noopener">Faucet</a>
+      <a href="index.html">Home</a>
+      <a href="index.html#faq">FAQ</a>
+      <a href="https://polygonscan.com/token/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5" target="_blank" rel="noopener">PolygonScan</a>
     </div>
-    <a class="cta" href="https://balbi-token.github.io/faucet/" target="_blank" rel="noopener">Balbi Faucet</a>
+    <a class="cta" href="index.html">Balbi Faucet</a>
   </div>
 </header>
 
 <section class="page-hero">
   <div class="container">
     <h1>Privacy Policy</h1>
-    <p class="subtitle">Last updated: August 28, 2025</p>
+    <p class="subtitle">Last updated: August 31, 2025</p>
   </div>
 </section>
 
-<section class="policy-wrap">
+<section class="wrap">
   <div class="container">
     <div class="card">
-      <p>Your privacy is important to us. This Privacy Policy explains how Balbi Token collects, uses, and protects your personal information.</p>
+      <p>Your privacy matters. This Privacy Policy explains how the <strong>Balbi Faucet</strong> (“Service”) collects, uses, and protects information.</p>
 
       <h2>1. Information We Collect</h2>
-      <p>We collect the following information when you interact with the Service:</p>
+      <p>When you interact with the Faucet, we may process:</p>
       <ul>
-        <li><strong>Wallet Address:</strong> Collected to send tokens and to enforce the cooldown period between claims.</li>
-        <li><strong>Last Claim Timestamp:</strong> Stored to track the cooldown period and prevent abuse of the Service.</li>
+        <li><strong>Wallet address:</strong> used to send tokens and enforce claim cooldowns.</li>
+        <li><strong>Last-claim timestamp:</strong> stored to calculate next eligibility and prevent abuse.</li>
       </ul>
 
-      <h2>2. Use of Cookies and Local Storage</h2>
-      <p>The site uses local storage in your browser to verify consent to this policy. This token is a simple marker indicating that you have accepted the policy.</p>
-      <p><strong>Your private key is not stored on our servers.</strong> It is only used locally in your browser to sign transactions and is never transmitted to our backend infrastructure.</p>
+      <h2>2. Cookies & Local Storage</h2>
+      <p>We may use local storage (and/or cookies) to remember consent to this policy and to store non-sensitive state for the Faucet UI. This marker simply indicates that you accepted the policy or that a cooldown is active.</p>
+      <p><strong>We do not store your private key on our servers.</strong> Private keys, if entered, are used only locally in your browser to sign transactions and are not transmitted to our backend.</p>
 
-      <h2>3. Purpose of Data Processing</h2>
-      <p>The collected data (wallet address and timestamp) is used exclusively to ensure the fair operation of the Service, distributing tokens equitably and preventing spam or abuse.</p>
+      <h2>3. Purpose of Processing</h2>
+      <p>We use wallet addresses and timestamps solely to operate the Faucet fairly, prevent spam/abuse, and comply with cooldown rules. We do not create user profiles.</p>
 
-      <h2>4. Information Sharing</h2>
-      <p>We do not sell, rent, or share your personal information with third parties.</p>
+      <h2>4. Sharing of Information</h2>
+      <p>We do not sell or rent your data. Limited operational data may be processed by infrastructure providers strictly to run the Service.</p>
 
       <h2>5. Security</h2>
-      <p>We take reasonable measures to protect collected information against unauthorized access. However, please remember that no method of transmission over the Internet is 100% secure.</p>
+      <p>We apply reasonable technical and organizational measures. Still, no internet transmission is 100% secure. Use the Faucet at your own risk and keep your keys safe.</p>
 
       <h2>6. Your Rights (LGPD)</h2>
-      <p>According to the Brazilian General Data Protection Law (LGPD), you have the right to:</p>
+      <p>Under Brazil’s LGPD, you may request:</p>
       <ul>
-        <li>Access the information we hold about you.</li>
-        <li>Request correction of incomplete or outdated data.</li>
-        <li>Request anonymization, blocking, or deletion of unnecessary data or data processed in violation of the LGPD.</li>
+        <li>Access to data related to you (e.g., wallet and last-claim record).</li>
+        <li>Correction of incomplete or outdated data we control.</li>
+        <li>Anonymization, blocking, or deletion of unnecessary or unlawfully processed data.</li>
       </ul>
-      <p>To exercise these rights, please contact us using the information provided on our website.</p>
+      <p>To exercise these rights, contact us through the channels provided on the Faucet homepage.</p>
 
       <h2>7. Changes to this Policy</h2>
-      <p>We may update this Privacy Policy periodically. Changes will be posted on this page. We encourage you to review it regularly.</p>
+      <p>We may update this Policy from time to time. We will post the new version at this URL. Continued use of the Faucet means you accept the changes.</p>
 
-      <p class="muted"><a href="index.html">← Back to Token</a></p>
+      <p class="muted"><a href="terms.html">See Terms of Service</a> · <a href="index.html">← Back to Faucet</a></p>
     </div>
   </div>
 </section>
@@ -187,15 +139,13 @@
     <div class="footer-content">
       <div>
         <div class="footer-logo">BALBI</div>
-        <p>Innovating in CO₂ compensation for HVAC through blockchain.</p>
-        <a href="https://instagram.com/balbitoken" target="_blank" class="cta" style="display:inline-block;margin-top:12px;">Follow on Instagram</a>
+        <p>Claim BALBI on Polygon and help the ecosystem grow.</p>
+        <a href="index.html" class="cta" style="display:inline-block;margin-top:12px;">Go to Faucet</a>
       </div>
       <div class="footer-links">
         <h4>Quick Links</h4>
-        <a href="index.html#about">About</a>
-        <a href="index.html#creator">Creator</a>
-        <a href="index.html#utility">Utility</a>
-        <a href="index.html#how-to-buy">How to Get</a>
+        <a href="index.html">Home</a>
+        <a href="index.html#faq">FAQ</a>
       </div>
       <div class="footer-contact">
         <h4>Contract</h4>
@@ -204,12 +154,12 @@
       </div>
       <div class="footer-links">
         <h4>Legal</h4>
-        <a href="terms.html">Terms and Conditions</a>
+        <a href="terms.html">Terms of Service</a>
         <a href="privacy.html">Privacy Policy</a>
       </div>
     </div>
     <div class="copyright">
-      © 2025 Balbi Token. Built with ❤️ for the crypto community.
+      © 2025 Balbi Faucet. Built with ❤️ for the crypto community.
     </div>
   </div>
 </footer>
