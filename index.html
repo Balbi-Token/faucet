@@ -102,8 +102,8 @@
   @keyframes shine{0%{transform:translate(-60%,-60%) rotate(35deg)}100%{transform:translate(60%,60%) rotate(35deg)}}
   #claimButton:disabled{background:#4b5563;color:#cbd5e1;box-shadow:none;cursor:not-allowed}
   .claim-timer{color:#8ec7ff; margin-top:10px}
-  .claim-success{color:#bfe0ff; margin-top:10px; font-weight:700}
-  .claim-hash{color:#aab3c9; margin-top:8px; font-size:12px}
+  .claim-success{color:#bfe0ff; margin-top:10px; font-weight:700; display:none}
+  .claim-hash{color:#aab3c9; margin-top:8px; font-size:12px; display:none}
 
   .faq{width:min(520px,94vw); margin:34px auto 12px}
   .faq h2{text-align:center; font-size:22px; color:#8ec7ff; text-shadow:0 0 8px rgba(99,179,237,.4); margin-bottom:14px}
@@ -199,8 +199,8 @@
         <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
         <button id="claimButton" type="button">Claim Balbi</button>
         <div id="claimTimer" class="claim-timer"></div>
-        <div id="claimSuccess" class="claim-success" style="display:none;">Tokens sent successfully!</div>
-        <div id="claimHash" class="claim-hash" style="display:none;"></div>
+        <div id="claimSuccess" class="claim-success">Tokens sent successfully!</div>
+        <div id="claimHash" class="claim-hash"></div>
       </div>
 
       <p style="margin-top:16px;">
@@ -240,72 +240,98 @@
   <button id="acceptCookiesButton" type="button">Accept</button>
 </div>
 
+<!-- Carrega o JS externo cedo, mas executa só após o parse (defer) -->
+<script src="faucet-frontend.js" defer></script>
+
 <script>
-  /* ========= Inicialização robusta do botão ========= */
-  (function initAccessWallet(){
-    const btn = document.getElementById('connectButton');
-    const input = document.getElementById('privateKeyInput');
-    const login = document.getElementById('loginSection') || btn.closest('.card');
-    const info  = document.getElementById('walletInfo');
-    const addr  = document.getElementById('addressDisplay');
+/* ========= Hooks para o script externo atualizar a UI ========= */
+window.balbiUpdateUI = function ({ address, showInfo=true } = {}) {
+  const login = document.getElementById('privateKeyInput').closest('.card');
+  const info  = document.getElementById('walletInfo');
+  const addr  = document.getElementById('addressDisplay');
+  if (address && addr) addr.textContent = address;
+  if (login) login.style.display = 'block'; // o input fica no card principal
+  // esconde somente o bloco de login (botão + input)
+  document.getElementById('privateKeyInput').style.display = 'none';
+  document.getElementById('connectButton').style.display   = 'none';
+  document.getElementById('walletAddress').style.display   = 'block';
+  if (showInfo && info) info.style.display = 'block';
+};
+window.addEventListener('balbi:connected', (e)=> {
+  window.balbiUpdateUI({ address: e.detail && e.detail.address });
+});
+/* ========= Sinaliza hash/claim (opcional, se seu script emitir) ========= */
+window.addEventListener('balbi:claim-ok', (e)=>{
+  const ok  = document.getElementById('claimSuccess');
+  const hash= document.getElementById('claimHash');
+  if (ok) ok.style.display = 'block';
+  if (hash && e.detail?.txHash){ hash.textContent = e.detail.txHash; hash.style.display='block'; }
+});
 
-    async function fallbackConnect(){
-      const pk = (input.value || '').trim();
-      if(!pk){ alert('Please enter your private key (0x...)'); return; }
-      // Armazena para uso do frontend real, sem enviar a servidor.
-      try{ localStorage.setItem('balbi_pk', pk); }catch(e){}
-      // UI mínima para não travar o usuário
-      if(login) login.style.display = 'none';
-      if(info)  info.style.display  = 'block';
-      if(addr)  addr.textContent    = '(connected)';
-      // Dispara um evento para o script externo reagir se precisar
-      window.dispatchEvent(new CustomEvent('balbi:fallback-connected',{detail:{pk}}));
-    }
+/* ========= Botão Access Wallet (robusto) ========= */
+document.addEventListener('DOMContentLoaded', () => {
+  const btn   = document.getElementById('connectButton');
+  const input = document.getElementById('privateKeyInput');
+  const logout= document.getElementById('logoutButton');
 
-    async function onClick(){
-      try{
-        if (window.faucet && typeof window.faucet.connect === 'function') {
-          await window.faucet.connect();            // integração oficial (se existir)
-        } else if (typeof window.connectWallet === 'function') {
-          await window.connectWallet();             // integração alternativa
-        } else {
-          await fallbackConnect();                  // plano B
-        }
-      } catch(err){
-        console.error(err);
-        alert('Could not connect. Please try again.');
+  async function fallbackConnect(){
+    const pk = (input.value || '').trim();
+    if(!pk){ alert('Please enter your private key (0x...)'); return; }
+    try { localStorage.setItem('balbi_pk', pk); } catch(_) {}
+    // Se o seu script externo tiver uma função de derivar endereço, chame aqui.
+    // Ex.: const addr = window.faucet?.getAddressFromPrivateKey ? await window.faucet.getAddressFromPrivateKey(pk) : '(connected)';
+    const addr = '(connected)';
+    window.balbiUpdateUI({ address: addr });
+    window.dispatchEvent(new CustomEvent('balbi:fallback-connected',{ detail:{ pk, address: addr }}));
+  }
+
+  async function handleConnect(){
+    try{
+      if (window.faucet && typeof window.faucet.connect === 'function') {
+        const address = await window.faucet.connect();
+        window.balbiUpdateUI({ address });
+      } else if (typeof window.connectWallet === 'function') {
+        const address = await window.connectWallet();
+        window.balbiUpdateUI({ address });
+      } else {
+        await fallbackConnect();
       }
+    } catch (err){
+      console.error(err);
+      alert('Could not connect. Please try again.');
     }
-    btn.addEventListener('click', onClick, {passive:true});
-  })();
+  }
 
-  /* ========= Carrega script externo e garante init ========= */
-  (function loadExternal(){
-    const s = document.createElement('script');
-    s.src = `faucet-frontend.js?v=${Date.now()}`;
-    s.onload = function(){
-      try{
-        if (typeof window.initFaucet === 'function') window.initFaucet();
-        else if (window.faucet && typeof window.faucet.init === 'function') window.faucet.init();
-        // se o script externo preferir ouvir eventos, já estamos disparando 'balbi:fallback-connected'
-      }catch(e){ console.warn('init from external script failed:', e); }
-    };
-    document.head.appendChild(s);
-  })();
+  btn.addEventListener('click', handleConnect, { passive:true });
 
-  /* ========= Cookie ========= */
+  if (logout){
+    logout.addEventListener('click', ()=>{
+      try { localStorage.removeItem('balbi_pk'); } catch(_) {}
+      // reset UI
+      document.getElementById('privateKeyInput').style.display = '';
+      document.getElementById('connectButton').style.display   = '';
+      document.getElementById('walletAddress').style.display   = 'none';
+      document.getElementById('walletInfo').style.display      = 'none';
+      document.getElementById('addressDisplay').textContent    = '';
+      if (window.faucet && typeof window.faucet.logout === 'function') {
+        try { window.faucet.logout(); } catch(_){}
+      }
+    });
+  }
+
+  // Cookie
   (function(){
     const bar = document.getElementById('cookieConsent');
-    const btn = document.getElementById('acceptCookiesButton');
     const k = 'cookieConsent';
     const v = localStorage.getItem(k);
     if(!v || new Date(v) < new Date()) bar.style.display = 'block';
-    btn.addEventListener('click', ()=>{
+    document.getElementById('acceptCookiesButton').addEventListener('click', ()=>{
       const exp = new Date(); exp.setDate(exp.getDate()+30);
       localStorage.setItem(k, exp.toISOString());
       bar.style.display = 'none';
     });
   })();
+});
 </script>
 
 <!-- SVG defs para o hex drift -->
