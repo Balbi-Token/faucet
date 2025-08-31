@@ -3,17 +3,14 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Balbi Faucet — Hex Neo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>Balbi Faucet</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg1:#0a1022; --bg2:#0d1b34;
     --accent:#2b6cb0; --accent2:#63b3ed; --accent3:#8ec7ff;
-    --text:#e6eefb; --muted:#a5b4cf;
-    --radius:18px;
+    --text:#e6eefb; --muted:#a5b4cf; --radius:18px;
   }
-
   html,body{height:100%}
   body{
     margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
@@ -22,121 +19,72 @@
       radial-gradient(1100px 520px at 10% -10%, rgba(43,108,176,.28) 0%, transparent 60%),
       radial-gradient(900px 420px at 110% 120%, rgba(99,179,237,.25) 0%, transparent 62%),
       linear-gradient(180deg,var(--bg1),var(--bg2));
-    display:flex; align-items:center; justify-content:flex-start; flex-direction:column;
+    display:flex; align-items:center; flex-direction:column; gap:16px;
     padding:24px 18px 28px; overflow-x:hidden;
   }
 
-  /* ===== HEX outlines no fundo (vértices preenchidos na cor do hex) ===== */
+  /* hex drift de fundo (com bolinhas preenchidas) */
   .hex-drift{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
   .hex{position:absolute; width:220px; aspect-ratio:1/1; opacity:.22}
   .hex svg{width:100%; height:100%}
   .hex use{stroke:url(#hexStroke); stroke-width:2.5; fill:none; filter:drop-shadow(0 0 10px rgba(99,179,237,.2))}
-
   .h1{top:10%; left:-20%; animation:float 28s linear infinite}
   .h2{top:60%; left:80%;  animation:float 32s linear infinite reverse}
   .h3{top:20%; left:45%;  animation:float 36s linear infinite}
   .h4{top:78%; left:-10%; animation:float 30s linear infinite reverse}
   @keyframes float{
-    0%  { transform: translateX(-10vw) translateY(0) rotate(0deg) scale(.9);}
-    50% { transform: translateX(20vw)  translateY(-8vh) rotate(180deg) scale(1);}
-    100%{ transform: translateX(60vw) translateY(4vh) rotate(360deg) scale(.9);}
+    0%{transform:translateX(-10vw) translateY(0) rotate(0deg) scale(.92)}
+    50%{transform:translateX(20vw) translateY(-8vh) rotate(180deg) scale(1)}
+    100%{transform:translateX(60vw) translateY(4vh) rotate(360deg) scale(.92)}
   }
 
-  /* ===== SPLASH ===== */
-  .splash{
-    position:fixed; inset:0; display:grid; place-items:center; background:linear-gradient(180deg,var(--bg1),var(--bg2));
-    z-index:50;
-  }
-  .splash-inner{width:min(180px,60vw); aspect-ratio:1/1; position:relative}
-
-  /* ===== LAYOUT ===== */
-  .layer{position:relative; z-index:1; width:min(520px,94vw); margin:4px auto 0}
+  .layer{position:relative; z-index:1; width:min(520px,94vw); margin:0 auto}
   .card{
-    position:relative; border-radius:var(--radius);
+    border-radius:var(--radius);
     background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
     border:1px solid rgba(47,82,152,.35);
     box-shadow:0 16px 44px rgba(8,14,35,.55), inset 0 1px 0 rgba(255,255,255,.05);
-    padding:26px 20px 22px; isolation:isolate;
-    transform: translateY(12px) scale(.98); opacity:0;
+    padding:26px 20px 22px;
   }
-  body.ready .card{animation:reveal .7s .2s cubic-bezier(.2,.8,.2,1) forwards}
-  @keyframes reveal{to{transform:none; opacity:1}}
 
-  .card::before{
-    content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
-    background: conic-gradient(from var(--spin), transparent 70%, rgba(43,108,176,.35) 82%, transparent 90%);
-    --spin:0turn; animation:spin 12s linear infinite;
-    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude;
-  }
-  @keyframes spin{to{--spin:1turn}}
+  /* hero hex com vértices preenchidos + logo1.png */
+  .hero{display:grid; place-items:center; gap:10px; margin-bottom:12px}
+  .logo-wrap{width:min(150px,54vw); aspect-ratio:1/1}
+  .logo-wrap svg{width:100%; height:100%}
+  .hx-main{stroke:url(#stroke); stroke-width:7; fill:none; stroke-linejoin:round}
+  .hx-dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:22 82; opacity:.9; animation:dash 9s linear infinite}
+  @keyframes dash{to{stroke-dashoffset:-104}}
+  .vertex{fill:url(#stroke)}
 
-  /* ===== HERO / LOGO ===== */
-  .hero{display:grid; place-items:center; margin-bottom:8px; transform:translateY(12px); opacity:0}
-  body.ready .hero{animation:lift .7s .35s cubic-bezier(.2,.8,.2,1) forwards}
-  @keyframes lift{to{transform:none; opacity:1}}
+  .title{font-weight:800; font-size:28px; color:#b3d9ff; text-shadow:0 0 10px rgba(99,179,237,.55); margin:0}
+  .subtitle{color:var(--muted); margin:0 8px 16px; text-align:center}
 
-  .logo-wrap{width:min(160px,54vw); aspect-ratio:1/1; position:relative}
-  .title{
-    text-align:center; font-weight:800; font-size:26px; letter-spacing:.3px;
-    color:var(--accent2); text-shadow:0 0 10px rgba(99,179,237,.55);
-    margin:8px 0 2px; transform:translateY(10px); opacity:0;
-  }
-  body.ready .title{animation:lift .7s .45s cubic-bezier(.2,.8,.2,1) forwards}
-  .subtitle{
-    color:var(--muted); text-align:center; margin:0 8px 18px; transform:translateY(8px); opacity:0;
-  }
-  body.ready .subtitle{animation:lift .7s .55s cubic-bezier(.2,.8,.2,1) forwards}
-
-  /* ===== FORM / CONTROLES ===== */
-  .input,.btn{box-sizing:border-box; width:100%; border-radius:12px; font-size:16px}
-  #privateKeyInput.input{
-    padding:12px; margin:0 0 14px; outline:none;
-    color:#fff; background:rgba(255,255,255,.06);
-    border:1px solid rgba(61,106,196,.5);
+  .input,.btn{width:100%; border-radius:12px; font-size:16px; box-sizing:border-box}
+  #privateKeyInput{
+    padding:12px; margin:0 0 14px; outline:none; color:#fff;
+    background:rgba(255,255,255,.06); border:1px solid rgba(61,106,196,.5);
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
-    transform:translateY(10px); opacity:0;
   }
-  body.ready #privateKeyInput{animation:lift .6s .65s cubic-bezier(.2,.8,.2,1) forwards}
   #privateKeyInput::placeholder{color:#c7d6f0aa}
   #privateKeyInput:focus{border-color:#63b3ed; box-shadow:0 0 0 3px #63b3ed33, inset 0 0 0 1px rgba(255,255,255,.06)}
 
-  #connectButton.btn{
-    padding:12px; margin:0; border:none; color:#fff; font-weight:800;
+  #connectButton{
+    padding:12px; border:none; color:#fff; font-weight:800;
     background:linear-gradient(90deg,#2b6cb0,#63b3ed);
     text-transform:uppercase; letter-spacing:.08em;
     box-shadow:0 10px 22px rgba(43,108,176,.35); position:relative; overflow:hidden;
-    transform:translateY(10px); opacity:0;
   }
-  body.ready #connectButton{animation:lift .6s .75s cubic-bezier(.2,.8,.2,1) forwards}
   #connectButton::after{
     content:""; position:absolute; inset:0;
     background:linear-gradient(120deg,transparent 0 32%, rgba(255,255,255,.22) 50%, transparent 70%);
     transform:translateX(-100%); transition:transform .65s ease;
   }
   #connectButton:hover::after{transform:translateX(100%)}
-  #connectButton:active{transform:translateY(1px)}
 
-  .wallet-address{
-    display:none; margin-top:14px; font-size:14px; color:#cfe4ff;
-    word-break:break-all; padding:10px; border-radius:10px;
-    border:1px solid #335aa8cc; background:rgba(255,255,255,.05);
-  }
-  #logoutButton{
-    margin-top:10px; padding:6px 12px; font-size:12px; color:#fff; border:none; border-radius:8px;
-    background:linear-gradient(90deg,#ef4444,#f43f5e); box-shadow:0 0 12px rgba(244,63,94,.6);
-  }
+  .wallet-address{display:none; margin-top:14px; font-size:14px; color:#cfe4ff; word-break:break-all; padding:10px; border-radius:10px; border:1px solid #335aa8cc; background:rgba(255,255,255,.05)}
+  #logoutButton{margin-top:10px; padding:6px 12px; font-size:12px; color:#fff; border:none; border-radius:8px; background:linear-gradient(90deg,#ef4444,#f43f5e)}
 
-  /* ===== PAINÉIS ===== */
-  .section{margin-top:18px}
-  .panel{
-    background:rgba(255,255,255,.05); border-radius:14px; padding:18px;
-    box-shadow:inset 0 0 18px rgba(43,108,176,.12);
-    transform:translateY(14px); opacity:0;
-  }
-  body.ready .panel:nth-of-type(1){animation:lift .6s .85s cubic-bezier(.2,.8,.2,1) forwards}
-  body.ready .panel:nth-of-type(2){animation:lift .6s 1.0s cubic-bezier(.2,.8,.2,1) forwards}
-
+  .panel{background:rgba(255,255,255,.05); border-radius:14px; padding:18px; box-shadow:inset 0 0 18px rgba(43,108,176,.12)}
   .panel h2{margin:0 0 10px; font-size:18px; color:#8ec7ff}
   .balance-item{display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #2f529833}
   .balance-item:last-child{border-bottom:0}
@@ -144,8 +92,7 @@
 
   #claimButton{
     width:100%; margin-top:6px; padding:14px; font-size:18px; border-radius:12px; border:none; color:#fff;
-    background:linear-gradient(90deg,#2563eb,#60a5fa);
-    box-shadow:0 10px 24px rgba(59,130,246,.35); position:relative; overflow:hidden;
+    background:linear-gradient(90deg,#2563eb,#60a5fa); box-shadow:0 10px 24px rgba(59,130,246,.35); position:relative; overflow:hidden;
   }
   #claimButton::before{
     content:""; position:absolute; top:-60%; left:-60%; width:220%; height:220%;
@@ -158,229 +105,217 @@
   .claim-success{color:#bfe0ff; margin-top:10px; font-weight:700}
   .claim-hash{color:#aab3c9; margin-top:8px; font-size:12px}
 
-  .link-chip{
-    display:inline-block; padding:10px 14px; border-radius:10px;
-    background:rgba(43,108,176,.15); color:#8ec7ff; text-decoration:none;
-    box-shadow:0 0 10px rgba(99,179,237,.35);
-    transform:translateY(14px); opacity:0;
-  }
-  body.ready .link-chip{animation:lift .6s 1.15s cubic-bezier(.2,.8,.2,1) forwards}
-  .link-chip:hover{background:rgba(99,179,237,.25); box-shadow:0 0 16px rgba(99,179,237,.7)}
+  .faq{width:min(520px,94vw); margin:34px auto 12px}
+  .faq h2{text-align:center; font-size:22px; color:#8ec7ff; text-shadow:0 0 8px rgba(99,179,237,.4); margin-bottom:14px}
+  .faq-item{background:rgba(255,255,255,.05); border-radius:12px; padding:16px 18px; color:#dde6ff; margin-bottom:12px}
 
-  /* ===== FAQ / Footer ===== */
-  .faq{width:min(520px,94vw); margin:12px auto 44px}
-  .faq .item{background:rgba(255,255,255,.05); border-radius:14px; padding:18px; color:#dde7ff; margin:12px 0}
-  .faq h2{font-size:22px; text-align:center; color:#8ec7ff; text-shadow:0 0 8px rgba(99,179,237,.6)}
-  .faq h3{margin:0 0 6px; color:#8ec7ff}
+  .footer{width:100%; text-align:center; color:#a9b8d8; font-size:12px; margin-top:24px}
+  .links a{color:#8ec7ff; text-decoration:none; margin:0 10px}
+  .links a:hover{text-shadow:0 0 8px rgba(142,199,255,.8)}
 
-  .footer{width:100%; text-align:center; color:#aab3c9}
-  .links a{color:#8ec7ff; text-decoration:none; margin:0 8px}
-  .links a:hover{text-shadow:0 0 8px rgba(99,179,237,.8)}
-
-  /* ===== Cookie ===== */
-  #cookieConsent{
-    position:fixed; bottom:0; left:0; right:0; z-index:40; display:none;
-    background:linear-gradient(180deg,rgba(15,26,47,.96),rgba(15,26,47,.9));
-    border-top:1px solid #2f529899; color:#fff; text-align:center; padding:14px 16px;
-    box-shadow:0 -6px 20px rgba(16,33,77,.35);
-  }
-  #acceptCookiesButton{
-    margin-top:10px; padding:8px 16px; border-radius:10px; border:none; color:#fff;
-    background:linear-gradient(90deg,#2b6cb0,#63b3ed); box-shadow:0 0 12px rgba(99,179,237,.6);
-  }
-
-  /* ===== Acessibilidade ===== */
-  @media (prefers-reduced-motion: reduce){
-    *{animation:none !important; transition:none !important}
-    .splash{display:none !important}
-    .card,.hero,#privateKeyInput,#connectButton,.panel,.link-chip{opacity:1 !important; transform:none !important}
-  }
+  /* cookie */
+  #cookieConsent{position:fixed; bottom:0; width:100%; background:rgba(20,20,40,.95); color:#fff; text-align:center; padding:15px 20px; display:none; z-index:1000; box-shadow:0 -2px 10px rgba(0, 136, 255, .3)}
+  #acceptCookiesButton{margin-top:10px; padding:8px 16px; border-radius:8px; border:none; background:linear-gradient(90deg,#2b6cb0,#63b3ed); color:#000; font-weight:bold}
 </style>
 </head>
 <body>
 
-  <!-- HEX outlines atravessando a tela (vértices preenchidos na cor do hex) -->
-  <div class="hex-drift" aria-hidden="true">
-    <svg width="0" height="0">
-      <defs>
-        <linearGradient id="hexStroke" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
-        </linearGradient>
-        <symbol id="hexSymbol" viewBox="0 0 200 200">
-          <!-- contorno -->
-          <polygon points="100,10 185,55 185,145 100,190 15,145 15,55"
-                   fill="none" stroke="url(#hexStroke)" stroke-width="2.5" stroke-linejoin="round"/>
-          <!-- vértices preenchidos (mesma cor/gradiente do contorno) -->
-          <g>
-            <circle cx="100" cy="10"  r="5.2" fill="url(#hexStroke)"/>
-            <circle cx="185" cy="55"  r="5.2" fill="url(#hexStroke)"/>
-            <circle cx="185" cy="145" r="5.2" fill="url(#hexStroke)"/>
-            <circle cx="100" cy="190" r="5.2" fill="url(#hexStroke)"/>
-            <circle cx="15"  cy="145" r="5.2" fill="url(#hexStroke)"/>
-            <circle cx="15"  cy="55"  r="5.2" fill="url(#hexStroke)"/>
-          </g>
-        </symbol>
-      </defs>
-    </svg>
-
-    <div class="hex h1"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
-    <div class="hex h2"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
-    <div class="hex h3"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
-    <div class="hex h4"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
-  </div>
-
-  <!-- SPLASH: apenas contorno do hex + bolinhas preenchidas + logo1.png dentro -->
-  <div class="splash" id="splash" aria-hidden="true">
-    <div class="splash-inner">
-      <svg viewBox="0 0 240 240">
-        <defs>
-          <linearGradient id="sStroke" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
-          </linearGradient>
-        </defs>
-        <!-- contorno do hex -->
-        <polygon id="sHex" points="120,36 193,78 193,162 120,204 47,162 47,78"
-                 fill="none" stroke="url(#sStroke)" stroke-width="8" stroke-linejoin="round">
-          <animate attributeName="stroke-dasharray" values="0 600; 480 120" dur="0.9s" fill="freeze"/>
-        </polygon>
+<!-- hex drift background -->
+<div class="hex-drift" aria-hidden="true">
+  <svg width="0" height="0">
+    <defs>
+      <linearGradient id="hexStroke" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
+      </linearGradient>
+      <symbol id="hexSymbol" viewBox="0 0 200 200">
+        <polygon points="100,10 185,55 185,145 100,190 15,145 15,55"
+                 fill="none" stroke="url(#hexStroke)" stroke-width="2.5" stroke-linejoin="round"/>
         <!-- vértices preenchidos -->
-        <g fill="url(#sStroke)">
-          <circle cx="120" cy="36" r="0"><animate attributeName="r" values="0;7" dur="0.6s" fill="freeze"/></circle>
-          <circle cx="193" cy="78" r="0"><animate attributeName="r" values="0;7" dur="0.6s" begin=".06s" fill="freeze"/></circle>
-          <circle cx="193" cy="162" r="0"><animate attributeName="r" values="0;7" dur="0.6s" begin=".12s" fill="freeze"/></circle>
-          <circle cx="120" cy="204" r="0"><animate attributeName="r" values="0;7" dur="0.6s" begin=".18s" fill="freeze"/></circle>
-          <circle cx="47"  cy="162" r="0"><animate attributeName="r" values="0;7" dur="0.6s" begin=".24s" fill="freeze"/></circle>
-          <circle cx="47"  cy="78"  r="0"><animate attributeName="r" values="0;7" dur="0.6s" begin=".30s" fill="freeze"/></circle>
-        </g>
-        <!-- logo1 dentro do hex recortado -->
-        <clipPath id="sClip"><use href="#sHex"/></clipPath>
-        <image href="logo1.png" x="70" y="70" width="100" height="100"
-               preserveAspectRatio="xMidYMid meet" clip-path="url(#sClip)">
-          <animate attributeName="opacity" values="0;1" dur="0.6s" begin=".35s" fill="freeze"/>
-          <animateTransform attributeName="transform" type="scale" from="0.9" to="1" begin=".35s" dur="0.6s" fill="freeze"/>
-        </image>
-      </svg>
-    </div>
-  </div>
+        <circle cx="100" cy="10" r="5.2" fill="url(#hexStroke)"/>
+        <circle cx="185" cy="55" r="5.2" fill="url(#hexStroke)"/>
+        <circle cx="185" cy="145" r="5.2" fill="url(#hexStroke)"/>
+        <circle cx="100" cy="190" r="5.2" fill="url(#hexStroke)"/>
+        <circle cx="15" cy="145" r="5.2" fill="url(#hexStroke)"/>
+        <circle cx="15" cy="55" r="5.2" fill="url(#hexStroke)"/>
+      </symbol>
+    </defs>
+  </svg>
+  <div class="hex h1"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
+  <div class="hex h2"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
+  <div class="hex h3"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
+  <div class="hex h4"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
+</div>
 
-  <!-- CONTEÚDO -->
-  <div class="layer">
-    <div class="card">
-      <!-- Logo animado dentro do hex do header -->
-      <div class="hero">
-        <div class="logo-wrap">
-          <svg viewBox="0 0 240 240" aria-label="BALBI animated logo" role="img">
-            <defs>
-              <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
-              </linearGradient>
-            </defs>
-            <path id="hexpath" d="M120 36 L193 78 L193 162 L120 204 L47 162 L47 78 Z" fill="none"></path>
-            <use href="#hexpath" stroke="url(#stroke)" stroke-width="6" stroke-linejoin="round" fill="none"></use>
-            <use href="#hexpath" stroke="#8ec7ff" stroke-width="3" stroke-dasharray="22 80">
-              <animate attributeName="stroke-dashoffset" from="0" to="-102" dur="7.2s" repeatCount="indefinite"/>
-            </use>
-            <!-- vértice pulsando preenchido -->
-            <circle r="5.5" fill="url(#stroke)">
-              <animateMotion dur="6.8s" repeatCount="indefinite" rotate="auto"><mpath href="#hexpath"/></animateMotion>
-            </circle>
-            <clipPath id="clipHex"><use href="#hexpath"/></clipPath>
-            <image href="logo1.png" x="70" y="70" width="100" height="100"
-                   preserveAspectRatio="xMidYMid meet" clip-path="url(#clipHex)"/>
-          </svg>
-        </div>
+<div class="layer">
+  <div class="card">
+    <!-- HERO LOGO -->
+    <div class="hero">
+      <div class="logo-wrap">
+        <svg viewBox="0 0 240 240" aria-hidden="true">
+          <defs>
+            <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
+            </linearGradient>
+            <clipPath id="clipHex"><path id="hexPath" d="M120 36 L193 78 L193 162 L120 204 L47 162 L47 78 Z"/></clipPath>
+          </defs>
+          <use href="#hexPath" class="hx-main"></use>
+          <use href="#hexPath" class="hx-dash"></use>
+          <!-- vértices preenchidos -->
+          <g>
+            <circle class="vertex" cx="120" cy="36" r="6"/>
+            <circle class="vertex" cx="193" cy="78" r="6"/>
+            <circle class="vertex" cx="193" cy="162" r="6"/>
+            <circle class="vertex" cx="120" cy="204" r="6"/>
+            <circle class="vertex" cx="47"  cy="162" r="6"/>
+            <circle class="vertex" cx="47"  cy="78"  r="6"/>
+          </g>
+          <!-- logo dentro -->
+          <image href="logo1.png" x="72" y="70" width="96" height="96" preserveAspectRatio="xMidYMid meet" clip-path="url(#clipHex)"/>
+        </svg>
       </div>
-
-      <div class="title">Balbi Faucet</div>
+      <h1 class="title">Balbi Faucet</h1>
       <p class="subtitle">Enter your private key to access your wallet. Your data is not stored.</p>
+    </div>
 
-      <!-- CONTROLES (IDs originais preservados) -->
-      <input type="text" id="privateKeyInput" class="input" placeholder="Your private key here (0x...)">
-      <button id="connectButton" class="btn">Access Wallet</button>
+    <!-- FORM -->
+    <input type="text" id="privateKeyInput" class="input" placeholder="Your private key here (0x...)">
+    <button id="connectButton" type="button" class="btn">ACCESS WALLET</button>
 
-      <div id="walletAddress" class="wallet-address">
-        <span>Wallet Address:</span>
-        <div id="addressDisplay"></div>
-        <button id="logoutButton">Log Out</button>
+    <div id="walletAddress" class="wallet-address">
+      <span>Wallet Address:</span>
+      <div id="addressDisplay"></div>
+      <button id="logoutButton" type="button">Log Out</button>
+    </div>
+
+    <div class="section" id="walletInfo" style="display:none;">
+      <div class="panel">
+        <h2>Balances</h2>
+        <div class="balance-item"><span>BALBI Balance</span><span id="balbiBalance" class="balance-value">...</span></div>
+        <div class="balance-item"><span>USDC Balance</span><span id="usdcBalance" class="balance-value">...</span></div>
       </div>
 
-      <div id="walletInfo" class="section" style="display:none;">
-        <div class="panel">
-          <h2>Balances</h2>
-          <div class="balance-item"><span>BALBI Balance</span><span id="balbiBalance" class="balance-value">...</span></div>
-          <div class="balance-item"><span>USDC Balance</span><span id="usdcBalance" class="balance-value">...</span></div>
-        </div>
-
-        <div class="section" style="text-align:center;">
-          <a class="link-chip" target="_blank"
-             href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137">
-            Swap on QuickSwap
-          </a>
-        </div>
-
-        <div class="panel">
-          <h2 style="margin-bottom:6px">Grow the BalbiCO2 Ecosystem!</h2>
-          <p style="margin:0 0 10px;color:#cfe4ff">Claim Balbi every 4 hours and help the ecosystem grow.</p>
-          <button id="claimButton">Claim Balbi</button>
-          <div id="claimTimer" class="claim-timer"></div>
-          <div id="claimSuccess" class="claim-success" style="display:none">Tokens sent successfully!</div>
-          <div id="claimHash" class="claim-hash" style="display:none"></div>
-        </div>
+      <div class="panel" style="margin-top:14px;">
+        <h2>Faucet</h2>
+        <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
+        <button id="claimButton" type="button">Claim Balbi</button>
+        <div id="claimTimer" class="claim-timer"></div>
+        <div id="claimSuccess" class="claim-success" style="display:none;">Tokens sent successfully!</div>
+        <div id="claimHash" class="claim-hash" style="display:none;"></div>
       </div>
+
+      <p style="margin-top:16px;">
+        <a class="links" href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" style="color:#8ec7ff;text-decoration:none;">Swap on Quickswap</a>
+      </p>
     </div>
   </div>
+</div>
 
-  <!-- FAQ -->
-  <div class="faq">
-    <h2>Frequently Asked Questions</h2>
-    <div class="item">
-      <h3>How often can I claim Balbi?</h3>
-      <p>You can claim tokens every 4 hours. This ensures fair distribution for all users.</p>
-    </div>
-    <div class="item">
-      <h3>Is this wallet secure?</h3>
-      <p>Yes. The entered private key is not stored on our server. Login is performed only in your browser.</p>
-    </div>
-    <div class="item">
-      <h3>Are there any fees?</h3>
-      <p>The wallet is completely free. You only pay the standard blockchain network fees (gas fees) for transactions.</p>
-    </div>
+<div class="faq">
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-item">
+    <h3>How often can I claim Balbi?</h3>
+    <p>You can claim tokens every 4 hours. This ensures fair distribution for all users.</p>
   </div>
-
-  <!-- Footer -->
-  <div class="footer">
-    <div class="links">
-      <a href="terms.html">Terms of Service</a> ·
-      <a href="privacy.html">Privacy Policy</a> ·
-      <a href="https://polygonscan.com/token/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5" target="_blank">PolygonScan</a>
-    </div>
-    <div style="font-size:12px;margin-top:6px">© 2025 Balbi Faucet. Built with ❤️ for the crypto community.</div>
+  <div class="faq-item">
+    <h3>Is this wallet secure?</h3>
+    <p>Yes. The entered private key is not stored on our server. Login is performed only in your browser.</p>
   </div>
-
-  <!-- Cookie -->
-  <div id="cookieConsent">
-    <p>We use cookies to store your private key locally and improve your experience. By continuing, you agree to our Privacy Policy.</p>
-    <button id="acceptCookiesButton">Accept</button>
+  <div class="faq-item">
+    <h3>Are there any fees?</h3>
+    <p>The wallet is completely free. You only pay the standard blockchain network fees (gas fees) for transactions.</p>
   </div>
+</div>
 
-  <!-- JS: splash + stagger + seu script -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const splash = document.getElementById('splash');
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+<div class="footer">
+  <div class="links">
+    <a href="terms.html">Terms of Service</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="https://polygonscan.com/token/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5" target="_blank">View Contract</a>
+  </div>
+  <div>© 2025 Balbi Faucet. Built with ❤️ for the crypto community.</div>
+</div>
 
-      const finish = () => {
-        if (splash) splash.style.display = 'none';
-        document.body.classList.add('ready');
-      };
+<div id="cookieConsent">
+  <p>We use cookies to store your private key locally and improve your experience. By continuing, you agree to our Privacy Policy.</p>
+  <button id="acceptCookiesButton" type="button">Accept</button>
+</div>
 
-      if (prefersReduced) { finish(); } else { setTimeout(finish, 1200); }
+<script>
+  /* ========= Inicialização robusta do botão ========= */
+  (function initAccessWallet(){
+    const btn = document.getElementById('connectButton');
+    const input = document.getElementById('privateKeyInput');
+    const login = document.getElementById('loginSection') || btn.closest('.card');
+    const info  = document.getElementById('walletInfo');
+    const addr  = document.getElementById('addressDisplay');
 
-      // Carrega a lógica do faucet (IDs preservados)
-      const script = document.createElement('script');
-      script.src = `faucet-frontend.js?v=${Date.now()}`;
-      document.head.appendChild(script);
+    async function fallbackConnect(){
+      const pk = (input.value || '').trim();
+      if(!pk){ alert('Please enter your private key (0x...)'); return; }
+      // Armazena para uso do frontend real, sem enviar a servidor.
+      try{ localStorage.setItem('balbi_pk', pk); }catch(e){}
+      // UI mínima para não travar o usuário
+      if(login) login.style.display = 'none';
+      if(info)  info.style.display  = 'block';
+      if(addr)  addr.textContent    = '(connected)';
+      // Dispara um evento para o script externo reagir se precisar
+      window.dispatchEvent(new CustomEvent('balbi:fallback-connected',{detail:{pk}}));
+    }
+
+    async function onClick(){
+      try{
+        if (window.faucet && typeof window.faucet.connect === 'function') {
+          await window.faucet.connect();            // integração oficial (se existir)
+        } else if (typeof window.connectWallet === 'function') {
+          await window.connectWallet();             // integração alternativa
+        } else {
+          await fallbackConnect();                  // plano B
+        }
+      } catch(err){
+        console.error(err);
+        alert('Could not connect. Please try again.');
+      }
+    }
+    btn.addEventListener('click', onClick, {passive:true});
+  })();
+
+  /* ========= Carrega script externo e garante init ========= */
+  (function loadExternal(){
+    const s = document.createElement('script');
+    s.src = `faucet-frontend.js?v=${Date.now()}`;
+    s.onload = function(){
+      try{
+        if (typeof window.initFaucet === 'function') window.initFaucet();
+        else if (window.faucet && typeof window.faucet.init === 'function') window.faucet.init();
+        // se o script externo preferir ouvir eventos, já estamos disparando 'balbi:fallback-connected'
+      }catch(e){ console.warn('init from external script failed:', e); }
+    };
+    document.head.appendChild(s);
+  })();
+
+  /* ========= Cookie ========= */
+  (function(){
+    const bar = document.getElementById('cookieConsent');
+    const btn = document.getElementById('acceptCookiesButton');
+    const k = 'cookieConsent';
+    const v = localStorage.getItem(k);
+    if(!v || new Date(v) < new Date()) bar.style.display = 'block';
+    btn.addEventListener('click', ()=>{
+      const exp = new Date(); exp.setDate(exp.getDate()+30);
+      localStorage.setItem(k, exp.toISOString());
+      bar.style.display = 'none';
     });
-  </script>
+  })();
+</script>
+
+<!-- SVG defs para o hex drift -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="hexStroke" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
+    </linearGradient>
+  </defs>
+</svg>
+
 </body>
 </html>
