@@ -1,536 +1,913 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BalbiQuiz - Mini RPG de HVAC</title>
-    <style>
-        :root {
-            --glow-color: #00ffcc;
-            --secondary-glow: #ff00cc;
-            --animation-speed: 0.5s;
-            --bg-color: #0a0a0a;
-            --text-color: #fff;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --border-color: var(--glow-color);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
-        body {
-            background: linear-gradient(45deg, var(--bg-color), #1a1a1a);
-            color: var(--text-color);
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; perspective: 1000px; overflow: hidden; position: relative;
-        }
-        body::before {
-            content: ''; position: absolute; width: 200%; height: 200%;
-            background: conic-gradient(from 0deg, transparent, var(--glow-color), transparent);
-            top: -50%; left: -50%; animation: rotate-bg 15s linear infinite; opacity: 0.15; z-index: -1;
-        }
-        @keyframes rotate-bg { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .container {
-            max-width: 800px; width: 90%; padding: 20px; text-align: center; transform-style: preserve-3d; position: relative;
-            min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-        #welcome, .question-card, #result { display: none; transform-style: preserve-3d; }
-        #welcome { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-        .logo {
-            font-size: 3em; text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--secondary-glow);
-            animation: text-glow 1.5s infinite alternate, float 4s ease-in-out infinite; transform-style: preserve-3d;
-        }
-        .logo::before {
-            content: 'BalbiQuiz'; position: absolute; top: 0; left: 0; color: transparent;
-            text-shadow: 0 0 20px var(--glow-color); animation: glitch 2s infinite;
-        }
-        @keyframes glitch { 0% { clip: rect(0, auto, auto, 0); } 5% { clip: rect(10px, auto, auto, 0); transform: skew(0.5deg); }
-            10% { clip: rect(20px, auto, auto, 0); transform: skew(-0.5deg); } 100% { clip: rect(0, auto, auto, 0); } }
-        @keyframes text-glow { 0% { text-shadow: 0 0 10px var(--glow-color); }
-            100% { text-shadow: 0 0 20px var(--glow-color), 0 0 30px var(--secondary-glow); } }
-        @keyframes float { 0%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
-            50% { transform: translateY(-20px) rotateX(10deg) rotateY(5deg); } }
-        button {
-            padding: 15px 30px; font-size: 1.2em;
-            background: linear-gradient(45deg, var(--glow-color), var(--secondary-glow));
-            border: none; border-radius: 10px; color: var(--text-color); cursor: pointer;
-            position: relative; overflow: hidden; transform-style: preserve-3d;
-            transition: transform var(--animation-speed) ease, box-shadow var(--animation-speed) ease; margin: 10px;
-        }
-        button:hover { transform: scale(1.1) rotateX(10deg) rotateY(5deg);
-            box-shadow: 0 0 30px var(--glow-color), 0 0 50px var(--secondary-glow); }
-        button::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            animation: shine 2s infinite linear;
-        }
-        @keyframes shine { 0% { left: -100%; } 100% { left: 100%; } }
-        .question-card {
-            background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 15px;
-            padding: 30px; margin: 20px 0; box-shadow: 0 0 20px var(--glow-color);
-            transform: rotateY(5deg); transition: transform var(--animation-speed) ease;
-            animation: pulse-card 2s infinite ease-in-out;
-        }
-        .question-card:hover { transform: rotateY(0deg) scale(1.05);
-            box-shadow: 0 0 40px var(--glow-color), 0 0 60px var(--secondary-glow); }
-        @keyframes pulse-card { 0%, 100% { transform: rotateY(5deg) scale(1); } 50% { transform: rotateY(5deg) scale(1.02); } }
-        .question-card h2 { font-size: 1.8em; margin-bottom: 20px; text-shadow: 0 0 10px var(--glow-color); }
-        .question-card p { font-size: 1.2em; margin-bottom: 20px; }
-        .hint { font-style: italic; color: #ccc; margin-top: 10px; display: none; }
-        #result { transform-style: preserve-3d; }
-        .score { font-size: 3em; text-shadow: 0 0 20px var(--glow-color); animation: score-pop 1s ease-out, text-glow 1.5s infinite alternate; }
-        @keyframes score-pop { 0% { transform: scale(0.5) rotateX(-90deg); opacity: 0; } 100% { transform: scale(1) rotateX(0deg); opacity: 1; } }
-        .pass-fail { font-size: 2em; margin: 20px 0; animation: float 4s ease-in-out infinite; }
-        .footer { position: absolute; bottom: 10px; width: 100%; text-align: center; font-size: 0.9em; color: #ccc; text-shadow: 0 0 5px var(--glow-color); }
-        @keyframes fadeOutUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-50px); } }
-        @keyframes fadeInDown { 0% { opacity: 0; transform: translateY(-50px); } 100% { opacity: 1; transform: translateY(0); } }
-        /* Gabarito */
-        #answerKey { margin-top: 10px; font-size: 0.85em; opacity: 0.9; text-align: left; }
-        #answerKey .item { margin: 6px 0; line-height: 1.25; }
-        #answerKey .ok { color: #10ff82; }
-        #answerKey .bad { color: #ff6b6b; }
-        #answerKey .tip { color: #66aaff; } /* correta quando o jogador erra */
-        /* Botão de som discreto (bem menor) */
-        .sound-toggle{
-            font-size: .8em;
-            padding: 6px 12px;
-            border-radius: 16px;
-            margin-top: 2px;
-            background:#2a2a2a;
-            box-shadow:none;
-        }
-        .sound-toggle:hover{ transform:none; box-shadow:none; }
-        .sound-toggle::before{ display:none; }
-        @media (max-width: 600px) {
-            .container { width: 95%; padding: 10px; }
-            .logo { font-size: 2em; }
-            button { padding: 10px 20px; font-size: 1em; }
-            .question-card h2 { font-size: 1.5em; }
-            .question-card p { font-size: 1em; }
-            .footer { font-size: 0.8em; }
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Balbi Faucet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- Favicon (ajuste o href se quiser usar outro arquivo) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="logo1.png">
+  <style>
+    :root{
+      --bg1:#0a1022; --bg2:#0d1b34;
+      --accent:#2b6cb0; --accent2:#63b3ed; --accent3:#8ec7ff;
+      --text:#e6eefb; --muted:#a5b4cf; --radius:18px;
+      --hexOpacity:.08;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1100px 520px at 10% -10%, rgba(43,108,176,.10) 0%, transparent 60%),
+        radial-gradient(900px 420px at 110% 120%, rgba(99,179,237,.10) 0%, transparent 62%),
+        linear-gradient(180deg,var(--bg1),var(--bg2));
+      display:flex; align-items:center; flex-direction:column; gap:16px;
+      padding:24px 18px 28px; overflow-x:hidden;
+    }
+
+    /* INTRO (abertura) — cobre a página inteira e aparece sozinha */
+    .intro{
+      position:fixed; inset:0; width:100%; height:100dvh;
+      display:grid; place-items:center;
+      z-index:10000;
+      /* fundo próprio animado, assim a intro não mostra o site por baixo */
+      background: linear-gradient(140deg, var(--bg1), var(--bg2), var(--bg1));
+      background-size: 240% 240%;
+      animation:
+        introFade 1.8s ease forwards,   /* some ao final */
+        bgMove 24s ease-in-out infinite; /* movimento suave de fundo */
+    }
+    .intro::before{
+      content:""; position:absolute; inset:0;
+      background: radial-gradient(1200px 700px at 50% -20%, rgba(99,179,237,.12), transparent 70%);
+      pointer-events:none;
+    }
+    @keyframes introFade{ 0%{opacity:1} 85%{opacity:1} 100%{opacity:0; visibility:hidden} }
+    @keyframes bgMove{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
+    .intro-wrap{
+      width:clamp(160px, 26vmin, 320px);
+      aspect-ratio:1/1; position:relative;
+      transform: translateY(-16vh);            /* mais alto na tela */
+      animation:introPop .9s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+    @keyframes introPop{
+      0%{opacity:0; transform:translateY(-16vh) scale(.6) rotate(-8deg)}
+      60%{opacity:1; transform:translateY(-16vh) scale(1.06)}
+      100%{transform:translateY(-16vh) scale(1)}
+    }
+    .intro svg{width:100%; height:100%}
+    .intro .hx-outline{stroke:url(#introStroke); stroke-width:8; fill:none; stroke-linejoin:round; filter:drop-shadow(0 8px 28px rgba(99,179,237,.25))}
+    .intro .vertex{fill:url(#introStroke)}
+    .intro image{clip-path:url(#introClip)}
+    .intro .dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:20 90; animation:introDash 1.8s linear forwards}
+    @keyframes introDash{ to{ stroke-dashoffset:-140 } }
+
+    /* HEX de fundo */
+    .hex-drift{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
+    .hex{position:absolute; width:220px; aspect-ratio:1/1; opacity:var(--hexOpacity)}
+    .hex svg{width:100%; height:100%}
+    .hex use{stroke:url(#hexStroke); stroke-width:2; fill:none; filter:drop-shadow(0 0 6px rgba(99,179,237,.08))}
+    .h1{top:10%; left:-20%; animation:float 28s linear infinite}
+    .h2{top:60%; left:80%;  animation:float 32s linear infinite reverse}
+    .h3{top:22%; left:45%;  animation:float 36s linear infinite}
+    .h4{top:78%; left:-10%; animation:float 30s linear infinite reverse}
+    @keyframes float{
+      0%{transform:translateX(-10vw) translateY(0) rotate(0deg) scale(.92)}
+      50%{transform:translateX(20vw) translateY(-8vh) rotate(180deg) scale(1)}
+      100%{transform:translateX(60vw) translateY(4vh) rotate(360deg) scale(.92)}
+    }
+
+    .layer{position:relative; z-index:1; width:min(520px,94vw); margin:0 auto}
+    .card{
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+      border:1px solid rgba(47,82,152,.35);
+      box-shadow:0 16px 44px rgba(8,14,35,.55), inset 0 1px 0 rgba(255,255,255,.05);
+      padding:26px 20px 22px;
+    }
+
+    .hero{display:grid; place-items:center; gap:10px; margin-bottom:12px}
+    .logo-wrap{width:min(150px,54vw,40dvh); aspect-ratio:1/1}
+    .logo-wrap svg{width:100%; height:100%}
+    .hx-main{stroke:url(#stroke); stroke-width:7; fill:none; stroke-linejoin:round}
+    .hx-dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:22 82; opacity:.9; animation:dash 9s linear infinite}
+    @keyframes dash{to{stroke-dashoffset:-104}}
+    .vertex{fill:url(#stroke)}
+    .title{font-weight:800; font-size:28px; color:#b3d9ff; text-shadow:0 0 10px rgba(99,179,237,.55); margin:0}
+    .subtitle{color:var(--muted); margin:0 8px 16px; text-align:center}
+
+    /* Inputs */
+    #privateKeyInput{
+      width:100%; padding:12px; margin:0 0 14px; outline:none; color:#fff;
+      background:rgba(255,255,255,.06); border:1px solid rgba(61,106,196,.5);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+      border-radius:12px; font-size:16px; box-sizing:border-box;
+    }
+    #privateKeyInput::placeholder{color:#c7d6f0aa}
+    #privateKeyInput:focus{border-color:#63b3ed; box-shadow:0 0 0 3px #63b3ed33, inset 0 0 0 1px rgba(255,255,255,.06)}
+
+    #connectButton{
+      width:100%; padding:12px; border:none; color:#fff; font-weight:800;
+      background:linear-gradient(90deg,#2b6cb0,#63b3ed);
+      text-transform:uppercase; letter-spacing:.08em;
+      box-shadow:0 10px 22px rgba(43,108,176,.35); position:relative; overflow:hidden;
+      border-radius:12px; font-size:16px; box-sizing:border-box; cursor:pointer;
+    }
+    #connectButton::after{
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(120deg,transparent 0 32%, rgba(255,255,255,.22) 50%, transparent 70%);
+      transform:translateX(-100%); transition:transform .65s ease;
+    }
+    #connectButton:hover::after{transform:translateX(100%)}
+
+    .wallet-address{
+      display:none; margin-top:14px; font-size:14px; color:#cfe4ff; word-break:break-all;
+      padding:10px; border-radius:10px; border:1px solid #335aa8cc; background:rgba(255,255,255,.05)
+    }
+    #logoutButton{
+      margin-top:10px; padding:6px 12px; font-size:12px; color:#fff; border:none; border-radius:8px;
+      background:linear-gradient(90deg,#ef4444,#f43f5e); cursor:pointer;
+    }
+
+    .panel{background:rgba(255,255,255,.05); border-radius:14px; padding:18px; box-shadow:inset 0 0 18px rgba(43,108,176,.12)}
+    .panel h2{margin:0 0 10px; font-size:18px; color:#8ec7ff}
+    .balance-item{display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #2f529833}
+    .balance-item:last-child{border-bottom:0}
+    .balance-value{font-weight:800; color:#8ec7ff}
+
+    /* Claim: cinza inativo, verde ativo */
+    #claimButton{
+      width:100%; margin-top:6px; padding:14px; font-size:18px; border-radius:12px; border:none;
+      position:relative; overflow:hidden; box-sizing:border-box;
+      background:linear-gradient(90deg,#6b7280,#9ca3af); color:#eee; box-shadow:none;
+      cursor:not-allowed; opacity:.95;
+    }
+    #claimButton[disabled]{
+      background:linear-gradient(90deg,#6b7280,#9ca3af);
+      color:#eee; box-shadow:none; cursor:not-allowed; opacity:.95; pointer-events:none;
+    }
+    #claimButton:not([disabled]){
+      background:linear-gradient(90deg,#39ff14,#00ffa3);
+      color:#000; box-shadow:0 0 20px rgba(57,255,20,.35);
+      cursor:pointer;
+    }
+    #claimButton::before{
+      content:""; position:absolute; top:-60%; left:-60%; width:220%; height:220%;
+      background:radial-gradient(circle,rgba(255,255,255,.22) 0%, transparent 60%);
+      transform:rotate(35deg); animation:shine 3s infinite; pointer-events:none;
+    }
+    @keyframes shine{0%{transform:translate(-60%,-60%) rotate(35deg)}100%{transform:translate(60%,60%) rotate(35deg)}}
+
+    .claim-timer{color:#8ec7ff; margin-top:10px}
+    .claim-success{color:#bfe0ff; margin-top:10px; font-weight:700; display:none}
+    .claim-hash{color:#aab3c9; margin-top:8px; font-size:12px; display:none; word-break:break-all}
+
+    .faq{width:min(520px,94vw); margin:34px auto 12px}
+    .faq h2{text-align:center; font-size:22px; color:#8ec7ff; text-shadow:0 0 8px rgba(99,179,237,.4); margin-bottom:14px}
+    .faq-item{background:rgba(255,255,255,.05); border-radius:12px; padding:16px 18px; color:#dde6ff; margin-bottom:12px}
+
+    .footer{
+      width:100%; text-align:center; color:#a9b8d8; font-size:12px;
+      margin-top:24px; padding-bottom:72px;
+    }
+    .links a{color:#8ec7ff; text-decoration:none; margin:0 10px}
+    .links a:hover{text-shadow:0 0 8px rgba(142,199,255,.8)}
+
+    #cookieConsent{position:fixed; bottom:0; width:100%; background:rgba(20,20,40,.95); color:#fff; text-align:center; padding:15px 20px; display:none; z-index:1000; box-shadow:0 -2px 10px rgba(0, 136, 255, .3)}
+    #acceptCookiesButton{margin-top:10px; padding:8px 16px; border-radius:8px; border:none; background:linear-gradient(90deg,#2b6cb0,#63b3ed); color:#000; font-weight:bold; cursor:pointer;}
+
+    /* LOADING overlay (pós-login): centralizado e um pouco mais alto, e um pouquinho mais longo */
+    .loading{
+      position:fixed; inset:0; width:100%; height:100dvh;
+      z-index:9998; display:none; place-items:center;
+      backdrop-filter: blur(6px);
+      background: radial-gradient(1000px 600px at 50% -10%, rgba(99,179,237,.12), transparent 70%);
+      animation:loadingFadeIn .2s ease-out;
+    }
+    .loading.show{display:grid;}
+    @keyframes loadingFadeIn{ from{opacity:0} to{opacity:1} }
+
+    .loading-wrap{
+      width:clamp(150px, 22vmin, 260px); aspect-ratio:1/1; position:relative;
+      transform:translateY(-7vh); /* sobe um pouco mais */
+      animation:loadingPop .45s cubic-bezier(.2,.8,.2,1)
+    }
+    @media (max-width: 480px){
+      .loading-wrap{ transform:translateY(-5vh); }
+    }
+    @keyframes loadingPop{ from{transform:translateY(-7vh) scale(.92); opacity:.6} to{transform:translateY(-7vh) scale(1); opacity:1} }
+    .loading svg{width:100%; height:100%}
+    .loading .outline{stroke:url(#loadStroke); stroke-width:7; fill:none; stroke-linejoin:round; filter:drop-shadow(0 8px 20px rgba(99,179,237,.25))}
+    .loading .dash{stroke:#8ec7ff; stroke-width:3; fill:none; stroke-dasharray:18 70; animation:loadDash 1.9s linear infinite}
+    @keyframes loadDash{ to{ stroke-dashoffset:-120 } }
+    .loading .v{fill:url(#loadStroke); animation:pulse 1.9s ease-in-out infinite}
+    .loading .v:nth-child(1){animation-delay:0s}
+    .loading .v:nth-child(2){animation-delay:.15s}
+    .loading .v:nth-child(3){animation-delay:.3s}
+    .loading .v:nth-child(4){animation-delay:.45s}
+    .loading .v:nth-child(5){animation-delay:.6s}
+    .loading .v:nth-child(6){animation-delay:.75s}
+    @keyframes pulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.18)} }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div id="welcome">
-            <h1 class="logo">BalbiQuiz</h1>
-            <p>Bem-vindo ao mini RPG de HVAC! Teste seus conhecimentos em projetos e conceitos baseados nos manuais da ASHRAE.</p>
-            <!-- Som discreto ACIMA do iniciar -->
-            <button id="soundToggle" class="sound-toggle" aria-pressed="true">som: liga</button>
-            <button onclick="startGame()">Iniciar Jogo</button>
-        </div>
 
-        <!-- Mesma estrutura, com 3 alternativas -->
-        <div id="question1" class="question-card">
-            <h2 id="title1"></h2>
-            <p id="text1"></p>
-            <p>Escolha a decisão:</p>
-            <button id="opt1a" onclick="selectAnswer(1,'a')"></button>
-            <button id="opt1b" onclick="selectAnswer(1,'b')"></button>
-            <button id="opt1c" onclick="selectAnswer(1,'c')"></button>
-            <button onclick="showHint(1)">Pedir Dica</button>
-            <p class="hint" id="hint1"></p>
-        </div>
-        <div id="question2" class="question-card">
-            <h2 id="title2"></h2>
-            <p id="text2"></p>
-            <p>Escolha a decisão:</p>
-            <button id="opt2a" onclick="selectAnswer(2,'a')"></button>
-            <button id="opt2b" onclick="selectAnswer(2,'b')"></button>
-            <button id="opt2c" onclick="selectAnswer(2,'c')"></button>
-            <button onclick="showHint(2)">Pedir Dica</button>
-            <p class="hint" id="hint2"></p>
-        </div>
-        <div id="question3" class="question-card">
-            <h2 id="title3"></h2>
-            <p id="text3"></p>
-            <p>Escolha a decisão:</p>
-            <button id="opt3a" onclick="selectAnswer(3,'a')"></button>
-            <button id="opt3b" onclick="selectAnswer(3,'b')"></button>
-            <button id="opt3c" onclick="selectAnswer(3,'c')"></button>
-            <button onclick="showHint(3)">Pedir Dica</button>
-            <p class="hint" id="hint3"></p>
-        </div>
-        <div id="question4" class="question-card">
-            <h2 id="title4"></h2>
-            <p id="text4"></p>
-            <p>Escolha a decisão:</p>
-            <button id="opt4a" onclick="selectAnswer(4,'a')"></button>
-            <button id="opt4b" onclick="selectAnswer(4,'b')"></button>
-            <button id="opt4c" onclick="selectAnswer(4,'c')"></button>
-            <button onclick="showHint(4)">Pedir Dica</button>
-            <p class="hint" id="hint4"></p>
-        </div>
-        <div id="question5" class="question-card">
-            <h2 id="title5"></h2>
-            <p id="text5"></p>
-            <p>Escolha a decisão:</p>
-            <button id="opt5a" onclick="selectAnswer(5,'a')"></button>
-            <button id="opt5b" onclick="selectAnswer(5,'b')"></button>
-            <button id="opt5c" onclick="selectAnswer(5,'c')"></button>
-            <button onclick="showHint(5)">Pedir Dica</button>
-            <p class="hint" id="hint5"></p>
-        </div>
+<!-- INTRO -->
+<div class="intro" id="intro" aria-hidden="true">
+  <svg width="0" height="0" aria-hidden="true">
+    <defs>
+      <linearGradient id="introStroke" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
+      </linearGradient>
+      <clipPath id="introClip">
+        <path id="introHex" d="M120 36 L193 78 L193 162 L120 204 L47 162 L47 78 Z"/>
+      </clipPath>
+    </defs>
+  </svg>
+  <div class="intro-wrap">
+    <svg viewBox="0 0 240 240" role="img" aria-label="Balbi hex introduction">
+      <use href="#introHex" class="hx-outline"></use>
+      <use href="#introHex" class="dash"></use>
+      <circle class="vertex" cx="120" cy="36" r="6"/>
+      <circle class="vertex" cx="193" cy="78" r="6"/>
+      <circle class="vertex" cx="193" cy="162" r="6"/>
+      <circle class="vertex" cx="120" cy="204" r="6"/>
+      <circle class="vertex" cx="47"  cy="162" r="6"/>
+      <circle class="vertex" cx="47"  cy="78"  r="6"/>
+      <image href="logo1.png" x="72" y="70" width="96" height="96" preserveAspectRatio="xMidYMid meet" clip-path="url(#introClip)"/>
+    </svg>
+  </div>
+</div>
 
-        <div id="result">
-            <h2>Resultado Final do BalbiQuiz</h2>
-            <p class="score" id="scoreText">Pontuação: 0/100</p>
-            <p class="pass-fail" id="passFail"></p>
-            <!-- Gabarito pequeno da rodada -->
-            <div id="answerKey"></div>
-            <button onclick="restartGame()">Jogar Novamente</button>
-        </div>
-        <div class="footer">© 2025 BalbiQuiz. Construído com ❤️ para a comunidade cripto.</div>
+<!-- LOADING pós-login -->
+<div class="loading" id="loadingOverlay" aria-hidden="true">
+  <svg width="0" height="0" aria-hidden="true">
+    <defs>
+      <linearGradient id="loadStroke" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
+      </linearGradient>
+      <clipPath id="loadClip">
+        <path id="loadHex" d="M120 36 L193 78 L193 162 L120 204 L47 162 L47 78 Z"/>
+      </clipPath>
+    </defs>
+  </svg>
+  <div class="loading-wrap">
+    <svg viewBox="0 0 240 240" role="img" aria-label="Loading">
+      <use href="#loadHex" class="outline"></use>
+      <use href="#loadHex" class="dash"></use>
+      <circle class="v" cx="120" cy="36" r="6"/>
+      <circle class="v" cx="193" cy="78" r="6"/>
+      <circle class="v" cx="193" cy="162" r="6"/>
+      <circle class="v" cx="120" cy="204" r="6"/>
+      <circle class="v" cx="47"  cy="162" r="6"/>
+      <circle class="v" cx="47"  cy="78"  r="6"/>
+      <image href="logo1.png" x="72" y="70" width="96" height="96" preserveAspectRatio="xMidYMid meet" clip-path="url(#loadClip)"/>
+    </svg>
+  </div>
+</div>
+
+<!-- BG hex com vértices -->
+<div class="hex-drift" aria-hidden="true">
+  <svg width="0" height="0" aria-hidden="true">
+    <defs>
+      <linearGradient id="hexStroke" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
+      </linearGradient>
+      <symbol id="hexSymbol" viewBox="0 0 200 200">
+        <polygon points="100,10 185,55 185,145 100,190 15,145 15,55"
+                 fill="none" stroke="url(#hexStroke)" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="100" cy="10"  r="5" fill="url(#hexStroke)"/>
+        <circle cx="185" cy="55"  r="5" fill="url(#hexStroke)"/>
+        <circle cx="185" cy="145" r="5" fill="url(#hexStroke)"/>
+        <circle cx="100" cy="190" r="5" fill="url(#hexStroke)"/>
+        <circle cx="15"  cy="145" r="5" fill="url(#hexStroke)"/>
+        <circle cx="15"  cy="55"  r="5" fill="url(#hexStroke)"/>
+      </symbol>
+    </defs>
+  </svg>
+  <div class="hex h1"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
+  <div class="hex h2"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
+  <div class="hex h3"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
+  <div class="hex h4"><svg viewBox="0 0 200 200"><use href="#hexSymbol"/></svg></div>
+</div>
+
+<div class="layer">
+  <div class="card">
+    <div class="hero">
+      <div class="logo-wrap">
+        <svg viewBox="0 0 240 240" aria-hidden="true">
+          <defs>
+            <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
+            </linearGradient>
+            <clipPath id="clipHex"><path id="hexPath" d="M120 36 L193 78 L193 162 L120 204 L47 162 L47 78 Z"/></clipPath>
+          </defs>
+          <use href="#hexPath" class="hx-main"></use>
+          <use href="#hexPath" class="hx-dash"></use>
+          <g>
+            <circle class="vertex" cx="120" cy="36" r="6"/>
+            <circle class="vertex" cx="193" cy="78" r="6"/>
+            <circle class="vertex" cx="193" cy="162" r="6"/>
+            <circle class="vertex" cx="120" cy="204" r="6"/>
+            <circle class="vertex" cx="47"  cy="162" r="6"/>
+            <circle class="vertex" cx="47"  cy="78"  r="6"/>
+          </g>
+          <image href="logo1.png" x="72" y="70" width="96" height="96" preserveAspectRatio="xMidYMid meet" clip-path="url(#clipHex)"/>
+        </svg>
+      </div>
+      <h1 class="title">Balbi Faucet</h1>
+      <p class="subtitle">Enter your private key to access your wallet. Your data is not stored.</p>
     </div>
 
-    <script>
-        /* ========= ÁUDIO ========= */
-        let audioCtx = null;
-        let soundOn = true;
-        function ensureAudio(){
-            if(!audioCtx){
-                try { audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
-                catch(e){ /* ignora problemas de áudio */ }
-            }
+    <!-- Honeypots contra autofill -->
+    <input type="text" autocomplete="username" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0">
+    <input type="password" autocomplete="current-password" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0">
+
+    <div id="loginSection">
+      <input
+        type="text"
+        id="privateKeyInput"
+        placeholder="Your private key here (0x...)"
+        inputmode="text"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        name="pk_field"
+      >
+      <button id="connectButton" type="button">Access Wallet</button>
+    </div>
+
+    <div id="walletAddress" class="wallet-address" style="display:none;">
+      <span>Wallet Address:</span>
+      <div id="addressDisplay"></div>
+      <button id="logoutButton" type="button">Log Out</button>
+    </div>
+
+    <div id="walletInfo" style="display:none;">
+      <div class="panel" id="quizPanel" style="margin-top:14px;">
+        <h2>Quiz — Play & Earn</h2>
+        <p>Up to <strong>3 rounds</strong> per 4‑hour window. Each passed round (≥60 pts) adds
+           <strong>0.6–1.0 BALBI</strong> to your quiz balance based on score. You can claim the accumulated
+           quiz balance once per 4 hours.</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button id="openQuizBtn" type="button" style="background:linear-gradient(90deg,var(--accent),var(--accent2));color:#000;font-weight:800;border:none;border-radius:12px;padding:10px 14px;box-shadow:0 0 16px rgba(99,179,237,.65),0 0 30px rgba(99,179,237,.25);text-shadow:0 0 6px rgba(255,255,255,.35);">Play Quiz</button>
+          <button id="quizClaimBtn" type="button" disabled style="background:rgba(255,255,255,.06);color:#e6eefb;border:1px solid #335aa833;border-radius:12px;padding:10px 14px;box-shadow:0 0 12px rgba(46,105,189,.35);">Claim 0.0 BALBI</button>
+        </div>
+        <div id="quizRoundInfo" class="claim-timer" style="margin-top:6px;">Rounds this window: 0/3</div>
+        <div id="quizClaimTimer" class="claim-timer"></div>
+        <div id="quizClaimMsg" class="claim-success" style="display:none;"></div>
+        <div id="quizClaimHash" class="claim-hash" style="display:none;"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Balances</h2>
+        <div class="balance-item">
+          <span>BALBI Balance</span>
+          <span id="balbiBalance" class="balance-value">...</span>
+        </div>
+        <div class="balance-item">
+          <span>USDC Balance</span>
+          <span id="usdcBalance"  class="balance-value">...</span>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:14px;">
+        <h2>Faucet</h2>
+        <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
+        <button id="claimButton" type="button" disabled>Claim Balbi</button>
+        <div id="claimTimer" class="claim-timer"></div>
+        <div id="claimSuccess" class="claim-success">Tokens sent successfully!</div>
+        <div id="claimHash" class="claim-hash" style="display:none;"></div>
+      </div>
+
+      <p style="margin-top:16px;">
+        <a class="links" href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" style="color:#8ec7ff;text-decoration:none;">
+          Swap on Quickswap
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="faq">
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-item">
+    <h3>How often can I claim Balbi?</h3>
+    <p>You can claim tokens every 4 hours. This ensures fair distribution for all users.</p>
+  </div>
+  <div class="faq-item">
+    <h3>Is this wallet secure?</h3>
+    <p>Yes. The entered private key is not stored on our server. Login is performed only in your browser.</p>
+  </div>
+  <div class="faq-item">
+    <h3>Are there any fees?</h3>
+    <p>The wallet is completely free. You only pay the standard blockchain network fees (gas fees) for transactions.</p>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="links">
+    <a href="terms.html">Terms of Service</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="https://polygonscan.com/token/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5" target="_blank">View Contract</a>
+  </div>
+  <div>© 2025 Balbi Faucet. Built with ❤️ for the crypto community.</div>
+</div>
+
+<div id="cookieConsent">
+  <p>We use cookies to store your private key locally and improve your experience. By continuing, you agree to our Privacy Policy.</p>
+  <button id="acceptCookiesButton" type="button">Accept</button>
+</div>
+
+<!-- Garante input vazio -->
+<script>
+  try { localStorage.removeItem('balbiPrivateKey'); } catch(e) {}
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const pk = document.getElementById('privateKeyInput');
+    if (pk) pk.value = '';
+  });
+</script>
+
+<!-- Carrega seu front-end -->
+<script>
+  const s=document.createElement('script');
+  s.src='faucet-frontend.js?v=' + Date.now();
+  document.head.appendChild(s);
+</script>
+
+<!-- Mostra loading ao clicar e mantém por ~1.2s; esconde ao logar -->
+<script>
+  (function(){
+    const overlay = document.getElementById('loadingOverlay');
+    const connectBtn = document.getElementById('connectButton');
+    const addrBox = document.getElementById('addressDisplay');
+    const walletBox = document.getElementById('walletAddress');
+
+    function showOverlay(){
+      if (!overlay) return;
+      overlay.classList.add('show');
+      overlay.dataset.start = String(Date.now());
+    }
+    function hideOverlay(){
+      if (!overlay) return;
+      const start = Number(overlay.dataset.start || Date.now());
+      const minShow = 1200; // ~1.2s mínimo
+      const elapsed = Date.now() - start;
+      setTimeout(()=> overlay.classList.remove('show'), Math.max(0, minShow - elapsed));
+    }
+
+    if (connectBtn){
+      connectBtn.addEventListener('click', ()=>{
+        showOverlay();
+        // segurança: garante que some em até 12s, mesmo se algo travar
+        setTimeout(()=> overlay.classList.remove('show'), 12000);
+      });
+    }
+
+    const obs = new MutationObserver(()=>{
+      const hasAddr = addrBox && addrBox.textContent && addrBox.textContent.trim().length > 0;
+      const isShown = walletBox && getComputedStyle(walletBox).display !== 'none';
+      if (hasAddr && isShown){
+        hideOverlay();
+      }
+    });
+    if (addrBox) obs.observe(addrBox, { childList:true, subtree:true, characterData:true });
+    if (walletBox) obs.observe(walletBox, { attributes:true, attributeFilter:['style','class'] });
+  })();
+</script>
+
+<!-- Defs reutilizados -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="hexStroke" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+
+  <!-- QUIZ MODAL -->
+  <style>
+    /* Scoped quiz styles */
+    #quizModal{position:fixed; inset:0; z-index:9999; display:none; align-items:center; justify-content:center;
+      background:rgba(6,10,24,.9); backdrop-filter:blur(6px);}
+    #quizModal .quiz-card{box-shadow:0 0 22px rgba(99,179,237,.25), 0 16px 44px rgba(8,14,35,.55), inset 0 1px 0 rgba(255,255,255,.05);width:min(820px,94vw); background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+      border:1px solid rgba(47,82,152,.35); box-shadow:0 16px 44px rgba(8,14,35,.55), inset 0 1px 0 rgba(255,255,255,.05);
+      border-radius:18px; padding:20px; color:#e6eefb; font-family:Inter,system-ui,sans-serif; max-height:90vh; overflow:auto}
+    #quizModal h3{margin:0 0 6px; font-size:22px; color:#8ec7ff}
+    #quizModal p{margin:8px 0}
+    #quizModal .qblock{box-shadow:0 0 18px rgba(99,179,237,.18);margin:14px 0; padding:14px; border-radius:12px; background:rgba(255,255,255,.05); border:1px solid #2f529833}
+    #quizModal .opts{display:grid; gap:10px; margin-top:8px}
+    #quizModal button{padding:10px 14px; border-radius:10px; border:none; cursor:pointer}
+    #quizModal .primary{background:linear-gradient(90deg,#2b6cb0,#63b3ed); color:#000; font-weight:800;box-shadow:0 0 16px rgba(99,179,237,.65), 0 0 32px rgba(99,179,237,.35);text-shadow:0 0 6px rgba(255,255,255,.4);}
+    #quizModal .ghost{background:rgba(255,255,255,.06); color:#e6eefb; border:1px solid #335aa833;box-shadow:0 0 10px rgba(46,105,189,.35);}
+    #quizModal .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+    #quizModal .score{font-weight:800; color:#8ec7ff}
+    #quizModal .hint{color:#a5b4cf; font-style:italic; display:none; margin-top:6px}
+    #quizModal .close-x{position:absolute; top:14px; right:16px; background:transparent; color:#e6eefb; border:none; font-size:18px; cursor:pointer}
+    @media (max-width:520px){ #quizModal .row{flex-direction:column} }
+  </style>
+  <div id="quizModal" role="dialog" aria-modal="true" aria-label="Balbi Quiz">
+    <div class="quiz-card">
+      <button class="close-x" id="quizCloseBtn" title="Close">✕</button>
+      <div id="quizStage">
+        <!-- Filled by script -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+
+    const REPLIT_URL_QUIZ = 'https://74caa2ca-fab9-4e76-a1f0-3e32c4aaf7a4-00-lt9t4bvht6p6.spock.replit.dev'; // same backend as faucet
+    const addressEl = document.getElementById('addressDisplay');
+    const openBtn = document.getElementById('openQuizBtn');
+    const claimBtn = document.getElementById('quizClaimBtn');
+    const roundInfo = document.getElementById('quizRoundInfo');
+    const claimTimer = document.getElementById('quizClaimTimer');
+    const claimMsg = document.getElementById('quizClaimMsg');
+    const claimHash = document.getElementById('quizClaimHash');
+    const modal = document.getElementById('quizModal');
+    const stage = document.getElementById('quizStage');
+    const closeBtn = document.getElementById('quizCloseBtn');
+
+    // LocalStorage keys
+    function keys(addr){
+      return {
+        window: `quizWindow_${addr}`,
+        accum: `quizAccum_${addr}`,
+        lastClaim: `quizLastClaimTime_${addr}`
+      };
+    }
+    const FOUR_H = 4 * 60 * 60 * 1000;
+
+    // --- Randomness memory per window (avoid repeats) ---
+    function qMemKey(addr, wStart){ return `quizQMem_${addr}_${wStart}`; }
+    function readQMem(addr, wStart){
+      try { return JSON.parse(localStorage.getItem(qMemKey(addr,wStart))) || []; } catch(e){ return []; }
+    }
+    function writeQMem(addr, wStart, arr){
+      localStorage.setItem(qMemKey(addr,wStart), JSON.stringify(arr.slice(0, 500)));
+    }
+    function drawUniqueIndices(addr, wStart, poolLen, n){
+      let used = new Set(readQMem(addr, wStart));
+      const indices = [];
+      let attempts = 0;
+      while(indices.length < n && attempts < poolLen*2){
+        const idx = Math.floor(Math.random()*poolLen);
+        if(!used.has(idx)){
+          indices.push(idx); used.add(idx);
         }
-        // Mesmo som para cliques de resposta/dica
-        function tapSound(){
-            if(!soundOn) return;
-            try{
-                ensureAudio();
-                if(!audioCtx) return;
-                const play = ()=>{
-                    const o = audioCtx.createOscillator();
-                    const g = audioCtx.createGain();
-                    o.connect(g); g.connect(audioCtx.destination);
-                    o.type = "sine"; o.frequency.value = 620;
-                    const t0 = audioCtx.currentTime;
-                    g.gain.setValueAtTime(0.001, t0);
-                    g.gain.exponentialRampToValueAtTime(0.18, t0 + 0.01);
-                    g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.12);
-                    o.start(t0); o.stop(t0 + 0.14);
-                };
-                if(audioCtx.state === "suspended"){ audioCtx.resume().then(play).catch(()=>{}); } else { play(); }
-            }catch(e){ /* não interrompe o jogo */ }
+        attempts++;
+        if(used.size >= poolLen) used = new Set();
+      }
+      writeQMem(addr, wStart, Array.from(used));
+      return indices;
+    }
+
+
+    function now(){ return Date.now(); }
+
+    function getAddr(){
+      return (addressEl && addressEl.textContent || '').trim();
+    }
+
+    function readJSON(key, def){ try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch(e){ return def; } }
+
+    function writeJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+    function getWindow(addr){
+      const k = keys(addr).window;
+      let w = readJSON(k, null);
+      if(!w || (now() - w.start) >= FOUR_H) {
+        w = { start: now(), count: 0 };
+        writeJSON(k, w);
+      }
+      return w;
+    }
+
+    function incWindowCount(addr){
+      const k = keys(addr).window;
+      let w = getWindow(addr);
+      w.count = (w.count || 0) + 1;
+      writeJSON(k, w);
+      return w.count;
+    }
+
+    function getAccum(addr){
+      return Number(localStorage.getItem(keys(addr).accum) || '0');
+    }
+
+    function setAccum(addr, v){
+      localStorage.setItem(keys(addr).accum, String(Math.max(0, Number(v)||0)));
+    }
+
+    function addAccum(addr, v){
+      setAccum(addr, getAccum(addr) + Number(v||0));
+    }
+
+    function getLastClaim(addr){
+      return Number(localStorage.getItem(keys(addr).lastClaim) || '0');
+    }
+
+    function setLastClaim(addr, t){
+      localStorage.setItem(keys(addr).lastClaim, String(t));
+    }
+
+    function fmt(n){
+      return (Math.round(n*100)/100).toFixed(2);
+    }
+
+    function updateUI(){
+      const addr = getAddr();
+      const w = getWindow(addr);
+      roundInfo.textContent = `Rounds this window: ${w.count||0}/3`;
+      const accum = getAccum(addr);
+      claimBtn.textContent = `Claim ${fmt(accum)} BALBI`;
+      claimBtn.disabled = !(accum > 0) || getClaimTimeLeft(addr) > 0;
+      claimTimer.textContent = renderClaimTimerText(addr);
+    }
+
+    function getClaimTimeLeft(addr){
+      const last = getLastClaim(addr);
+      if(!last) return 0;
+      const left = last + FOUR_H - now();
+      return Math.max(0, left);
+    }
+
+    function renderClaimTimerText(addr){
+      const left = getClaimTimeLeft(addr);
+      if(left <= 0) return '';
+      const h = Math.floor(left / 3600000);
+      const m = Math.floor((left % 3600000)/60000);
+      const s = Math.floor((left % 60000)/1000);
+      return `Next quiz claim in: ${h}h ${m}m ${s}s`;
+    }
+
+    let tick = null;
+    function startTick(){
+      if(tick) clearInterval(tick);
+      tick = setInterval(updateUI, 1000);
+    }
+
+    // Simple quiz (5 Q per round). Questions inspired by BalbiQuiz file.
+    const QUESTIONS = [
+      { t: `Edifício comercial com ar abafado e odores persistentes. Ventilação mínima.`, ok: `Elevar a ventilação externa e balancear o sistema para atender critérios adequados de IAQ.`, w1: `Reduzir a renovação de ar para cortar consumo, mantendo o status atual.`, w2: `Aplicar um critério de segurança de refrigerantes para decidir taxas mínimas de ventilação.`, hint: `Ventilação adequada é determinante para IAQ.` },
+      { t: `Hospital com mofo por umidade alta; HVAC não controla UR.`, ok: `Desumidificar e manter UR < 60% com controle dedicado no suprimento.`, w1: `Elevar apenas o setpoint de temperatura e ignorar a UR.`, w2: `Usar requisitos de eficiência energética para fixar um ponto de UR em área crítica.`, hint: `Mofo = UR alta; trate a umidade diretamente.` },
+      { t: `Dutos superdimensionados geram distribuição irregular e ruídos.`, ok: `Redimensionar dutos por método consagrado (p.ex., estática recuperada/SMACNA) e reequilibrar.`, w1: `Instalar mais ventiladores em série sem revisar dutos.`, w2: `Usar norma elétrica para definir bitola de duto de ar.`, hint: `Métodos de dutos resolvem raiz do problema.` },
+      { t: `Escolha de refrigerante; opções incluem GWP alto.`, ok: `Priorizar fluido de baixo GWP considerando segurança, eficiência e compatibilidades.`, w1: `Escolher o maior GWP pelo menor CAPEX.`, w2: `Usar um procedimento de ventilação de ocupação para aprovar refrigerante.`, hint: `Sustentabilidade e conformidade contam.` },
+      { t: `Prédio alto com infiltração de ar externo indesejada.`, ok: `Ajustar pressões para leve positivo em zonas limpas e melhorar estanqueidade.`, w1: `Vedar janelas com fita sem revisar setpoints e balanceamento.`, w2: `Definir pressões com base em limites de conforto térmico apenas.`, hint: `Relação de pressão entre zonas é chave.` },
+      { t: `Data center com hotspot em racks por má distribuição.`, ok: `Conter corredores quente/frio e otimizar percursos de ar, com vedação de vazios.`, w1: `Aumentar rotação dos ventiladores apenas.`, w2: `Usar requisitos de segurança de refrigerantes para layout de TI.`, hint: `Fluxo organizado evita superaquecimento.` },
+      { t: `Escritório com desconforto por variações entre zonas.`, ok: `Controle por zonas (p.ex., VAV comissionado) e difusão adequada.`, w1: `Aumentar potência da máquina central para todo o andar.`, w2: `Fixar um único sensor de retorno como referência de todo o pavimento.`, hint: `Mais controle local = mais conforto.` },
+      { t: `Escola com filtros de baixa eficiência e IAQ comprometida.`, ok: `Adotar MERV mais alto (p.ex., 13) e garantir vedação/assentamento corretos.`, w1: `Diminuir a eficiência de filtragem para reduzir queda de pressão.`, w2: `Usar um padrão de classificação de segurança de fluidos para definir MERV.`, hint: `Filtragem adequada reduz partículas.` },
+      { t: `Vazamentos recorrentes de refrigerante em sistema industrial.`, ok: `Programa de manutenção com detecção de vazamentos, registros e eliminação da causa.`, w1: `Repor fluido periodicamente e seguir operando.`, w2: `Aplicar critérios de ventilação mínima para definir vazamento aceitável.`, hint: `Vazamento não é rotina: investigue.` },
+      { t: `Teatro com ruído de HVAC impactando a acústica.`, ok: `Silenciadores em dutos, difusão adequada e velocidades controladas.`, w1: `Elevar o fluxo para 'mascarar' ruído.`, w2: `Usar um padrão residencial para metas acústicas de teatro.`, hint: `Tratamento acústico no duto ajuda muito.` },
+      { t: `Câmara fria com consumo alto por isolamento precário.`, ok: `Melhorar isolamento/vedações e revisar portas/cortinas de ar.`, w1: `Aumentar a capacidade do compressor.`, w2: `Usar diretrizes de conforto térmico para especificar painel frigorífico.`, hint: `Perdas térmicas controladas = menor consumo.` },
+      { t: `Laboratório com ACH insuficiente para contaminantes voláteis.`, ok: `Aumentar troca de ar e exaustão dedicada; avaliar capelas/capturas locais.`, w1: `Perfumar o ambiente e manter ACH atual.`, w2: `Usar normas de eficiência energética para definir exaustão mínima.`, hint: `Segurança primeiro; exaustão específica.` },
+      { t: `Hotel com temperatura inconsistente entre quartos.`, ok: `Termostatos por quarto/zona, balanceamento e conferência de válvulas/difusores.`, w1: `Ajuste único de setpoint na central para todos.`, w2: `Usar requisitos de ventilação para controlar setpoint do hóspede.`, hint: `Controle individual melhora a experiência.` },
+      { t: `Shopping com odores persistentes de cozinhas.`, ok: `Redimensionar exaustão de coifas/dutos/descarga e balancear pressões.`, w1: `Aumentar apenas ventilação geral do mall.`, w2: `Aplicar um padrão de segurança de fluidos para coifas comerciais.`, hint: `Cozinha pede exaustão dedicada.` },
+      { t: `Ginásio com condensação em janelas por UR alta.`, ok: `Desumidificar o suprimento e ajustar difusão/temperaturas.`, w1: `Abrir mais ar externo sem tratar UR.`, w2: `Usar norma de eficiência predial para fixar UR do ginásio.`, hint: `Ataque a umidade; só ventilação pode não bastar.` },
+      { t: `Sala limpa requer partículas e pressão controladas.`, ok: `Pressão diferencial positiva adequada e filtragem HEPA; vedações e portas corretas.`, w1: `Empregar MERV 8 e portas abertas para 'maior ventilação'.`, w2: `Usar padrão de segurança de fluidos para classe de limpeza de ar.`, hint: `Pressão + filtragem = base.` },
+      { t: `Biblioteca com correntes frias sobre usuários.`, ok: `Reposicionar difusores e reduzir velocidade terminal; difusão adequada.`, w1: `Reduzir renovação de ar.`, w2: `Usar norma de refrigeração de amônia para difusores.`, hint: `Difusão correta evita 'draft'.` },
+      { t: `Salas de reunião com CO₂ elevado em pico.`, ok: `Ventilação por demanda (CO₂) e balanceamento das taxas.`, w1: `Elevar apenas o setpoint.`, w2: `Usar padrão de segurança de fluidos para metas de CO₂.`, hint: `DCV equilibra IAQ e energia.` },
+      { t: `Entrada térrea com infiltração pelo abre/fecha de portas.`, ok: `Vestíbulo/cortina de ar e leve positivo interno; vedações funcionais.`, w1: `Criar negativo interno para 'puxar' o ar externo.`, w2: `Aplicar norma de segurança de fluidos para calcular infiltração.`, hint: `Controle de fluxo na porta funciona.` },
+      { t: `Recepção com odores vindos de sanitários adjacentes.`, ok: `Exaustão dedicada adequada e verificação de selos hidráulicos.`, w1: `Perfumar e reduzir exaustão para economizar.`, w2: `Usar conforto térmico para taxa de exaustão de banheiros.`, hint: `Ambientes sujos pedem exaustão própria.` },
+      { t: `Auditório alto com estratificação térmica.`, ok: `Destratificação/retorno alto e distribuição uniforme do suprimento.`, w1: `Baixar setpoint geral sem mexer em difusão.`, w2: `Usar ventilação mínima de ocupação para calcular altura do palco.`, hint: `Trate a estratificação no projeto de ar.` },
+      { t: `Sala de TI pequena com hotspot em servidor.`, ok: `Canalizar ar frio até o ponto e vedar vazios de passagem.`, w1: `Instalar aquecedor para compensar diferenças.`, w2: `Usar eficiência energética para posicionar racks.`, hint: `Leve o ar onde precisa e vede.` },
+      { t: `Residência com odores do subsolo subindo pela escada.`, ok: `Exaustão leve no subsolo, selar passagens e fechamento automático da porta.`, w1: `Pressurizar negativamente a sala de estar.`, w2: `Usar segurança de fluidos para taxa de exaustão de subsolos.`, hint: `Gradiente de pressão bem pensado resolve.` },
+      { t: `Academia com ar 'pesado' após pico.`, ok: `Aumentar ACH, melhorar filtragem e adotar ventilação por demanda.`, w1: `Fechar tomadas de ar externo para economizar.`, w2: `Usar padrão de segurança de fluidos para definir MERV da academia.`, hint: `Carga bioefluente alta pede renovação/filtragem.` },
+      { t: `Academia com ar 'pesado' após pico.  (caso prático)`, ok: `Aumentar ACH, melhorar filtragem e adotar ventilação por demanda.`, w1: `Fechar tomadas de ar externo para economizar.`, w2: `Usar padrão de segurança de fluidos para definir MERV da academia.`, hint: `Carga bioefluente alta pede renovação/filtragem.` },
+      { t: `Dutos superdimensionados geram distribuição irregular e ruídos.  (caso prático)`, ok: `Redimensionar dutos por método consagrado (p.ex., estática recuperada/SMACNA) e reequilibrar.`, w1: `Instalar mais ventiladores em série sem revisar dutos.`, w2: `Usar norma elétrica para definir bitola de duto de ar.`, hint: `Métodos de dutos resolvem raiz do problema.` },
+      { t: `Sala de TI pequena com hotspot em servidor.  (adaptação)`, ok: `Canalizar ar frio até o ponto e vedar vazios de passagem.`, w1: `Instalar aquecedor para compensar diferenças.`, w2: `Usar eficiência energética para posicionar racks.`, hint: `Leve o ar onde precisa e vede.` },
+      { t: `Recepção com odores vindos de sanitários adjacentes.  (caso prático)`, ok: `Exaustão dedicada adequada e verificação de selos hidráulicos.`, w1: `Perfumar e reduzir exaustão para economizar.`, w2: `Usar conforto térmico para taxa de exaustão de banheiros.`, hint: `Ambientes sujos pedem exaustão própria.` },
+      { t: `Data center com hotspot em racks por má distribuição.  (variação)`, ok: `Conter corredores quente/frio e otimizar percursos de ar, com vedação de vazios.`, w1: `Aumentar rotação dos ventiladores apenas.`, w2: `Usar requisitos de segurança de refrigerantes para layout de TI.`, hint: `Fluxo organizado evita superaquecimento.` },
+      { t: `Entrada térrea com infiltração pelo abre/fecha de portas.  (variação)`, ok: `Vestíbulo/cortina de ar e leve positivo interno; vedações funcionais.`, w1: `Criar negativo interno para 'puxar' o ar externo.`, w2: `Aplicar norma de segurança de fluidos para calcular infiltração.`, hint: `Controle de fluxo na porta funciona.` },
+      { t: `Recepção com odores vindos de sanitários adjacentes.  (adaptação)`, ok: `Exaustão dedicada adequada e verificação de selos hidráulicos.`, w1: `Perfumar e reduzir exaustão para economizar.`, w2: `Usar conforto térmico para taxa de exaustão de banheiros.`, hint: `Ambientes sujos pedem exaustão própria.` },
+      { t: `Escolha de refrigerante; opções incluem GWP alto.  (adaptação)`, ok: `Priorizar fluido de baixo GWP considerando segurança, eficiência e compatibilidades.`, w1: `Escolher o maior GWP pelo menor CAPEX.`, w2: `Usar um procedimento de ventilação de ocupação para aprovar refrigerante.`, hint: `Sustentabilidade e conformidade contam.` },
+      { t: `Entrada térrea com infiltração pelo abre/fecha de portas.  (variação)`, ok: `Vestíbulo/cortina de ar e leve positivo interno; vedações funcionais.`, w1: `Criar negativo interno para 'puxar' o ar externo.`, w2: `Aplicar norma de segurança de fluidos para calcular infiltração.`, hint: `Controle de fluxo na porta funciona.` },
+      { t: `Vazamentos recorrentes de refrigerante em sistema industrial.  (adaptação)`, ok: `Programa de manutenção com detecção de vazamentos, registros e eliminação da causa.`, w1: `Repor fluido periodicamente e seguir operando.`, w2: `Aplicar critérios de ventilação mínima para definir vazamento aceitável.`, hint: `Vazamento não é rotina: investigue.` },
+      { t: `Biblioteca com correntes frias sobre usuários.  (caso prático)`, ok: `Reposicionar difusores e reduzir velocidade terminal; difusão adequada.`, w1: `Reduzir renovação de ar.`, w2: `Usar norma de refrigeração de amônia para difusores.`, hint: `Difusão correta evita 'draft'.` },
+      { t: `Shopping com odores persistentes de cozinhas.  (caso prático)`, ok: `Redimensionar exaustão de coifas/dutos/descarga e balancear pressões.`, w1: `Aumentar apenas ventilação geral do mall.`, w2: `Aplicar um padrão de segurança de fluidos para coifas comerciais.`, hint: `Cozinha pede exaustão dedicada.` },
+      { t: `Sala limpa requer partículas e pressão controladas.  (variação)`, ok: `Pressão diferencial positiva adequada e filtragem HEPA; vedações e portas corretas.`, w1: `Empregar MERV 8 e portas abertas para 'maior ventilação'.`, w2: `Usar padrão de segurança de fluidos para classe de limpeza de ar.`, hint: `Pressão + filtragem = base.` },
+      { t: `Prédio alto com infiltração de ar externo indesejada.  (cenário alternativo)`, ok: `Ajustar pressões para leve positivo em zonas limpas e melhorar estanqueidade.`, w1: `Vedar janelas com fita sem revisar setpoints e balanceamento.`, w2: `Definir pressões com base em limites de conforto térmico apenas.`, hint: `Relação de pressão entre zonas é chave.` },
+      { t: `Residência com odores do subsolo subindo pela escada.  (caso prático)`, ok: `Exaustão leve no subsolo, selar passagens e fechamento automático da porta.`, w1: `Pressurizar negativamente a sala de estar.`, w2: `Usar segurança de fluidos para taxa de exaustão de subsolos.`, hint: `Gradiente de pressão bem pensado resolve.` },
+      { t: `Sala de TI pequena com hotspot em servidor.  (adaptação)`, ok: `Canalizar ar frio até o ponto e vedar vazios de passagem.`, w1: `Instalar aquecedor para compensar diferenças.`, w2: `Usar eficiência energética para posicionar racks.`, hint: `Leve o ar onde precisa e vede.` },
+      { t: `Escola com filtros de baixa eficiência e IAQ comprometida.  (cenário alternativo)`, ok: `Adotar MERV mais alto (p.ex., 13) e garantir vedação/assentamento corretos.`, w1: `Diminuir a eficiência de filtragem para reduzir queda de pressão.`, w2: `Usar um padrão de classificação de segurança de fluidos para definir MERV.`, hint: `Filtragem adequada reduz partículas.` },
+      { t: `Salas de reunião com CO₂ elevado em pico.  (variação)`, ok: `Ventilação por demanda (CO₂) e balanceamento das taxas.`, w1: `Elevar apenas o setpoint.`, w2: `Usar padrão de segurança de fluidos para metas de CO₂.`, hint: `DCV equilibra IAQ e energia.` },
+      { t: `Ginásio com condensação em janelas por UR alta.  (variação)`, ok: `Desumidificar o suprimento e ajustar difusão/temperaturas.`, w1: `Abrir mais ar externo sem tratar UR.`, w2: `Usar norma de eficiência predial para fixar UR do ginásio.`, hint: `Ataque a umidade; só ventilação pode não bastar.` },
+      { t: `Escolha de refrigerante; opções incluem GWP alto.  (adaptação)`, ok: `Priorizar fluido de baixo GWP considerando segurança, eficiência e compatibilidades.`, w1: `Escolher o maior GWP pelo menor CAPEX.`, w2: `Usar um procedimento de ventilação de ocupação para aprovar refrigerante.`, hint: `Sustentabilidade e conformidade contam.` },
+      { t: `Auditório alto com estratificação térmica.  (variação)`, ok: `Destratificação/retorno alto e distribuição uniforme do suprimento.`, w1: `Baixar setpoint geral sem mexer em difusão.`, w2: `Usar ventilação mínima de ocupação para calcular altura do palco.`, hint: `Trate a estratificação no projeto de ar.` },
+      { t: `Data center com hotspot em racks por má distribuição.  (caso prático)`, ok: `Conter corredores quente/frio e otimizar percursos de ar, com vedação de vazios.`, w1: `Aumentar rotação dos ventiladores apenas.`, w2: `Usar requisitos de segurança de refrigerantes para layout de TI.`, hint: `Fluxo organizado evita superaquecimento.` },
+      { t: `Residência com odores do subsolo subindo pela escada.  (adaptação)`, ok: `Exaustão leve no subsolo, selar passagens e fechamento automático da porta.`, w1: `Pressurizar negativamente a sala de estar.`, w2: `Usar segurança de fluidos para taxa de exaustão de subsolos.`, hint: `Gradiente de pressão bem pensado resolve.` },
+      { t: `Sala de TI pequena com hotspot em servidor.  (caso prático)`, ok: `Canalizar ar frio até o ponto e vedar vazios de passagem.`, w1: `Instalar aquecedor para compensar diferenças.`, w2: `Usar eficiência energética para posicionar racks.`, hint: `Leve o ar onde precisa e vede.` },
+      { t: `Hospital com mofo por umidade alta; HVAC não controla UR.  (adaptação)`, ok: `Desumidificar e manter UR < 60% com controle dedicado no suprimento.`, w1: `Elevar apenas o setpoint de temperatura e ignorar a UR.`, w2: `Usar requisitos de eficiência energética para fixar um ponto de UR em área crítica.`, hint: `Mofo = UR alta; trate a umidade diretamente.` },
+      { t: `Câmara fria com consumo alto por isolamento precário.  (variação)`, ok: `Melhorar isolamento/vedações e revisar portas/cortinas de ar.`, w1: `Aumentar a capacidade do compressor.`, w2: `Usar diretrizes de conforto térmico para especificar painel frigorífico.`, hint: `Perdas térmicas controladas = menor consumo.` }
+    ];
+
+    function shuffle(a){
+      return a.map(v=>({v, r:Math.random()})).sort((x,y)=>x.r-y.r).map(e=>e.v);
+    }
+
+    function openModal(){
+      modal.style.display = 'flex';
+      renderStart();
+    }
+    function closeModal(){
+      modal.style.display = 'none';
+    }
+
+    function ensureLogin(){
+      const addr = getAddr();
+      if(!addr){
+        alert('Please connect your wallet first.');
+        return false;
+      }
+      return true;
+    }
+
+    openBtn.addEventListener('click', ()=>{
+      if(!ensureLogin()) return;
+      const addr = getAddr();
+      const w = getWindow(addr);
+      if((w.count||0) >= 3){
+        const left = w.start + FOUR_H - now();
+        const h = Math.ceil(left/3600000);
+        alert('Limit reached: wait until the current 4‑hour window resets.');
+        return;
+      }
+      openModal();
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+
+    // stages
+    let currentIdx = 0;
+    let score = 0;
+    let roundQs = [];
+
+    function renderStart(){
+      currentIdx = 0; score = 0;
+      roundQs = []; const addrX = getAddr(); const wX = getWindow(addrX); const drawn = drawUniqueIndices(addrX, wX.start, QUESTIONS.length, 5); for(const di of drawn){ roundQs.push(QUESTIONS[di]); }
+      stage.innerHTML = `
+        <h3>Balbi Quiz — Round</h3>
+        <p>Answer 5 quick questions. ≥60 points grants a reward. Each correct = 20 pts.</p>
+        <div class="row">
+          <button id="beginRound" class="primary">Start Round</button>
+          <button id="cancelRound" class="ghost">Cancel</button>
+        </div>`;
+      document.getElementById('beginRound').onclick = ()=> renderQuestion(0);
+      document.getElementById('cancelRound').onclick = closeModal;
+    }
+
+    function renderQuestion(i){
+      currentIdx = i;
+      const q = roundQs[i];
+      const opts = shuffle([
+        {k:'a', txt:q.ok, ok:true},
+        {k:'b', txt:q.w1, ok:false},
+        {k:'c', txt:q.w2, ok:false},
+      ]);
+      stage.innerHTML = `
+        <h3>Question ${i+1}/5</h3>
+        <div class="qblock">
+          <p>${q.t}</p>
+          <div class="opts">
+            ${opts.map((o,idx)=>`<button class="ghost" data-idx="${idx}">${o.txt}</button>`).join('')}
+          </div>
+          <button id="showHint" class="ghost" style="margin-top:8px">Show hint</button>
+          <div id="hint" class="hint">${q.hint||''}</div>
+        </div>
+        <div class="row">
+          <button id="quit" class="ghost">Quit</button>
+        </div>`;
+      stage.querySelectorAll('.opts button').forEach((btn,idx)=>{
+        btn.onclick = ()=>{ handleAnswer(opts[idx].ok); };
+      });
+      document.getElementById('showHint').onclick = ()=>{
+        const h = document.getElementById('hint'); h.style.display = 'block';
+      };
+      document.getElementById('quit').onclick = closeModal;
+    }
+
+    function handleAnswer(ok){
+      if(ok) score += 20;
+      const next = currentIdx + 1;
+      if(next < 5) renderQuestion(next);
+      else renderResult();
+    }
+
+    function rewardFromScore(sc){
+      if(sc < 60) return 0;
+      const tenth = Math.floor(sc/10); // 60->6, 70->7, ... 100->10
+      return Math.min(1.0, tenth/10);
+    }
+
+    function renderResult(){
+      const addr = getAddr();
+      const w = getWindow(addr);
+      const reward = rewardFromScore(score);
+      const passed = reward > 0;
+      if(passed) addAccum(addr, reward);
+      // consume a round in the window
+      incWindowCount(addr);
+      updateUI();
+
+      stage.innerHTML = `
+        <h3>Round Complete</h3>
+        <p class="score">Score: ${score}/100</p>
+        <p>${passed ? `+ ${fmt(reward)} BALBI added to your quiz balance.` : 'Score below 60 — no reward this round.'}</p>
+        <div class="row">
+          <button id="playAgain" class="primary">Play Another Round</button>
+          <button id="close" class="ghost">Close</button>
+        </div>`;
+      document.getElementById('playAgain').onclick = ()=>{
+        const w2 = getWindow(addr);
+        if((w2.count||0) >= 3){
+          alert('Limit reached for this 4‑hour window.');
+          closeModal();
+          return;
         }
-        // Som curto ao iniciar
-        function startSound(){
-            if(!soundOn) return;
-            try{
-                ensureAudio();
-                if(!audioCtx) return;
-                const play = ()=>{
-                    const o = audioCtx.createOscillator();
-                    const g = audioCtx.createGain();
-                    o.connect(g); g.connect(audioCtx.destination);
-                    o.type = "sine"; o.frequency.value = 520;
-                    const t0 = audioCtx.currentTime;
-                    g.gain.setValueAtTime(0.001, t0);
-                    g.gain.exponentialRampToValueAtTime(0.15, t0 + 0.02);
-                    g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.10);
-                    o.start(t0); o.stop(t0 + 0.12);
-                };
-                if(audioCtx.state === "suspended"){ audioCtx.resume().then(play).catch(()=>{}); } else { play(); }
-            }catch(e){ /* ignora */ }
-        }
+        renderStart();
+      };
+      document.getElementById('close').onclick = closeModal;
+    }
 
-        const soundBtn = document.getElementById('soundToggle');
-        soundBtn.addEventListener('click', ()=>{
-            soundOn = !soundOn;
-            soundBtn.textContent = soundOn ? "som: liga" : "som: desliga";
-            soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
-            // não toca som aqui para não atrapalhar a primeira interação
-        });
+    // Claim logic (same backend endpoint as faucet; we include amount + source)
+    
+    claimBtn.addEventListener('click', async ()=>{
+      const addr = getAddr();
+      if(!addr){ alert('Please connect your wallet first.'); return; }
+      const amount = getAccum(addr);
+      if(!(amount>0)) return;
 
-        /* ========= ESTADO ========= */
-        const QUESTIONS_PER_ROUND = 5; // mantido
-        let currentQuestion = 0;
-        let score = 0;
-        let hintsUsed = Array(5).fill(false);
-        let selectedQuestions = [];
-        const answersMap = {};             // mapa ok/err da UI
-        const chosen = {};                 // registro de escolha do usuário
-        const displayedOptionsText = {};   // textos exibidos por pergunta
-        const correctTextMap = {};         // texto da correta exibida (para gabarito quando errar)
+      claimBtn.disabled = true;
+      claimMsg.style.display = 'none';
+      claimHash.style.display = 'none';
+      claimBtn.textContent = 'Claiming...';
 
-        // util
-        const shuffle = (arr) => arr.map(v=>({v, r:Math.random()})).sort((a,b)=>a.r-b.r).map(e=>e.v);
-
-        // referências curtas (aparecem aleatório em certas/erradas)
-        const normRefs = [
-            "ASHRAE 62.1-2019 §6.2",
-            "ASHRAE 55-2020 §5.3",
-            "ASHRAE 90.1-2019 §6.5",
-            "ASHRAE 15-2019 §8",
-            "ASHRAE TC 9.9 (Thermal Guidelines)",
-            "NBR 16401-3:2008 §7",
-            "NBR 15220-3 §5",
-            "IEC 60079-13 §5.5"
+      const tryEndpoints = async () => {
+        // Prefer custom amount endpoint if available
+        const endpoints = [
+          { url: (REPLIT_URL_QUIZ||'') + '/quiz-claim', body: { address: addr, amount: Number(amount.toFixed(2)), source:'quiz' } },
+          { url: (REPLIT_URL_QUIZ||'') + '/claim',      body: { address: addr, amount: Number(amount.toFixed(2)), source:'quiz' } },
+          { url: (REPLIT_URL_QUIZ||'') + '/claim',      body: { address: addr } } // faucet-compat fallback
         ];
-        function maybeDecorateWithRef(text){
-            if (Math.random() < 0.5) {
-                const ref = normRefs[Math.floor(Math.random()*normRefs.length)];
-                return `${text} — Ref: ${ref}`;
-            }
-            return text;
+        for (const ep of endpoints) {
+          try {
+            const res = await fetch(ep.url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(ep.body),
+              mode: 'cors',
+              credentials: 'omit',
+            });
+            const data = await res.json().catch(()=>({}));
+            if (res.ok) return data;
+          } catch(e){ /* keep trying next */ }
         }
+        throw new Error('All claim attempts failed');
+      };
 
-        /* ====== BANCO DE QUESTÕES (24 itens, 3 alternativas) ====== */
-        const questions = [
-            { text: "Edifício comercial com ar abafado e odores persistentes. Ventilação mínima.",
-              correct: "Elevar a ventilação externa e balancear o sistema para atender critérios adequados de IAQ.",
-              wrong1: "Reduzir a renovação de ar para cortar consumo, mantendo o status atual.",
-              wrong2: "Aplicar um critério de segurança de refrigerantes para decidir taxas mínimas de ventilação.",
-              hint: "Ventilação adequada é determinante para IAQ." },
-            { text: "Hospital com mofo por umidade alta; HVAC não controla UR.",
-              correct: "Desumidificar e manter UR < 60% com controle dedicado no suprimento.",
-              wrong1: "Elevar apenas o setpoint de temperatura e ignorar a UR.",
-              wrong2: "Usar requisitos de eficiência energética para fixar um ponto de UR em área crítica.",
-              hint: "Mofo = UR alta; trate a umidade diretamente." },
-            { text: "Dutos superdimensionados geram distribuição irregular e ruídos.",
-              correct: "Redimensionar dutos por método consagrado (p.ex., estática recuperada/SMACNA) e reequilibrar.",
-              wrong1: "Instalar mais ventiladores em série sem revisar dutos.",
-              wrong2: "Usar norma elétrica para definir bitola de duto de ar.",
-              hint: "Métodos de dutos resolvem raiz do problema." },
-            { text: "Escolha de refrigerante; opções incluem GWP alto.",
-              correct: "Priorizar fluido de baixo GWP considerando segurança, eficiência e compatibilidades.",
-              wrong1: "Escolher o maior GWP pelo menor CAPEX.",
-              wrong2: "Usar um procedimento de ventilação de ocupação para aprovar refrigerante.",
-              hint: "Sustentabilidade e conformidade contam." },
-            { text: "Prédio alto com infiltração de ar externo indesejada.",
-              correct: "Ajustar pressões para leve positivo em zonas limpas e melhorar estanqueidade.",
-              wrong1: "Vedar janelas com fita sem revisar setpoints e balanceamento.",
-              wrong2: "Definir pressões com base em limites de conforto térmico apenas.",
-              hint: "Relação de pressão entre zonas é chave." },
-            { text: "Data center com hotspot em racks por má distribuição.",
-              correct: "Conter corredores quente/frio e otimizar percursos de ar, com vedação de vazios.",
-              wrong1: "Aumentar rotação dos ventiladores apenas.",
-              wrong2: "Usar requisitos de segurança de refrigerantes para layout de TI.",
-              hint: "Fluxo organizado evita superaquecimento." },
-            { text: "Escritório com desconforto por variações entre zonas.",
-              correct: "Controle por zonas (p.ex., VAV comissionado) e difusão adequada.",
-              wrong1: "Aumentar potência da máquina central para todo o andar.",
-              wrong2: "Fixar um único sensor de retorno como referência de todo o pavimento.",
-              hint: "Mais controle local = mais conforto." },
-            { text: "Escola com filtros de baixa eficiência e IAQ comprometida.",
-              correct: "Adotar MERV mais alto (p.ex., 13) e garantir vedação/assentamento corretos.",
-              wrong1: "Diminuir a eficiência de filtragem para reduzir queda de pressão.",
-              wrong2: "Usar um padrão de classificação de segurança de fluidos para definir MERV.",
-              hint: "Filtragem adequada reduz partículas." },
-            { text: "Vazamentos recorrentes de refrigerante em sistema industrial.",
-              correct: "Programa de manutenção com detecção de vazamentos, registros e eliminação da causa.",
-              wrong1: "Repor fluido periodicamente e seguir operando.",
-              wrong2: "Aplicar critérios de ventilação mínima para definir vazamento aceitável.",
-              hint: "Vazamento não é rotina: investigue." },
-            { text: "Teatro com ruído de HVAC impactando a acústica.",
-              correct: "Silenciadores em dutos, difusão adequada e velocidades controladas.",
-              wrong1: "Elevar o fluxo para 'mascarar' ruído.",
-              wrong2: "Usar um padrão residencial para metas acústicas de teatro.",
-              hint: "Tratamento acústico no duto ajuda muito." },
-            { text: "Câmara fria com consumo alto por isolamento precário.",
-              correct: "Melhorar isolamento/vedações e revisar portas/cortinas de ar.",
-              wrong1: "Aumentar a capacidade do compressor.",
-              wrong2: "Usar diretrizes de conforto térmico para especificar painel frigorífico.",
-              hint: "Perdas térmicas controladas = menor consumo." },
-            { text: "Laboratório com ACH insuficiente para contaminantes voláteis.",
-              correct: "Aumentar troca de ar e exaustão dedicada; avaliar capelas/capturas locais.",
-              wrong1: "Perfumar o ambiente e manter ACH atual.",
-              wrong2: "Usar normas de eficiência energética para definir exaustão mínima.",
-              hint: "Segurança primeiro; exaustão específica." },
-            { text: "Hotel com temperatura inconsistente entre quartos.",
-              correct: "Termostatos por quarto/zona, balanceamento e conferência de válvulas/difusores.",
-              wrong1: "Ajuste único de setpoint na central para todos.",
-              wrong2: "Usar requisitos de ventilação para controlar setpoint do hóspede.",
-              hint: "Controle individual melhora a experiência." },
-            { text: "Shopping com odores persistentes de cozinhas.",
-              correct: "Redimensionar exaustão de coifas/dutos/descarga e balancear pressões.",
-              wrong1: "Aumentar apenas ventilação geral do mall.",
-              wrong2: "Aplicar um padrão de segurança de fluidos para coifas comerciais.",
-              hint: "Cozinha pede exaustão dedicada." },
-            { text: "Ginásio com condensação em janelas por UR alta.",
-              correct: "Desumidificar o suprimento e ajustar difusão/temperaturas.",
-              wrong1: "Abrir mais ar externo sem tratar UR.",
-              wrong2: "Usar norma de eficiência predial para fixar UR do ginásio.",
-              hint: "Ataque a umidade; só ventilação pode não bastar." },
-            { text: "Sala limpa requer partículas e pressão controladas.",
-              correct: "Pressão diferencial positiva adequada e filtragem HEPA; vedações e portas corretas.",
-              wrong1: "Empregar MERV 8 e portas abertas para 'maior ventilação'.",
-              wrong2: "Usar padrão de segurança de fluidos para classe de limpeza de ar.",
-              hint: "Pressão + filtragem = base." },
-            { text: "Biblioteca com correntes frias sobre usuários.",
-              correct: "Reposicionar difusores e reduzir velocidade terminal; difusão adequada.",
-              wrong1: "Reduzir renovação de ar.",
-              wrong2: "Usar norma de refrigeração de amônia para difusores.",
-              hint: "Difusão correta evita 'draft'." },
-            { text: "Salas de reunião com CO₂ elevado em pico.",
-              correct: "Ventilação por demanda (CO₂) e balanceamento das taxas.",
-              wrong1: "Elevar apenas o setpoint.",
-              wrong2: "Usar padrão de segurança de fluidos para metas de CO₂.",
-              hint: "DCV equilibra IAQ e energia." },
-            { text: "Entrada térrea com infiltração pelo abre/fecha de portas.",
-              correct: "Vestíbulo/cortina de ar e leve positivo interno; vedações funcionais.",
-              wrong1: "Criar negativo interno para 'puxar' o ar externo.",
-              wrong2: "Aplicar norma de segurança de fluidos para calcular infiltração.",
-              hint: "Controle de fluxo na porta funciona." },
-            { text: "Recepção com odores vindos de sanitários adjacentes.",
-              correct: "Exaustão dedicada adequada e verificação de selos hidráulicos.",
-              wrong1: "Perfumar e reduzir exaustão para economizar.",
-              wrong2: "Usar conforto térmico para taxa de exaustão de banheiros.",
-              hint: "Ambientes sujos pedem exaustão própria." },
-            { text: "Auditório alto com estratificação térmica.",
-              correct: "Destratificação/retorno alto e distribuição uniforme do suprimento.",
-              wrong1: "Baixar setpoint geral sem mexer em difusão.",
-              wrong2: "Usar ventilação mínima de ocupação para calcular altura do palco.",
-              hint: "Trate a estratificação no projeto de ar." },
-            { text: "Sala de TI pequena com hotspot em servidor.",
-              correct: "Canalizar ar frio até o ponto e vedar vazios de passagem.",
-              wrong1: "Instalar aquecedor para compensar diferenças.",
-              wrong2: "Usar eficiência energética para posicionar racks.",
-              hint: "Leve o ar onde precisa e vede." },
-            { text: "Residência com odores do subsolo subindo pela escada.",
-              correct: "Exaustão leve no subsolo, selar passagens e fechamento automático da porta.",
-              wrong1: "Pressurizar negativamente a sala de estar.",
-              wrong2: "Usar segurança de fluidos para taxa de exaustão de subsolos.",
-              hint: "Gradiente de pressão bem pensado resolve." },
-            { text: "Academia com ar 'pesado' após pico.",
-              correct: "Aumentar ACH, melhorar filtragem e adotar ventilação por demanda.",
-              wrong1: "Fechar tomadas de ar externo para economizar.",
-              wrong2: "Usar padrão de segurança de fluidos para definir MERV da academia.",
-              hint: "Carga bioefluente alta pede renovação/filtragem." }
-        ];
-
-        function startGame() {
-            // não deixar nenhum problema de áudio travar o primeiro toque
-            try { startSound(); } catch(e) {}
-            document.getElementById('welcome').style.display = 'none';
-            score = 0; currentQuestion = 0; hintsUsed = Array(5).fill(false);
-            selectRandomQuestions();
-            setupQuestions();
-            nextQuestion();
+      try {
+        const data = await tryEndpoints();
+        setLastClaim(addr, now());
+        setAccum(addr, 0);
+        claimMsg.textContent = 'Quiz tokens sent successfully!';
+        claimMsg.style.display = 'block';
+        if(data && data.txHash){
+          claimHash.textContent = 'Tx Hash: ' + data.txHash;
+          claimHash.style.display = 'block';
         }
+      } catch(e) {
+        claimMsg.textContent = 'Claim failed. If running the HTML from your disk, a CORS block may occur. '
+          + 'Open this page via a local server (e.g., `npx http-server`) or host it (GitHub Pages) and try again.';
+        claimMsg.style.display = 'block';
+      } finally {
+        claimBtn.textContent = `Claim ${fmt(getAccum(getAddr()))} BALBI`;
+        updateUI();
+      }
+    });
 
-        function selectRandomQuestions() {
-            selectedQuestions = [];
-            const total = questions.length; // 24
-            let indices = Array.from({length: total}, (_, i) => i);
-            for (let i = 0; i < 5; i++) {
-                const r = Math.floor(Math.random() * indices.length);
-                selectedQuestions.push(indices.splice(r, 1)[0]);
-            }
-        }
+    // Initialize on load/login changes
+    
+    function initOnce(){
+      updateUI(); startTick();
+    }
 
-        function setupQuestions() {
-            for (let i = 0; i < 5; i++) {
-                let questionNum = i + 1;
-                let questionIndex = selectedQuestions[i];
-                const q = questions[questionIndex];
+    // Observe wallet visibility / address changes to refresh UI once logged in
+    const walletBox = document.getElementById('walletAddress');
+    const obs = new MutationObserver(()=>{ updateUI(); });
+    if(addressEl) obs.observe(addressEl, { childList:true, subtree:true, characterData:true });
+    if(walletBox) obs.observe(walletBox, { attributes:true, attributeFilter:['style','class'] });
 
-                document.getElementById(`title${questionNum}`).innerText = `Situação ${questionNum}`;
-                document.getElementById(`text${questionNum}`).innerText = q.text;
-                document.getElementById(`hint${questionNum}`).innerText = q.hint || "";
+    // Kick off
+    document.addEventListener('DOMContentLoaded', initOnce);
+    initOnce();
 
-                // 3 alternativas com chance de citar norma (tanto corretas quanto erradas)
-                const optionObjs = [
-                    { key: 'a', text: q.correct, ok: true },
-                    { key: 'b', text: q.wrong1, ok: false },
-                    { key: 'c', text: q.wrong2, ok: false }
-                ].map(o => ({ ...o, text: maybeDecorateWithRef(o.text) }));
+  })(); 
+  </script>
 
-                const shuffled = shuffle(optionObjs);
-
-                // mapa e textos exibidos
-                answersMap[questionNum] = {};
-                displayedOptionsText[questionNum] = { a: "", b: "", c: "" };
-
-                // localizar texto da correta exibida (para gabarito)
-                let correctShownText = "";
-
-                const ids = [`opt${questionNum}a`, `opt${questionNum}b`, `opt${questionNum}c`];
-                for (let k = 0; k < 3; k++) {
-                    const btnId = ids[k];
-                    const opt = shuffled[k];
-                    const actualKey = ['a','b','c'][k];
-                    document.getElementById(btnId).innerText = opt.text;
-                    answersMap[questionNum][actualKey] = opt.ok;
-                    displayedOptionsText[questionNum][actualKey] = opt.text;
-                    if (opt.ok) correctShownText = opt.text;
-                }
-                correctTextMap[questionNum] = correctShownText;
-            }
-        }
-
-        function nextQuestion() {
-            currentQuestion++;
-            if (currentQuestion <= 5) {
-                let nextCard = document.getElementById(`question${currentQuestion}`);
-                nextCard.style.display = 'block';
-                nextCard.style.animation = 'fadeInDown 0.5s ease-in-out';
-                setTimeout(() => { nextCard.style.animation = ''; }, 500);
-            } else {
-                showResult();
-            }
-        }
-
-        function selectAnswer(questionNum, key) {
-            const correct = !!(answersMap[questionNum] && answersMap[questionNum][key]);
-            chosen[questionNum] = { key, text: displayedOptionsText[questionNum][key], correct };
-
-            if (correct) { score += 20; }
-            tapSound();
-
-            let currentCard = document.getElementById(`question${questionNum}`);
-            currentCard.style.animation = 'fadeOutUp 0.5s ease-in-out';
-            setTimeout(() => {
-                currentCard.style.display = 'none';
-                currentCard.style.animation = '';
-                nextQuestion();
-            }, 500);
-        }
-
-        function showHint(question) {
-            if (!hintsUsed[question - 1]) {
-                document.getElementById(`hint${question}`).style.display = 'block';
-                hintsUsed[question - 1] = true;
-                tapSound();
-            } else {
-                alert('Você já usou sua dica para esta pergunta!');
-            }
-        }
-
-        function showResult() {
-            document.getElementById('result').style.display = 'block';
-            document.getElementById('scoreText').innerText = `Pontuação: ${score}/100`;
-            if (score >= 60) {
-                document.getElementById('passFail').innerText = 'Você passou no Teste de Fogo de HVAC! Parabéns, Agente!';
-                document.getElementById('passFail').style.color = '#00ff00';
-            } else {
-                document.getElementById('passFail').innerText = 'Você não passou. Estude mais os manuais ASHRAE!';
-                document.getElementById('passFail').style.color = '#ff0000';
-            }
-            renderAnswerKey();
-        }
-
-        // Gabarito: mostra escolha; se errar, também mostra a correta em azul
-        function renderAnswerKey(){
-            const wrap = document.getElementById('answerKey');
-            let html = '<h4 style="margin:8px 0 4px; opacity:.9">Gabarito desta rodada</h4>';
-            html += '<div>';
-            for (let i=1;i<=5;i++){
-                if (!chosen[i]) continue;
-                const cls = chosen[i].correct ? 'ok' : 'bad';
-                html += `<div class="item"><strong>Q${i}:</strong> <span class="${cls}">${escapeHtml(chosen[i].text)}</span>`;
-                if (!chosen[i].correct) {
-                    html += `<div class="tip">Correta: ${escapeHtml(correctTextMap[i] || "")}</div>`;
-                }
-                html += `</div>`;
-            }
-            html += '</div>';
-            wrap.innerHTML = html;
-        }
-
-        function escapeHtml(str){
-            return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-        }
-
-        function restartGame(){ location.reload(); }
-    </script>
 </body>
 </html>
