@@ -220,33 +220,10 @@
       text-shadow: 0 0 6px rgba(255,255,255,.35);
     }
     
-/* === i18n + scrollbars fix === */
+/* v9b: hide scrollbars in quiz modal */
 #quizModal .quiz-card { overflow-y: visible !important; max-height: none !important; }
 #quizModal { overflow-y: auto !important; scrollbar-width: none; }
 #quizModal::-webkit-scrollbar { display: none !important; }
-#quizLangToggle { position:absolute; top:12px; left:14px; display:flex; gap:8px; }
-#quizLangToggle button {
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(0,255,204,.18);
-  border-radius: 10px; padding:6px 10px; cursor:pointer; color:#e6eefb;
-}
-#quizLangToggle button.active {
-  background: linear-gradient(90deg,#00ffd0,#ff5ee1,#00ffd0);
-  background-size:200% 200%;
-  color:#0a0f14; font-weight:800; border:none;
-  animation: neonShift 6s linear infinite;
-}
-
-
-/* --- Fix: place language toggle top-right, no overflow/scrollbars --- */
-#quizModal { overflow: hidden !important; }
-#quizModal .quiz-card { overflow: visible !important; max-height: 90vh !important; }
-#quizLangToggle {
-  position: absolute; top: 10px; right: 44px; display: flex; gap: 6px; z-index: 2;
-}
-#quizLangToggle button {
-  padding: 4px 8px; font-size: 12px; border-radius: 8px;
-}
 
 </style>
 </head>
@@ -631,10 +608,6 @@
 </style>
   <div id="quizModal" role="dialog" aria-modal="true" aria-label="Balbi Quiz">
     <div class="quiz-card">
-      <div id="quizLangToggle" aria-label="Language">
-        <button id="langEN" type="button">EN</button>
-        <button id="langPT" type="button">PT</button>
-      </div>
       <button class="close-x" id="quizCloseBtn" title="Close">✕</button>
       <div id="quizStage">
         <!-- Filled by script -->
@@ -850,7 +823,10 @@ function updateUI(){
       return a.map(v=>({v, r:Math.random()})).sort((x,y)=>x.r-y.r).map(e=>e.v);
     }
 
-    function openModal(){ modal.style.display = 'flex'; try{ if(window.__QUIZ_I18N__){ document.getElementById('langEN')?.classList.toggle('active', __QUIZ_I18N__.getLang()==='EN'); document.getElementById('langPT')?.classList.toggle('active', __QUIZ_I18N__.getLang()==='PT'); } }catch(_){} renderStart(); }
+    function openModal(){
+      modal.style.display = 'flex';
+      renderStart();
+    }
     function closeModal(){
       modal.style.display = 'none';
     }
@@ -901,8 +877,6 @@ function updateUI(){
     function renderQuestion(i){
       currentIdx = i;
       const q = roundQs[i];
-      const L = (window.__QUIZ_I18N__ && __QUIZ_I18N__.getLang()) || 'EN';
-      const UI = (window.__QUIZ_I18N__ && __QUIZ_I18N__.UI_STR[L]) || {};
       const opts = shuffle([
         {k:'a', txt:q.ok, ok:true},
         {k:'b', txt:q.w1, ok:false},
@@ -915,11 +889,11 @@ function updateUI(){
           <div class="opts">
             ${opts.map((o,idx)=>`<button class="ghost" data-idx="${idx}">${o.txt}</button>`).join('')}
           </div>
-          <button id="showHint" class="ghost" style="margin-top:8px">${UI.showHint || 'Show Hint'}</button>
+          <button id="showHint" class="ghost" style="margin-top:8px">Show hint</button>
           <div id="hint" class="hint">${q.hint||''}</div>
         </div>
         <div class="row">
-          <button id="quit" class="ghost">${UI.quit || 'Quit'}</button>
+          <button id="quit" class="ghost">Quit</button>
         </div>`;
       stage.querySelectorAll('.opts button').forEach((btn,idx)=>{
         btn.onclick = ()=>{ handleAnswer(opts[idx].ok); };
@@ -949,25 +923,25 @@ function rewardFromScore(sc){
     function renderResult(){
       const addr = getAddr();
       const w = getWindow(addr);
-      const L = (window.__QUIZ_I18N__ && __QUIZ_I18N__.getLang()) || 'EN';
-      const UI = (window.__QUIZ_I18N__ && __QUIZ_I18N__.UI_STR[L]) || {};
       const reward = rewardFromScore(score);
       const passed = reward > 0;
       if(passed) addAccum(addr, reward);
+      // consume a round in the window
       incWindowCount(addr);
       updateUI();
+
       stage.innerHTML = `
-        <h3>${UI.roundComplete || 'Round Complete'}</h3>
-        <p class="score">${UI.score || 'Score'}: ${score}/100</p>
-        <p>${passed ? (UI.added ? UI.added(fmt(reward)) : ('+ '+fmt(reward)+' BALBI added to your quiz balance.')) : (UI.below || 'Score below 60 — no reward this round.')}</p>
+        <h3>Round Complete</h3>
+        <p class="score">Score: ${score}/100</p>
+        <p>${passed ? `+ ${fmt(reward)} BALBI added to your quiz balance.` : 'Score below 60 — no reward this round.'}</p>
         <div class="row">
-          <button id="playAgain" class="primary">${UI.startBtn || 'Start Round'}</button>
-          <button id="close" class="ghost">${UI.cancelBtn || 'Cancel'}</button>
+          <button id="playAgain" class="primary">Play Another Round</button>
+          <button id="close" class="ghost">Close</button>
         </div>`;
       document.getElementById('playAgain').onclick = ()=>{
         const w2 = getWindow(addr);
         if((w2.count||0) >= 3){
-          alert('Limit reached for this 4-hour window.');
+          alert('Limit reached for this 4‑hour window.');
           closeModal();
           return;
         }
@@ -1051,100 +1025,6 @@ claimBtn.addEventListener('click', async ()=>{
 
   })(); 
   </script>
-
-
-<script>
-(function(){
-  // --- Language state ---
-  const LS_KEY = 'quiz_lang';
-  function getLang(){ return localStorage.getItem(LS_KEY) || 'EN'; }
-  function setLang(l){ localStorage.setItem(LS_KEY, l); }
-
-  // --- UI translations ---
-  const UI_STR = {
-    EN: {
-      startTitle: 'Balbi Quiz — Round',
-      startDesc: 'Answer 5 quick questions. Score ≥60 points to earn a reward. Each correct = 20 pts.',
-      startBtn: 'Start Round',
-      cancelBtn: 'Cancel',
-      showHint: 'Show Hint',
-      quit: 'Quit',
-      roundComplete: 'Round Complete',
-      score: 'Score',
-      below: 'Score below 60 — no reward this round.',
-      added: (amt)=>`+ ${amt} BALBI added to your quiz balance.`
-    },
-    PT: {
-      startTitle: 'Balbi Quiz — Rodada',
-      startDesc: 'Responda 5 perguntas rápidas. Pontuação ≥60 garante recompensa. Cada acerto = 20 pts.',
-      startBtn: 'Iniciar Rodada',
-      cancelBtn: 'Cancelar',
-      showHint: 'Mostrar dica',
-      quit: 'Sair',
-      roundComplete: 'Rodada Concluída',
-      score: 'Pontuação',
-      below: 'Abaixo de 60 — sem recompensa nesta rodada.',
-      added: (amt)=>`+ ${amt} BALBI adicionados ao saldo do quiz.`
-    }
-  };
-
-  // --- Lightweight glossary for PT -> EN quiz texts ---
-  const G = new Map(Object.entries({
-    'Teatro': 'Theater','ruído': 'noise','acústica':'acoustics','impactando':'impacting',
-    'Ginásio':'Gym','ar pesado':'stale air','pós pico':'after peak times','Ventilação':'Ventilation',
-    'Aumentar':'Increase','Reduzir':'Reduce','Fechar':'Close','Abrir':'Open','Filtração':'Filtration',
-    'dutos':'ducts','velocidades':'velocities','difusão':'diffusion','silenciadores':'silencers',
-    'controle de umidade':'humidity control','desumidificar':'dehumidify','pressurização':'pressurization',
-    'corredor':'corridor','dados':'data','sala de dados':'data hall','pontos quentes':'hot spots',
-    'contenção':'containment','vazamentos':'leakage','refrigerante':'refrigerant','GWP':'GWP',
-    'seleção':'selection','IAQ':'IAQ','padrão':'standard','taxa':'rate','condensação':'condensation',
-    'energia':'energy','economia':'energy savings','exterior':'outdoor','ar exterior':'outdoor air',
-    'exautão':'exhaust','exaustão':'exhaust','fornecimento':'supply','balanço':'balance','balanceamento':'balancing',
-    'de acordo com':'per','método':'method','SMACNA':'SMACNA','ASHRAE':'ASHRAE','ISO':'ISO',
-    'manter':'maintain','temperatura':'temperature','umidade relativa':'RH','filtração':'filtration',
-    'bypass':'bypass','mudar':'change','melhorar':'improve','adequada':'adequate','controladas':'controlled'
-  }));
-  function tPTtoEN(s){
-    // conservative word-by-word swap; keeps unknown terms as-is
-    return String(s).split(/(\b)/).map(tok=> G.get(tok) || tok).join('');
-  }
-
-  // Build English bank from existing QUESTIONS if not already bilingual
-  try {
-    if (window.QUESTIONS && !window.QUESTIONS_EN) {
-      window.QUESTIONS_EN = window.QUESTIONS.map(q => ({
-        t: tPTtoEN(q.t),
-        ok: tPTtoEN(q.ok),
-        w1: tPTtoEN(q.w1),
-        w2: tPTtoEN(q.w2),
-        hint: q.hint ? tPTtoEN(q.hint) : ''
-      }));
-    }
-  } catch(_) {}
-
-  // Wire buttons
-  document.addEventListener('DOMContentLoaded', () => {
-    const bEN = document.getElementById('langEN');
-    const bPT = document.getElementById('langPT');
-    function applyActive(){
-      const L = getLang();
-      if (bEN && bPT){
-        bEN.classList.toggle('active', L==='EN');
-        bPT.classList.toggle('active', L==='PT');
-      }
-    }
-    if (bEN) bEN.onclick = ()=>{ setLang('EN'); applyActive(); try{ const m=document.getElementById('quizModal'); if(m&&getComputedStyle(m).display==='flex'){ renderStart(); } }catch(_){} };
-    if (bPT) bPT.onclick = ()=>{ setLang('PT'); applyActive(); try{ const m=document.getElementById('quizModal'); if(m&&getComputedStyle(m).display==='flex'){ renderStart(); } }catch(_){} };
-    applyActive();
-  });
-
-  // Expose helpers so the quiz renderer can use them
-  window.__QUIZ_I18N__ = {
-    getLang, UI_STR,
-    getBank: ()=> (getLang()==='EN' && window.QUESTIONS_EN ? window.QUESTIONS_EN : window.QUESTIONS)
-  };
-})();
-</script>
 
 </body>
 </html>
