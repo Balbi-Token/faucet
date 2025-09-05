@@ -237,6 +237,17 @@
   animation: neonShift 6s linear infinite;
 }
 
+
+/* --- Fix: place language toggle top-right, no overflow/scrollbars --- */
+#quizModal { overflow: hidden !important; }
+#quizModal .quiz-card { overflow: visible !important; max-height: 90vh !important; }
+#quizLangToggle {
+  position: absolute; top: 10px; right: 44px; display: flex; gap: 6px; z-index: 2;
+}
+#quizLangToggle button {
+  padding: 4px 8px; font-size: 12px; border-radius: 8px;
+}
+
 </style>
 </head>
 <body>
@@ -839,10 +850,7 @@ function updateUI(){
       return a.map(v=>({v, r:Math.random()})).sort((x,y)=>x.r-y.r).map(e=>e.v);
     }
 
-    function openModal(){
-      modal.style.display = 'flex';
-      renderStart();
-    }
+    function openModal(){ modal.style.display = 'flex'; try{ if(window.__QUIZ_I18N__){ document.getElementById('langEN')?.classList.toggle('active', __QUIZ_I18N__.getLang()==='EN'); document.getElementById('langPT')?.classList.toggle('active', __QUIZ_I18N__.getLang()==='PT'); } }catch(_){} renderStart(); }
     function closeModal(){
       modal.style.display = 'none';
     }
@@ -1125,8 +1133,8 @@ claimBtn.addEventListener('click', async ()=>{
         bPT.classList.toggle('active', L==='PT');
       }
     }
-    if (bEN) bEN.onclick = ()=>{ setLang('EN'); applyActive(); };
-    if (bPT) bPT.onclick = ()=>{ setLang('PT'); applyActive(); };
+    if (bEN) bEN.onclick = ()=>{ setLang('EN'); applyActive(); try{ const m=document.getElementById('quizModal'); if(m&&getComputedStyle(m).display==='flex'){ renderStart(); } }catch(_){} };
+    if (bPT) bPT.onclick = ()=>{ setLang('PT'); applyActive(); try{ const m=document.getElementById('quizModal'); if(m&&getComputedStyle(m).display==='flex'){ renderStart(); } }catch(_){} };
     applyActive();
   });
 
