@@ -225,6 +225,28 @@
 #quizModal { overflow-y: auto !important; scrollbar-width: none; }
 #quizModal::-webkit-scrollbar { display: none !important; }
 
+
+/* v9c: strict removal of scrollbars in quiz modal */
+#quizModal {
+  overflow: hidden !important;
+  max-height: 100vh !important;
+  max-width: 100vw !important;
+}
+#quizModal .quiz-card {
+  overflow: visible !important;
+  max-height: none !important;
+  max-width: 100% !important;
+  padding-right: 20px;
+  box-sizing: border-box;
+}
+#quizModal, #quizModal * {
+  scrollbar-width: none !important;
+}
+#quizModal::-webkit-scrollbar,
+#quizModal *::-webkit-scrollbar {
+  display: none !important;
+}
+
 </style>
 </head>
 <body>
