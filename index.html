@@ -31,12 +31,11 @@
       position:fixed; inset:0; width:100%; height:100dvh;
       display:grid; place-items:center;
       z-index:10000;
-      /* fundo próprio animado, assim a intro não mostra o site por baixo */
       background: linear-gradient(140deg, var(--bg1), var(--bg2), var(--bg1));
       background-size: 240% 240%;
       animation:
-        introFade 1.8s ease forwards,   /* some ao final */
-        bgMove 24s ease-in-out infinite; /* movimento suave de fundo */
+        introFade 1.8s ease forwards,
+        bgMove 24s ease-in-out infinite;
     }
     .intro::before{
       content:""; position:absolute; inset:0;
@@ -49,7 +48,7 @@
     .intro-wrap{
       width:clamp(160px, 26vmin, 320px);
       aspect-ratio:1/1; position:relative;
-      transform: translateY(-16vh);            /* mais alto na tela */
+      transform: translateY(-16vh);
       animation:introPop .9s cubic-bezier(.2,.8,.2,1) forwards;
     }
     @keyframes introPop{
@@ -178,7 +177,7 @@
     #cookieConsent{position:fixed; bottom:0; width:100%; background:rgba(20,20,40,.95); color:#fff; text-align:center; padding:15px 20px; display:none; z-index:1000; box-shadow:0 -2px 10px rgba(0, 136, 255, .3)}
     #acceptCookiesButton{margin-top:10px; padding:8px 16px; border-radius:8px; border:none; background:linear-gradient(90deg,#2b6cb0,#63b3ed); color:#000; font-weight:bold; cursor:pointer;}
 
-    /* LOADING overlay (pós-login): centralizado e um pouco mais alto, e um pouquinho mais longo */
+    /* LOADING overlay (pós-login) */
     .loading{
       position:fixed; inset:0; width:100%; height:100dvh;
       z-index:9998; display:none; place-items:center;
@@ -191,7 +190,7 @@
 
     .loading-wrap{
       width:clamp(150px, 22vmin, 260px); aspect-ratio:1/1; position:relative;
-      transform:translateY(-7vh); /* sobe um pouco mais */
+      transform:translateY(-7vh);
       animation:loadingPop .45s cubic-bezier(.2,.8,.2,1)
     }
     @media (max-width: 480px){
@@ -379,7 +378,7 @@
     <div id="walletInfo" style="display:none;">
       <div class="panel" id="quizPanel" style="margin-top:14px;">
         <h2>Quiz — Play & Earn</h2>
-        <p>Up to <strong>3 rounds</strong> per 4‑hour window. Each passed round (≥60 pts) adds
+        <p>Up to <strong>3 rounds</strong> per 4-hour window. Each passed round (≥60 pts) adds
            <strong>0.6–1.0 BALBI</strong> to your quiz balance based on score. You can claim the accumulated
            quiz balance once per 4 hours.</p>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -394,7 +393,7 @@
 
       <div class="panel">
         <h2>Balances</h2>
-<p class="tiny-note" style="margin-top:6px;font-size:11px;color:#ccc;opacity:.6">⏳ Note: balance may take a moment to update after a claim.</p>
+        <p class="tiny-note" style="margin-top:6px;font-size:11px;color:#ccc;opacity:.6">⏳ Note: balance may take a moment to update after a claim.</p>
         <div class="balance-item">
           <span>BALBI Balance</span>
           <span id="balbiBalance" class="balance-value">...</span>
@@ -657,48 +656,50 @@
     }
     const FOUR_H = 4 * 60 * 60 * 1000;
 
-    // --- Randomness memory per window (avoid repeats) ---
+    // --- Randomness memory per window (STRICT: no repeats until the whole pool is used) ---
     function qMemKey(addr, wStart){ return `quizQMem_${addr}_${wStart}`; }
     function readQMem(addr, wStart){
       try { return JSON.parse(localStorage.getItem(qMemKey(addr,wStart))) || []; } catch(e){ return []; }
     }
     function writeQMem(addr, wStart, arr){
-      localStorage.setItem(qMemKey(addr,wStart), JSON.stringify(arr.slice(0, 500)));
+      localStorage.setItem(qMemKey(addr,wStart), JSON.stringify(arr.slice(0, 2000)));
     }
-    
-function drawUniqueIndices(addr, wStart, poolLen, n){
-  let used = new Set(readQMem(addr, wStart));
-  const indices = [];
-  const targetUniqueBeforeRepeat = Math.floor(poolLen * 0.8); // aim to exhaust ~80% before repeats
-  let attempts = 0, maxAttempts = poolLen * 4;
-  while(indices.length < n && attempts < maxAttempts){
-    const idx = Math.floor(Math.random()*poolLen);
-    const shouldAvoid = used.size < targetUniqueBeforeRepeat;
-    if(!shouldAvoid || !used.has(idx)){
-      // accept if not yet used OR we already reached target uniqueness
-      if(!used.has(idx)) used.add(idx);
-      if(!indices.includes(idx)) indices.push(idx);
-    }
-    attempts++;
-    // Safety: if pool too small, break potential infinite loop
-    if(attempts > poolLen*3 && indices.length === 0){
-      indices.push(Math.floor(Math.random()*poolLen));
-    }
-  }
-  writeQMem(addr, wStart, Array.from(used).slice(0, 500));
-  return indices.slice(0, n);
-}
 
+    function drawUniqueIndicesStrict(addr, wStart, poolLen, n){
+      // current used set for this 4h window
+      let used = new Set(readQMem(addr, wStart));
+      // If we already used the entire pool, reset
+      if (used.size >= poolLen) used = new Set();
 
+      // Build available list
+      const available = [];
+      for (let i=0;i<poolLen;i++){
+        if (!used.has(i)) available.push(i);
+      }
+
+      // If available < n, reset used and make all available
+      let pickFrom = available;
+      if (pickFrom.length < n){
+        used = new Set();
+        pickFrom = Array.from({length: poolLen}, (_,i)=>i);
+      }
+
+      // Fisher-Yates shuffle then take n
+      for (let i = pickFrom.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pickFrom[i], pickFrom[j]] = [pickFrom[j], pickFrom[i]];
+      }
+      const chosen = pickFrom.slice(0, n);
+
+      // Update memory
+      for (const c of chosen) used.add(c);
+      writeQMem(addr, wStart, Array.from(used));
+      return chosen;
+    }
 
     function now(){ return Date.now(); }
-
-    function getAddr(){
-      return (addressEl && addressEl.textContent || '').trim();
-    }
-
+    function getAddr(){ return (addressEl && addressEl.textContent || '').trim(); }
     function readJSON(key, def){ try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch(e){ return def; } }
-
     function writeJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 
     function getWindow(addr){
@@ -710,7 +711,6 @@ function drawUniqueIndices(addr, wStart, poolLen, n){
       }
       return w;
     }
-
     function incWindowCount(addr){
       const k = keys(addr).window;
       let w = getWindow(addr);
@@ -718,47 +718,26 @@ function drawUniqueIndices(addr, wStart, poolLen, n){
       writeJSON(k, w);
       return w.count;
     }
+    function getAccum(addr){ return Number(localStorage.getItem(keys(addr).accum) || '0'); }
+    function setAccum(addr, v){ localStorage.setItem(keys(addr).accum, String(Math.max(0, Number(v)||0))); }
+    function addAccum(addr, v){ setAccum(addr, getAccum(addr) + Number(v||0)); }
+    function getLastClaim(addr){ return Number(localStorage.getItem(keys(addr).lastClaim) || '0'); }
+    function setLastClaim(addr, t){ localStorage.setItem(keys(addr).lastClaim, String(t)); }
+    function fmt(n){ return (Math.round(n*100)/100).toFixed(2); }
 
-    function getAccum(addr){
-      return Number(localStorage.getItem(keys(addr).accum) || '0');
+    function updateUI(){
+      const addr = getAddr();
+      const w = getWindow(addr);
+      roundInfo.textContent = `Rounds this window: ${(w.count||0)}/3`;
+      const accum = getAccum(addr);
+      claimBtn.textContent = `Claim ${fmt(accum)} BALBI`;
+      const blocked = getClaimTimeLeft(addr) > 0;
+      const canClaim = (accum > 0) && !blocked;
+      claimBtn.disabled = !canClaim;
+      if(canClaim) claimBtn.classList.add('quiz-claim-active');
+      else claimBtn.classList.remove('quiz-claim-active');
+      claimTimer.textContent = renderClaimTimerText(addr);
     }
-
-    function setAccum(addr, v){
-      localStorage.setItem(keys(addr).accum, String(Math.max(0, Number(v)||0)));
-    }
-
-    function addAccum(addr, v){
-      setAccum(addr, getAccum(addr) + Number(v||0));
-    }
-
-    function getLastClaim(addr){
-      return Number(localStorage.getItem(keys(addr).lastClaim) || '0');
-    }
-
-    function setLastClaim(addr, t){
-      localStorage.setItem(keys(addr).lastClaim, String(t));
-    }
-
-    function fmt(n){
-      return (Math.round(n*100)/100).toFixed(2);
-    }
-
-    
-function updateUI(){
-  const addr = getAddr();
-  const w = getWindow(addr);
-  roundInfo.textContent = `Rounds this window: ${(w.count||0)}/3`;
-  const accum = getAccum(addr);
-  claimBtn.textContent = `Claim ${fmt(accum)} BALBI`;
-  const blocked = getClaimTimeLeft(addr) > 0;
-  const canClaim = (accum > 0) && !blocked;
-  claimBtn.disabled = !canClaim;
-  // toggle neon-green state
-  if(canClaim) claimBtn.classList.add('quiz-claim-active');
-  else claimBtn.classList.remove('quiz-claim-active');
-  claimTimer.textContent = renderClaimTimerText(addr);
-}
-
 
     function getClaimTimeLeft(addr){
       const last = getLastClaim(addr);
@@ -766,7 +745,6 @@ function updateUI(){
       const left = last + FOUR_H - now();
       return Math.max(0, left);
     }
-
     function renderClaimTimerText(addr){
       const left = getClaimTimeLeft(addr);
       if(left <= 0) return '';
@@ -775,85 +753,70 @@ function updateUI(){
       const s = Math.floor((left % 60000)/1000);
       return `Next quiz claim in: ${h}h ${m}m ${s}s`;
     }
-
     let tick = null;
-    function startTick(){
-      if(tick) clearInterval(tick);
-      tick = setInterval(updateUI, 1000);
-    }
+    function startTick(){ if(tick) clearInterval(tick); tick = setInterval(updateUI, 1000); }
 
-    // Simple quiz (5 Q per round). Questions inspired by BalbiQuiz file.
+    // === 50 UNIQUE HVAC QUESTIONS (EN) ===
     const QUESTIONS = [
-      { t: `Cleanroom requires controlled particles and pressure.`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times.`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` },
-      { t: `Data center with hotspots.`, ok: `Implement hot/cold aisle containment and manage bypass air.`, w1: `Scatter perforated tiles randomly.`, w2: `Only increase CRAC setpoint.`, hint: `Airflow management beats brute-force cooling.` },
-      { t: `Hospital with mold due to high humidity; HVAC does not control RH.`, ok: `Dehumidify and keep RH < 60% with dedicated control.`, w1: `Use energy standard to set one RH point for critical space.`, w2: `Only raise temperature setpoint and ignore RH.`, hint: `Mold risk rises above ~60% RH.` },
-      { t: `Cleanroom requires controlled particles and pressure. (alt 1)`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times. (alt 2)`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` },
-      { t: `Data center with hotspots. (alt 3)`, ok: `Implement hot/cold aisle containment and manage bypass air.`, w1: `Scatter perforated tiles randomly.`, w2: `Only increase CRAC setpoint.`, hint: `Airflow management beats brute-force cooling.` },
-      { t: `Hospital with mold due to high humidity; HVAC does not control RH. (alt 4)`, ok: `Dehumidify and keep RH < 60% with dedicated control.`, w1: `Use energy standard to set one RH point for critical space.`, w2: `Only raise temperature setpoint and ignore RH.`, hint: `Mold risk rises above ~60% RH.` },
-      { t: `Cleanroom requires controlled particles and pressure. (alt 5)`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times. (alt 6)`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` },
-      { t: `Data center with hotspots. (alt 7)`, ok: `Implement hot/cold aisle containment and manage bypass air.`, w1: `Scatter perforated tiles randomly.`, w2: `Only increase CRAC setpoint.`, hint: `Airflow management beats brute-force cooling.` },
-      { t: `Hospital with mold due to high humidity; HVAC does not control RH. (alt 8)`, ok: `Dehumidify and keep RH < 60% with dedicated control.`, w1: `Use energy standard to set one RH point for critical space.`, w2: `Only raise temperature setpoint and ignore RH.`, hint: `Mold risk rises above ~60% RH.` },
-      { t: `Cleanroom requires controlled particles and pressure. (alt 9)`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times. (alt 10)`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` },
-      { t: `Data center with hotspots. (alt 11)`, ok: `Implement hot/cold aisle containment and manage bypass air.`, w1: `Scatter perforated tiles randomly.`, w2: `Only increase CRAC setpoint.`, hint: `Airflow management beats brute-force cooling.` },
-      { t: `Hospital with mold due to high humidity; HVAC does not control RH. (alt 12)`, ok: `Dehumidify and keep RH < 60% with dedicated control.`, w1: `Use energy standard to set one RH point for critical space.`, w2: `Only raise temperature setpoint and ignore RH.`, hint: `Mold risk rises above ~60% RH.` },
-      { t: `Cleanroom requires controlled particles and pressure. (alt 13)`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times. (alt 14)`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` },
-      { t: `Data center with hotspots. (alt 15)`, ok: `Implement hot/cold aisle containment and manage bypass air.`, w1: `Scatter perforated tiles randomly.`, w2: `Only increase CRAC setpoint.`, hint: `Airflow management beats brute-force cooling.` },
-      { t: `Hospital with mold due to high humidity; HVAC does not control RH. (alt 16)`, ok: `Dehumidify and keep RH < 60% with dedicated control.`, w1: `Use energy standard to set one RH point for critical space.`, w2: `Only raise temperature setpoint and ignore RH.`, hint: `Mold risk rises above ~60% RH.` },
-      { t: `Cleanroom requires controlled particles and pressure. (alt 17)`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times. (alt 18)`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` },
-      { t: `Data center with hotspots. (alt 19)`, ok: `Implement hot/cold aisle containment and manage bypass air.`, w1: `Scatter perforated tiles randomly.`, w2: `Only increase CRAC setpoint.`, hint: `Airflow management beats brute-force cooling.` },
-      { t: `Hospital with mold due to high humidity; HVAC does not control RH. (alt 20)`, ok: `Dehumidify and keep RH < 60% with dedicated control.`, w1: `Use energy standard to set one RH point for critical space.`, w2: `Only raise temperature setpoint and ignore RH.`, hint: `Mold risk rises above ~60% RH.` },
-      { t: `Cleanroom requires controlled particles and pressure. (alt 21)`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times. (alt 22)`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` },
-      { t: `Data center with hotspots. (alt 23)`, ok: `Implement hot/cold aisle containment and manage bypass air.`, w1: `Scatter perforated tiles randomly.`, w2: `Only increase CRAC setpoint.`, hint: `Airflow management beats brute-force cooling.` },
-      { t: `Hospital with mold due to high humidity; HVAC does not control RH. (alt 24)`, ok: `Dehumidify and keep RH < 60% with dedicated control.`, w1: `Use energy standard to set one RH point for critical space.`, w2: `Only raise temperature setpoint and ignore RH.`, hint: `Mold risk rises above ~60% RH.` },
-      { t: `Cleanroom requires controlled particles and pressure. (alt 25)`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times. (alt 26)`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` },
-      { t: `Data center with hotspots. (alt 27)`, ok: `Implement hot/cold aisle containment and manage bypass air.`, w1: `Scatter perforated tiles randomly.`, w2: `Only increase CRAC setpoint.`, hint: `Airflow management beats brute-force cooling.` },
-      { t: `Hospital with mold due to high humidity; HVAC does not control RH. (alt 28)`, ok: `Dehumidify and keep RH < 60% with dedicated control.`, w1: `Use energy standard to set one RH point for critical space.`, w2: `Only raise temperature setpoint and ignore RH.`, hint: `Mold risk rises above ~60% RH.` },
-      { t: `Cleanroom requires controlled particles and pressure. (alt 29)`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times. (alt 30)`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` },
-      { t: `Data center with hotspots. (alt 31)`, ok: `Implement hot/cold aisle containment and manage bypass air.`, w1: `Scatter perforated tiles randomly.`, w2: `Only increase CRAC setpoint.`, hint: `Airflow management beats brute-force cooling.` },
-      { t: `Hospital with mold due to high humidity; HVAC does not control RH. (alt 32)`, ok: `Dehumidify and keep RH < 60% with dedicated control.`, w1: `Use energy standard to set one RH point for critical space.`, w2: `Only raise temperature setpoint and ignore RH.`, hint: `Mold risk rises above ~60% RH.` },
-      { t: `Cleanroom requires controlled particles and pressure. (alt 33)`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times. (alt 34)`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` },
-      { t: `Data center with hotspots. (alt 35)`, ok: `Implement hot/cold aisle containment and manage bypass air.`, w1: `Scatter perforated tiles randomly.`, w2: `Only increase CRAC setpoint.`, hint: `Airflow management beats brute-force cooling.` },
-      { t: `Hospital with mold due to high humidity; HVAC does not control RH. (alt 36)`, ok: `Dehumidify and keep RH < 60% with dedicated control.`, w1: `Use energy standard to set one RH point for critical space.`, w2: `Only raise temperature setpoint and ignore RH.`, hint: `Mold risk rises above ~60% RH.` },
-      { t: `Cleanroom requires controlled particles and pressure. (alt 37)`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times. (alt 38)`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` },
-      { t: `Data center with hotspots. (alt 39)`, ok: `Implement hot/cold aisle containment and manage bypass air.`, w1: `Scatter perforated tiles randomly.`, w2: `Only increase CRAC setpoint.`, hint: `Airflow management beats brute-force cooling.` },
-      { t: `Hospital with mold due to high humidity; HVAC does not control RH. (alt 40)`, ok: `Dehumidify and keep RH < 60% with dedicated control.`, w1: `Use energy standard to set one RH point for critical space.`, w2: `Only raise temperature setpoint and ignore RH.`, hint: `Mold risk rises above ~60% RH.` },
-      { t: `Cleanroom requires controlled particles and pressure. (alt 41)`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times. (alt 42)`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` },
-      { t: `Data center with hotspots. (alt 43)`, ok: `Implement hot/cold aisle containment and manage bypass air.`, w1: `Scatter perforated tiles randomly.`, w2: `Only increase CRAC setpoint.`, hint: `Airflow management beats brute-force cooling.` },
-      { t: `Hospital with mold due to high humidity; HVAC does not control RH. (alt 44)`, ok: `Dehumidify and keep RH < 60% with dedicated control.`, w1: `Use energy standard to set one RH point for critical space.`, w2: `Only raise temperature setpoint and ignore RH.`, hint: `Mold risk rises above ~60% RH.` },
-      { t: `Cleanroom requires controlled particles and pressure. (alt 45)`, ok: `Maintain positive differential pressure and HEPA filtration; proper seals and doors.`, w1: `Use fluid-safety standard to define cleanliness.`, w2: `Use MERV 8 and leave doors open for 'more ventilation'.`, hint: `Cleanrooms need HEPA and positive pressure.` },
-      { t: `Gym with 'stale' air after peak times. (alt 46)`, ok: `Increase ACH, improve filtration, and adopt demand-controlled ventilation.`, w1: `Close outdoor air intakes to save energy.`, w2: `Use a fluid safety standard to define gym MERV.`, hint: `Purge + DCV help with CO₂ and odors.` }
+      { t:`Commercial building with stale air and odors; minimum OA only.`, ok:`Increase outdoor air to ASHRAE targets and rebalance to improve IAQ.`, w1:`Reduce OA to save energy and keep current balance.`, w2:`Use a refrigerant safety standard to set minimum ventilation.`, hint:`Proper OA and balance drive IAQ.` },
+      { t:`Hospital shows mold due to high humidity; HVAC doesn’t control RH.`, ok:`Dehumidify supply air and keep RH < 60% with dedicated control.`, w1:`Raise only temperature setpoint and ignore RH.`, w2:`Use an energy standard to pick one RH for critical spaces.`, hint:`Treat humidity directly; mold risk rises >~60% RH.` },
+      { t:`Oversized ducts cause uneven distribution and noise.`, ok:`Resize using recognized duct methods (e.g., static regain/SMACNA) and rebalance.`, w1:`Add more fans in series without revising ductwork.`, w2:`Use electrical code to pick air duct sizes.`, hint:`Sizing + TAB fixes the root cause.` },
+      { t:`Refrigerant selection includes high-GWP options.`, ok:`Prioritize lower-GWP refrigerant, ensuring safety, efficiency, and compatibility.`, w1:`Pick the highest GWP for lowest CAPEX.`, w2:`Use occupancy ventilation rules to approve refrigerant type.`, hint:`Balance sustainability and safety.` },
+      { t:`High-rise building with unwanted infiltration.`, ok:`Adjust zone pressures (slightly positive in clean zones) and improve airtightness.`, w1:`Tape windows without revising setpoints/balancing.`, w2:`Determine pressures from comfort standard only.`, hint:`Pressure relationships matter.` },
+      { t:`Data center racks show hotspots.`, ok:`Implement hot/cold aisle containment and seal bypass.`, w1:`Only increase CRAC setpoint.`, w2:`Randomly add perforated tiles.`, hint:`Airflow management beats brute force.` },
+      { t:`Office has comfort variation across zones.`, ok:`Use zoned control (e.g., commissioned VAV) and proper diffusion.`, w1:`Upsize the central unit for entire floor.`, w2:`Rely on a single return sensor for the whole floor.`, hint:`More local control = more comfort.` },
+      { t:`School uses low-efficiency filters; IAQ is poor.`, ok:`Adopt MERV 13 where feasible and ensure proper sealing/seating.`, w1:`Lower filtration efficiency to reduce pressure drop.`, w2:`Use refrigerant safety class to choose MERV.`, hint:`Filtration reduces particles significantly.` },
+      { t:`Industrial system with recurring refrigerant leaks.`, ok:`Leak detection program, records, and elimination of root cause.`, w1:`Periodically top up and keep operating.`, w2:`Use minimum OA rules to define acceptable leakage.`, hint:`Leaks are not “normal operations.”` },
+      { t:`Theater disturbed by HVAC noise.`, ok:`Use duct silencers, proper diffusion, and controlled velocities.`, w1:`Increase airflow to “mask” noise.`, w2:`Apply a residential noise target to a theater.`, hint:`Treat acoustics in the air path.` },
+      { t:`Cold room uses too much energy; poor insulation and seals.`, ok:`Improve insulation and door management (seals/air curtains).`, w1:`Increase compressor capacity only.`, w2:`Use comfort standard to select cold-room panels.`, hint:`Reduce thermal losses first.` },
+      { t:`Lab has insufficient ACH for volatile contaminants.`, ok:`Increase air changes and provide dedicated exhaust/capture.`, w1:`Deodorize and keep ACH as is.`, w2:`Use energy standard to set minimum exhaust.`, hint:`Safety first: source capture & ACH.` },
+      { t:`Hotel rooms have inconsistent temperatures.`, ok:`Provide room-level thermostats/zones and perform TAB.`, w1:`Single setpoint for the whole building.`, w2:`Use ventilation rates to control guest setpoints.`, hint:`Individual control improves experience.` },
+      { t:`Mall corridors smell cooking odors from food court.`, ok:`Resize hood/exhaust/ducts and balance pressures.`, w1:`Only increase general mall OA.`, w2:`Use fluid safety classification to size Type I hoods.`, hint:`Kitchens need dedicated exhaust.` },
+      { t:`Gym windows condensation due to high RH.`, ok:`Dehumidify supply air and adjust diffusion/temps.`, w1:`Increase OA only without treating RH.`, w2:`Use building efficiency standard to set gym RH.`, hint:`Attack moisture; OA alone may not fix.` },
+      { t:`Cleanroom needs particle and pressure control.`, ok:`Maintain positive differential and HEPA filtration; tight doors/seals.`, w1:`Use MERV 8 and keep doors open “for more ventilation”.`, w2:`Use fluid safety code to define ISO class.`, hint:`Pressure + HEPA = baseline.` },
+      { t:`Library has cold drafts on occupants.`, ok:`Reposition diffusers and reduce terminal velocities.`, w1:`Reduce outdoor air rate.`, w2:`Use ammonia refrigeration code for diffuser selection.`, hint:`Proper diffusion avoids drafts.` },
+      { t:`Meeting rooms with high CO₂ during peaks.`, ok:`Adopt CO₂-based DCV and balance minimums.`, w1:`Only raise temp setpoint.`, w2:`Use fluid safety class to set CO₂ targets.`, hint:`DCV matches IAQ to occupancy.` },
+      { t:`Ground-floor lobby gets infiltration from door cycling.`, ok:`Vestibule/air curtain and slight positive interior pressure; seals working.`, w1:`Make interior negative to “pull air in.”`, w2:`Use fluid safety code to compute infiltration.`, hint:`Control door airflows.` },
+      { t:`Reception area smells from nearby restrooms.`, ok:`Provide adequate dedicated restroom exhaust and check traps.`, w1:`Perfume and reduce exhaust to save energy.`, w2:`Use comfort standard to set toilet exhaust.`, hint:`Dirty spaces need directional airflow.` },
+      { t:`Tall auditorium with thermal stratification.`, ok:`Destratification/high returns and uniform supply.`, w1:`Lower global setpoint without changing diffusion.`, w2:`Use OA minimum formula to size stage height.`, hint:`Treat stratification with airflow design.` },
+      { t:`Small IT room with a server hotspot.`, ok:`Duct cold air to load and seal bypass openings.`, w1:`Add heater to “balance” temperature.`, w2:`Use energy code to place racks.`, hint:`Bring air to where it’s needed.` },
+      { t:`Residence has odors rising from basement via stairs.`, ok:`Light exhaust in basement, seal penetrations, auto-closing door.`, w1:`Pressurize living room negative.`, w2:`Use fluid safety class for basement exhaust rate.`, hint:`Pressure gradient solves migration.` },
+      { t:`Gym air feels heavy after peak hours.`, ok:`Increase ACH, improve filtration, and use DCV/purge.`, w1:`Close OA intakes to save energy.`, w2:`Use fluid safety class to choose MERV.`, hint:`High bioeffluent needs renewal.` },
+      { t:`Parking garage ventilation design.`, ok:`Use CO/NO₂ sensors to modulate fans and meet code purge rates.`, w1:`Rely on a fixed low speed at all times.`, w2:`Use comfort temperature standard to set garage ACH.`, hint:`Demand-control by gas sensors.` },
+      { t:`Commercial kitchen fire/grease risk.`, ok:`Type I hoods with proper CFM, grease-rated ducts, and suppression.`, w1:`General OA alone will capture grease.`, w2:`Comfort standard determines hood class.`, hint:`Grease capture ≠ general ventilation.` },
+      { t:`Indoor pool (natatorium) corrosion and odor.`, ok:`Maintain ~50–60% RH, supply to deck, exhaust at surface, slight negative to adjacent spaces.`, w1:`Max OA with no dehumidification.`, w2:`Use office comfort targets for pool RH.`, hint:`Specialized airflow + dehumidification.` },
+      { t:`Airborne isolation room design.`, ok:`Negative pressure with anteroom and HEPA-filtered exhaust.`, w1:`Positive pressure to corridors.`, w2:`Use general office ACH as the sole criterion.`, hint:`Containment needs negative pressure.` },
+      { t:`Operating room pressurization.`, ok:`Positive to corridors with HEPA and tight control of temp/RH.`, w1:`Neutral to corridors to save energy.`, w2:`Use parking-garage rules for ACH.`, hint:`ORs are kept positive & clean.` },
+      { t:`Battery-charging room with hydrogen risk.`, ok:`Provide dedicated exhaust high in the space per charging rate; minimize ignition sources.`, w1:`Rely only on general OA of the building.`, w2:`Use comfort cooling standard to size exhaust.`, hint:`Ventilate at the top; consider H₂.` },
+      { t:`Warehouse heating bills high; stratification.`, ok:`Use HVLS/destrat fans and adjust supply strategy.`, w1:`Raise supply temp only.`, w2:`Turn off returns completely.`, hint:`Mix layers to reduce losses.` },
+      { t:`Heat pump frosting in winter.`, ok:`Ensure proper airflow and defrost cycle; clear drains/placement.`, w1:`Disable defrost to avoid interruptions.`, w2:`Run on continuous max speed.`, hint:`Defrost is intended behavior.` },
+      { t:`OA economizer not reducing cooling load.`, ok:`Enable enthalpy-based economizer with high-limit and proper sensors.`, w1:`Economizer fixed open year-round.`, w2:`Economizer never allowed to open.`, hint:`Use free cooling when conditions allow.` },
+      { t:`Consider heat recovery on DOAS.`, ok:`Use ERV/HRV to reduce OA load while maintaining IAQ.`, w1:`Bypass ERV to avoid any added pressure drop.`, w2:`Use only recirculation; remove OA.`, hint:`Recovery saves energy with IAQ.` },
+      { t:`Cooling coil fouling, rising ΔP and poor capacity.`, ok:`Clean coils, keep upstream filtration, and verify ΔP and airflow.`, w1:`Increase chilled-water temp only.`, w2:`Remove filters to lower pressure drop.`, hint:`Dirty coils = lost capacity.` },
+      { t:`VAV boxes “hunting.”`, ok:`Commission: tune PID, verify minimum flows, and static-pressure reset.`, w1:`Lock all boxes at maximum.`, w2:`Disable feedback from boxes.`, hint:`Control tuning + good setpoints.` },
+      { t:`Pumps oversized; poor control.`, ok:`Trim impeller or use VFD; balance; implement DP reset.`, w1:`Throttle discharge valve permanently.`, w2:`Run constant speed at 100%.`, hint:`Right-size or vary the speed.` },
+      { t:`Chilled-water ΔT is too low (“low ΔT syndrome”).`, ok:`Fix bypassing, valve authority, coil reset, and balance flows.`, w1:`Increase primary flow endlessly.`, w2:`Close all bypasses and all valves.`, hint:`Address coil performance & control.` },
+      { t:`High condenser-water approach temp.`, ok:`Clean towers/condensers, ensure treatment and design flow.`, w1:`Raise chiller lift permanently.`, w2:`Disable tower fans.`, hint:`Heat rejection needs maintenance.` },
+      { t:`VRF and refrigerant concentration limit (RCL).`, ok:`Ensure RCL compliance (volume/leak detection/segmentation).`, w1:`Ignore volume; RCL applies only to chillers.`, w2:`Rely on open windows as mitigation.`, hint:`Check room volume vs charge.` },
+      { t:`High duct leakage found on test.`, ok:`Upgrade sealing class, repair leaks, and re-test TAB.`, w1:`Increase fan speed to compensate.`, w2:`Ignore unless comfort complaints arise.`, hint:`Leakage = wasted capacity/energy.` },
+      { t:`Stair pressurization for smoke control.`, ok:`Pressurize stairs positive with relief paths; verify door opening forces.`, w1:`Negative stairwell to pull smoke out.`, w2:`Seal stairs airtight and over-pressurize.`, hint:`Keep smoke out; doors still operable.` },
+      { t:`UFAD has hotspots and weak throw.`, ok:`Adjust diffuser layout, loads, and plenum sealing; verify supply temps.`, w1:`Switch to ceiling return only.`, w2:`Block floor diffusers randomly.`, hint:`Plenum tightness & layout matter.` },
+      { t:`Radiant floor overheating complaints.`, ok:`Use mixing valve, floor sensors, and reset curves.`, w1:`Raise boiler temp.`, w2:`Disable thermostatic control.`, hint:`Limit surface temperature smartly.` },
+      { t:`Thermostats installed near supply/solar gain.`, ok:`Relocate or average sensors away from drafts/solar.`, w1:`Hide sensors behind curtains.`, w2:`Use return sensor only.`, hint:`Sensors must reflect occupied zone.` },
+      { t:`BAS has no schedules or optimum start.`, ok:`Implement occupancy schedules, night setback, and optimum start/stop.`, w1:`Run at occupied mode 24/7.`, w2:`Disable all scheduling to avoid errors.`, hint:`Scheduling saves a lot.` },
+      { t:`Boilers short-cycling at low loads.`, ok:`Add buffer volume, stage boilers, and reset SWT.`, w1:`Force both boilers on always.`, w2:`Disable staging logic.`, hint:`Longer, fewer cycles are better.` },
+      { t:`HPWH in tight mechanical room.`, ok:`Provide make-up air and manage cooling effect on room.`, w1:`Seal the room completely.`, w2:`Exhaust all air to outdoors with no intake.`, hint:`HPWH cools the room; plan airflow.` },
+      { t:`Rooftop unit nuisance trips.`, ok:`Verify rotation/phasing, airflow proving (filters/fans), freezestat, and low-ambient kits.`, w1:`Bypass safeties to keep it running.`, w2:`Oversize fuses only.`, hint:`Safeties trip for real reasons.` },
+      { t:`DOAS sizing for classrooms.`, ok:`Size OA by people + area; use MERV 13; ensure supply/relief paths.`, w1:`Size only by floor area.`, w2:`Eliminate OA to reduce cost.`, hint:`Both people and area count.` }
     ];
 
-    function shuffle(a){
-      return a.map(v=>({v, r:Math.random()})).sort((x,y)=>x.r-y.r).map(e=>e.v);
-    }
+    function shuffle(a){ return a.map(v=>({v, r:Math.random()})).sort((x,y)=>x.r-y.r).map(e=>e.v); }
 
-    function openModal(){
-      modal.style.display = 'flex';
-      renderStart();
-    }
-    function closeModal(){
-      modal.style.display = 'none';
-    }
-
+    function openModal(){ modal.style.display = 'flex'; renderStart(); }
+    function closeModal(){ modal.style.display = 'none'; }
     function ensureLogin(){
       const addr = getAddr();
-      if(!addr){
-        alert('Please connect your wallet first.');
-        return false;
-      }
+      if(!addr){ alert('Please connect your wallet first.'); return false; }
       return true;
     }
 
@@ -862,14 +825,11 @@ function updateUI(){
       const addr = getAddr();
       const w = getWindow(addr);
       if((w.count||0) >= 3){
-        const left = w.start + FOUR_H - now();
-        const h = Math.ceil(left/3600000);
-        alert('Limit reached: wait until the current 4‑hour window resets.');
+        alert('Limit reached: wait until the current 4-hour window resets.');
         return;
       }
       openModal();
     });
-
     closeBtn.addEventListener('click', closeModal);
 
     // stages
@@ -879,7 +839,11 @@ function updateUI(){
 
     function renderStart(){
       currentIdx = 0; score = 0;
-      roundQs = []; const addrX = getAddr(); const wX = getWindow(addrX); const drawn = drawUniqueIndices(addrX, wX.start, QUESTIONS.length, 5); for(const di of drawn){ roundQs.push(QUESTIONS[di]); }
+      roundQs = [];
+      const addrX = getAddr();
+      const wX = getWindow(addrX);
+      const drawn = drawUniqueIndicesStrict(addrX, wX.start, QUESTIONS.length, 5);
+      for(const di of drawn){ roundQs.push(QUESTIONS[di]); }
       stage.innerHTML = `
         <h3>Balbi Quiz — Round</h3>
         <p>Answer 5 quick questions. ≥60 points grants a reward. Each correct = 20 pts.</p>
@@ -915,9 +879,7 @@ function updateUI(){
       stage.querySelectorAll('.opts button').forEach((btn,idx)=>{
         btn.onclick = ()=>{ handleAnswer(opts[idx].ok); };
       });
-      document.getElementById('showHint').onclick = ()=>{
-        const h = document.getElementById('hint'); h.style.display = 'block';
-      };
+      document.getElementById('showHint').onclick = ()=>{ const h = document.getElementById('hint'); h.style.display = 'block'; };
       document.getElementById('quit').onclick = closeModal;
     }
 
@@ -928,14 +890,12 @@ function updateUI(){
       else renderResult();
     }
 
-    
-function rewardFromScore(sc){
-  if (sc < 60) return 0;
-  if (sc >= 100) return 1.0;
-  const tens = Math.floor(sc / 10); // 60->6, 70->7, 80->8, 90->9
-  return Math.min(1.0, tens / 10);
-}
-
+    function rewardFromScore(sc){
+      if (sc < 60) return 0;
+      if (sc >= 100) return 1.0;
+      const tens = Math.floor(sc / 10); // 60->6, 70->7, 80->8, 90->9
+      return Math.min(1.0, tens / 10);
+    }
 
     function renderResult(){
       const addr = getAddr();
@@ -943,7 +903,6 @@ function rewardFromScore(sc){
       const reward = rewardFromScore(score);
       const passed = reward > 0;
       if(passed) addAccum(addr, reward);
-      // consume a round in the window
       incWindowCount(addr);
       updateUI();
 
@@ -958,7 +917,7 @@ function rewardFromScore(sc){
       document.getElementById('playAgain').onclick = ()=>{
         const w2 = getWindow(addr);
         if((w2.count||0) >= 3){
-          alert('Limit reached for this 4‑hour window.');
+          alert('Limit reached for this 4-hour window.');
           closeModal();
           return;
         }
@@ -968,74 +927,65 @@ function rewardFromScore(sc){
     }
 
     // Claim logic (same backend endpoint as faucet; we include amount + source)
-    
-    
-claimBtn.addEventListener('click', async ()=>{
-  const addr = getAddr();
-  if(!addr){ alert('Please connect your wallet first.'); return; }
-  const amount = getAccum(addr);
-  if(!(amount>0)) return;
+    claimBtn.addEventListener('click', async ()=>{
+      const addr = getAddr();
+      if(!addr){ alert('Please connect your wallet first.'); return; }
+      const amount = getAccum(addr);
+      if(!(amount>0)) return;
 
-  claimBtn.disabled = true;
-  claimMsg.style.display = 'none';
-  claimHash.style.display = 'none';
-  claimBtn.textContent = 'Claiming...';
+      claimBtn.disabled = true;
+      claimMsg.style.display = 'none';
+      claimHash.style.display = 'none';
+      claimBtn.textContent = 'Claiming...';
 
-  // Encode amount with 18 decimals (e.g., 0.6 -> "600000000000000000")
-  function toWeiStr(x){
-    const s = (Math.round(x*100)/100).toFixed(2); // keep two decimals per game spec
-    const parts = s.split('.');
-    const intp = parts[0];
-    const fracp = (parts[1] || '00');
-    const frac2 = (fracp + '00').slice(0,2); // ensure 2 digits
-    return intp + frac2 + '0000000000000000'; // * 10^(18-2) = 10^16
-  }
-  const amountWei = toWeiStr(amount);
+      function toWeiStr(x){
+        const s = (Math.round(x*100)/100).toFixed(2);
+        const parts = s.split('.');
+        const intp = parts[0];
+        const fracp = (parts[1] || '00');
+        const frac2 = (fracp + '00').slice(0,2);
+        return intp + frac2 + '0000000000000000'; // 10^(18-2)
+      }
+      const amountWei = toWeiStr(amount);
 
-  try {
-    const res = await fetch((REPLIT_URL_QUIZ || '') + '/quiz-claim', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address: addr, amount_decimals: 18, amount_wei: amountWei, amount: Number(amount.toFixed(2)), source: 'quiz' }),
-      mode: 'cors',
-      credentials: 'omit'
+      try {
+        const res = await fetch((REPLIT_URL_QUIZ || '') + '/quiz-claim', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: addr, amount_decimals: 18, amount_wei: amountWei, amount: Number(amount.toFixed(2)), source: 'quiz' }),
+          mode: 'cors',
+          credentials: 'omit'
+        });
+        const data = await res.json().catch(()=>({}));
+        if(!res.ok){
+          throw new Error(data && data.error ? data.error : 'quiz-claim rejected');
+        }
+        setLastClaim(addr, now());
+        setAccum(addr, 0);
+        claimMsg.textContent = 'Quiz tokens sent successfully!';
+        claimMsg.style.display = 'block';
+        if(data && data.txHash){
+          claimHash.textContent = 'Tx Hash: ' + data.txHash;
+          claimHash.style.display = 'block';
+        }
+      } catch(e){
+        claimMsg.textContent = 'Quiz claim failed: ' + (e.message || 'unknown error') + '. '
+          + 'Your backend must implement POST /quiz-claim and honor the passed amount.';
+        claimMsg.style.display = 'block';
+      } finally {
+        claimBtn.textContent = `Claim ${fmt(getAccum(getAddr()))} BALBI`;
+        updateUI();
+      }
     });
-    const data = await res.json().catch(()=>({}));
-    if(!res.ok){
-      throw new Error(data && data.error ? data.error : 'quiz-claim rejected');
-    }
-    setLastClaim(addr, now());
-    setAccum(addr, 0);
-    claimMsg.textContent = 'Quiz tokens sent successfully!';
-    claimMsg.style.display = 'block';
-    if(data && data.txHash){
-      claimHash.textContent = 'Tx Hash: ' + data.txHash;
-      claimHash.style.display = 'block';
-    }
-  } catch(e){
-    claimMsg.textContent = 'Quiz claim failed: ' + (e.message || 'unknown error') + '. '
-      + 'Your backend must implement POST /quiz-claim and honor the passed amount.';
-    claimMsg.style.display = 'block';
-  } finally {
-    claimBtn.textContent = `Claim ${fmt(getAccum(getAddr()))} BALBI`;
-    updateUI();
-  }
-});
 
-
-    // Initialize on load/login changes
-    
-    function initOnce(){
-      updateUI(); startTick();
-    }
+    function initOnce(){ updateUI(); startTick(); }
 
     // Observe wallet visibility / address changes to refresh UI once logged in
     const walletBox = document.getElementById('walletAddress');
-    const obs = new MutationObserver(()=>{ updateUI(); });
-    if(addressEl) obs.observe(addressEl, { childList:true, subtree:true, characterData:true });
-    if(walletBox) obs.observe(walletBox, { attributes:true, attributeFilter:['style','class'] });
+    const obs2 = new MutationObserver(()=>{ updateUI(); });
+    if(addressEl) obs2.observe(addressEl, { childList:true, subtree:true, characterData:true });
+    if(walletBox) obs2.observe(walletBox, { attributes:true, attributeFilter:['style','class'] });
 
-    // Kick off
     document.addEventListener('DOMContentLoaded', initOnce);
     updateUI();
     initOnce();
