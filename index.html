@@ -811,7 +811,7 @@
       { t:`Boilers short-cycling at low loads.`, ok:`Add buffer volume, stage boilers, and reset SWT.`, w1:`Force both boilers on always.`, w2:`Disable staging logic.`, hint:`Longer, fewer cycles are better.` },
       { t:`HPWH in tight mechanical room.`, ok:`Provide make-up air and manage cooling effect on room.`, w1:`Seal the room completely.`, w2:`Exhaust all air to outdoors with no intake.`, hint:`HPWH cools the room; plan airflow.` },
       { t:`Rooftop unit nuisance trips.`, ok:`Verify rotation/phasing, airflow proving (filters/fans), freezestat, and low-ambient kits.`, w1:`Bypass safeties to keep it running.`, w2:`Oversize fuses only.`, hint:`Safeties trip for real reasons.` },
-      { t:`DOAS sizing for classrooms.`, ok:`Size OA by people + area; use MERV 13; ensure supply/relief paths.`, w1:`Size only by floor area.`, w2:`Eliminate OA to reduce cost.` },
+      { t:`DOAS sizing for classrooms.`, ok:`Size OA by people + area; use MERV 13; ensure supply/relief paths.`, w1:`Size only by floor area.`, w2:`Eliminate OA to reduce cost.` }
     ];
 
     function shuffle(a){ return a.map(v=>({v, r:Math.random()})).sort((x,y)=>x.r-y.r).map(e=>e.v); }
@@ -931,7 +931,9 @@
       document.getElementById('close').onclick = closeModal;
     }
 
-    // Claim logic (mesmo backend endpoint do faucet; inclui valor do quiz)
+    /* ============================
+       CLAIM DO QUIZ (do MODELO)
+       ============================ */
     claimBtn.addEventListener('click', async ()=>{
       const addr = getAddr();
       if(!addr){ alert('Please connect your wallet first.'); return; }
