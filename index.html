@@ -954,7 +954,7 @@
       const amountWei = toWeiStr(amount);
 
       try {
-        const res = await fetch((REPLIT_URL_QUIZ || '') + '/claim', {  /* <<< ÚNICA MUDANÇA AQUI */
+        const res = await fetch((REPLIT_URL_QUIZ || '') + '/quiz-claim', {  /* <<< ÚNICA MUDANÇA AQUI */
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
