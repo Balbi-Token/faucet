@@ -811,7 +811,7 @@
       { t:`Boilers short-cycling at low loads.`, ok:`Add buffer volume, stage boilers, and reset SWT.`, w1:`Force both boilers on always.`, w2:`Disable staging logic.`, hint:`Longer, fewer cycles are better.` },
       { t:`HPWH in tight mechanical room.`, ok:`Provide make-up air and manage cooling effect on room.`, w1:`Seal the room completely.`, w2:`Exhaust all air to outdoors with no intake.`, hint:`HPWH cools the room; plan airflow.` },
       { t:`Rooftop unit nuisance trips.`, ok:`Verify rotation/phasing, airflow proving (filters/fans), freezestat, and low-ambient kits.`, w1:`Bypass safeties to keep it running.`, w2:`Oversize fuses only.`, hint:`Safeties trip for real reasons.` },
-      { t:`DOAS sizing for classrooms.`, ok:`Size OA by people + area; use MERV 13; ensure supply/relief paths.`, w1:`Size only by floor area.`, w2:`Eliminate OA to reduce cost.`, hint:`Both people and area count.` }
+      { t:`DOAS sizing for classrooms.`, ok:`Size OA by people + area; use MERV 13; ensure supply/relief paths.`, w1:`Size only by floor area.`, w2:`Eliminate OA to reduce cost.` },
     ];
 
     function shuffle(a){ return a.map(v=>({v, r:Math.random()})).sort((x,y)=>x.r-y.r).map(e=>e.v); }
@@ -931,7 +931,7 @@
       document.getElementById('close').onclick = closeModal;
     }
 
-    // Claim logic (usar mesmo endpoint do faucet)
+    // Claim logic (mesmo backend endpoint do faucet; inclui valor do quiz)
     claimBtn.addEventListener('click', async ()=>{
       const addr = getAddr();
       if(!addr){ alert('Please connect your wallet first.'); return; }
@@ -954,16 +954,10 @@
       const amountWei = toWeiStr(amount);
 
       try {
-        const res = await fetch((REPLIT_URL_QUIZ || '') + '/quiz-claim', {  /* <<< ÚNICA MUDANÇA AQUI */
+        const res = await fetch((REPLIT_URL_QUIZ || '') + '/quiz-claim', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            address: addr,
-            amount_decimals: 18,
-            amount_wei: amountWei,
-            amount: Number(amount.toFixed(2)),
-            source: 'quiz'
-          }),
+          body: JSON.stringify({ address: addr, amount_decimals: 18, amount_wei: amountWei, amount: Number(amount.toFixed(2)), source: 'quiz' }),
           mode: 'cors',
           credentials: 'omit'
         });
