@@ -376,19 +376,13 @@
     </div>
 
     <div id="walletInfo" style="display:none;">
-      <div class="panel" id="quizPanel" style="margin-top:14px;">
-        <h2>Quiz — Play & Earn</h2>
-        <p>Up to <strong>3 rounds</strong> per 4-hour window. Each passed round (≥60 pts) adds
-           <strong>0.6–1.0 BALBI</strong> to your quiz balance based on score. You can claim the accumulated
-           quiz balance once per 4 hours.</p>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button id="openQuizBtn" type="button" style="background:linear-gradient(90deg,var(--accent),var(--accent2));color:#000;font-weight:800;border:none;border-radius:12px;padding:10px 14px;box-shadow:0 0 16px rgba(99,179,237,.65),0 0 30px rgba(99,179,237,.25);text-shadow:0 0 6px rgba(255,255,255,.35);">Play Quiz</button>
-          <button id="quizClaimBtn" type="button" style="background:rgba(255,255,255,.06);color:#e6eefb;border:1px solid #335aa833;border-radius:12px;padding:10px 14px;box-shadow:0 0 12px rgba(46,105,189,.35);">Claim 0.0 BALBI</button>
-        </div>
-        <div id="quizRoundInfo" class="claim-timer" style="margin-top:6px;">Rounds this window: 0/3</div>
-        <div id="quizClaimTimer" class="claim-timer"></div>
-        <div id="quizClaimMsg" class="claim-success" style="display:none;"></div>
-        <div id="quizClaimHash" class="claim-hash" style="display:none;"></div>
+      <div class="panel" style="margin-top:14px;">
+        <h2>Faucet</h2>
+        <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
+        <button id="claimButton" type="button" disabled>Claim Balbi</button>
+        <div id="claimTimer" class="claim-timer"></div>
+        <div id="claimSuccess" class="claim-success">Tokens sent successfully!</div>
+        <div id="claimHash" class="claim-hash" style="display:none;"></div>
       </div>
 
       <div class="panel">
@@ -404,13 +398,19 @@
         </div>
       </div>
 
-      <div class="panel" style="margin-top:14px;">
-        <h2>Faucet</h2>
-        <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
-        <button id="claimButton" type="button" disabled>Claim Balbi</button>
-        <div id="claimTimer" class="claim-timer"></div>
-        <div id="claimSuccess" class="claim-success">Tokens sent successfully!</div>
-        <div id="claimHash" class="claim-hash" style="display:none;"></div>
+      <div class="panel" id="quizPanel" style="margin-top:14px;">
+        <h2>Quiz — Play & Earn</h2>
+        <p>Up to <strong>3 rounds</strong> per 4-hour window. Each passed round (≥60 pts) adds
+           <strong>0.06–0.1 BALBI</strong> to your quiz balance based on score. You can claim the accumulated
+           quiz balance once per 4 hours.</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button id="openQuizBtn" type="button" style="background:linear-gradient(90deg,var(--accent),var(--accent2));color:#000;font-weight:800;border:none;border-radius:12px;padding:10px 14px;box-shadow:0 0 16px rgba(99,179,237,.65),0 0 30px rgba(99,179,237,.25);text-shadow:0 0 6px rgba(255,255,255,.35);">Play Quiz</button>
+          <button id="quizClaimBtn" type="button" style="background:rgba(255,255,255,.06);color:#e6eefb;border:1px solid #335aa833;border-radius:12px;padding:10px 14px;box-shadow:0 0 12px rgba(46,105,189,.35);">Claim 0.0 BALBI</button>
+        </div>
+        <div id="quizRoundInfo" class="claim-timer" style="margin-top:6px;">Rounds this window: 0/3</div>
+        <div id="quizClaimTimer" class="claim-timer"></div>
+        <div id="quizClaimMsg" class="claim-success" style="display:none;"></div>
+        <div id="quizClaimHash" class="claim-hash" style="display:none;"></div>
       </div>
 
       <p style="margin-top:16px;">
@@ -475,6 +475,8 @@
     const connectBtn = document.getElementById('connectButton');
     const addrBox = document.getElementById('addressDisplay');
     const walletBox = document.getElementById('walletAddress');
+    const quizClaimHash = document.getElementById('quizClaimHash');
+    const quizClaimMsg = document.getElementById('quizClaimMsg');
 
     function showOverlay(){
       if (!overlay) return;
@@ -494,6 +496,9 @@
         showOverlay();
         // segurança: garante que some em até 12s, mesmo se algo travar
         setTimeout(()=> overlay.classList.remove('show'), 12000);
+        // Limpa quiz claim hash e mensagem ao iniciar novo login
+        if (quizClaimHash) quizClaimHash.style.display = 'none';
+        if (quizClaimMsg) quizClaimMsg.style.display = 'none';
       });
     }
 
@@ -892,9 +897,9 @@
 
     function rewardFromScore(sc){
       if (sc < 60) return 0;
-      if (sc >= 100) return 1.0;
+      if (sc >= 100) return 0.1;
       const tens = Math.floor(sc / 10); // 60->6, 70->7, 80->8, 90->9
-      return Math.min(1.0, tens / 10);
+      return Math.min(0.1, tens / 100);
     }
 
     function renderResult(){
