@@ -376,19 +376,22 @@
     </div>
 
     <div id="walletInfo" style="display:none;">
-
-      <!-- ======= Faucet PRIMEIRO ======= -->
-      <div class="panel" style="margin-top:14px;">
-        <h2>Faucet</h2>
-        <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
-        <button id="claimButton" type="button" disabled>Claim Balbi</button>
-        <div id="claimTimer" class="claim-timer"></div>
-        <div id="claimSuccess" class="claim-success">Tokens sent successfully!</div>
-        <div id="claimHash" class="claim-hash" style="display:none;"></div>
+      <div class="panel" id="quizPanel" style="margin-top:14px;">
+        <h2>Quiz — Play & Earn</h2>
+        <p>Up to <strong>3 rounds</strong> per 4-hour window. Each passed round (≥60 pts) adds
+           <strong>0.6–1.0 BALBI</strong> to your quiz balance based on score. You can claim the accumulated
+           quiz balance once per 4 hours.</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button id="openQuizBtn" type="button" style="background:linear-gradient(90deg,var(--accent),var(--accent2));color:#000;font-weight:800;border:none;border-radius:12px;padding:10px 14px;box-shadow:0 0 16px rgba(99,179,237,.65),0 0 30px rgba(99,179,237,.25);text-shadow:0 0 6px rgba(255,255,255,.35);">Play Quiz</button>
+          <button id="quizClaimBtn" type="button" style="background:rgba(255,255,255,.06);color:#e6eefb;border:1px solid #335aa833;border-radius:12px;padding:10px 14px;box-shadow:0 0 12px rgba(46,105,189,.35);">Claim 0.0 BALBI</button>
+        </div>
+        <div id="quizRoundInfo" class="claim-timer" style="margin-top:6px;">Rounds this window: 0/3</div>
+        <div id="quizClaimTimer" class="claim-timer"></div>
+        <div id="quizClaimMsg" class="claim-success" style="display:none;"></div>
+        <div id="quizClaimHash" class="claim-hash" style="display:none;"></div>
       </div>
 
-      <!-- Balances -->
-      <div class="panel" style="margin-top:14px;">
+      <div class="panel">
         <h2>Balances</h2>
         <p class="tiny-note" style="margin-top:6px;font-size:11px;color:#ccc;opacity:.6">⏳ Note: balance may take a moment to update after a claim.</p>
         <div class="balance-item">
@@ -401,20 +404,13 @@
         </div>
       </div>
 
-      <!-- ======= Quiz DEPOIS ======= -->
-      <div class="panel" id="quizPanel" style="margin-top:14px;">
-        <h2>Quiz — Play & Earn</h2>
-        <p>Up to <strong>3 rounds</strong> per 4-hour window. Each passed round (≥60 pts) adds
-           <strong>0.06–0.10 BALBI</strong> to your quiz balance based on score. You can claim the accumulated
-           quiz balance once per 4 hours.</p>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button id="openQuizBtn" type="button" style="background:linear-gradient(90deg,var(--accent),var(--accent2));color:#000;font-weight:800;border:none;border-radius:12px;padding:10px 14px;box-shadow:0 0 16px rgba(99,179,237,.65),0 0 30px rgba(99,179,237,.25);text-shadow:0 0 6px rgba(255,255,255,.35);">Play Quiz</button>
-          <button id="quizClaimBtn" type="button" style="background:rgba(255,255,255,.06);color:#e6eefb;border:1px solid #335aa833;border-radius:12px;padding:10px 14px;box-shadow:0 0 12px rgba(46,105,189,.35);">Claim 0.0 BALBI</button>
-        </div>
-        <div id="quizRoundInfo" class="claim-timer" style="margin-top:6px;">Rounds this window: 0/3</div>
-        <div id="quizClaimTimer" class="claim-timer"></div>
-        <div id="quizClaimMsg" class="claim-success" style="display:none;"></div>
-        <div id="quizClaimHash" class="claim-hash" style="display:none;"></div>
+      <div class="panel" style="margin-top:14px;">
+        <h2>Faucet</h2>
+        <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
+        <button id="claimButton" type="button" disabled>Claim Balbi</button>
+        <div id="claimTimer" class="claim-timer"></div>
+        <div id="claimSuccess" class="claim-success">Tokens sent successfully!</div>
+        <div id="claimHash" class="claim-hash" style="display:none;"></div>
       </div>
 
       <p style="margin-top:16px;">
@@ -811,7 +807,7 @@
       { t:`Boilers short-cycling at low loads.`, ok:`Add buffer volume, stage boilers, and reset SWT.`, w1:`Force both boilers on always.`, w2:`Disable staging logic.`, hint:`Longer, fewer cycles are better.` },
       { t:`HPWH in tight mechanical room.`, ok:`Provide make-up air and manage cooling effect on room.`, w1:`Seal the room completely.`, w2:`Exhaust all air to outdoors with no intake.`, hint:`HPWH cools the room; plan airflow.` },
       { t:`Rooftop unit nuisance trips.`, ok:`Verify rotation/phasing, airflow proving (filters/fans), freezestat, and low-ambient kits.`, w1:`Bypass safeties to keep it running.`, w2:`Oversize fuses only.`, hint:`Safeties trip for real reasons.` },
-      { t:`DOAS sizing for classrooms.`, ok:`Size OA by people + area; use MERV 13; ensure supply/relief paths.`, w1:`Size only by floor area.`, w2:`Eliminate OA to reduce cost.` }
+      { t:`DOAS sizing for classrooms.`, ok:`Size OA by people + area; use MERV 13; ensure supply/relief paths.`, w1:`Size only by floor area.`, w2:`Eliminate OA to reduce cost.`, hint:`Both people and area count.` }
     ];
 
     function shuffle(a){ return a.map(v=>({v, r:Math.random()})).sort((x,y)=>x.r-y.r).map(e=>e.v); }
@@ -894,12 +890,11 @@
       else renderResult();
     }
 
-    // >>> AJUSTE DE PREMIAÇÃO: 0.06/0.07/0.08/0.09/0.10 <<<
     function rewardFromScore(sc){
       if (sc < 60) return 0;
-      if (sc >= 100) return 0.10;
+      if (sc >= 100) return 1.0;
       const tens = Math.floor(sc / 10); // 60->6, 70->7, 80->8, 90->9
-      return Math.min(0.10, tens / 100); // 6→0.06, 7→0.07, 8→0.08, 9→0.09
+      return Math.min(1.0, tens / 10);
     }
 
     function renderResult(){
@@ -931,9 +926,7 @@
       document.getElementById('close').onclick = closeModal;
     }
 
-    /* ============================
-       CLAIM DO QUIZ (do MODELO)
-       ============================ */
+    // Claim logic (same backend endpoint as faucet; we include amount + source)
     claimBtn.addEventListener('click', async ()=>{
       const addr = getAddr();
       if(!addr){ alert('Please connect your wallet first.'); return; }
@@ -987,24 +980,9 @@
 
     function initOnce(){ updateUI(); startTick(); }
 
-    // Observe wallet visibility / address changes para atualizar UI e LIMPAR HASH DO QUIZ em novo login
+    // Observe wallet visibility / address changes to refresh UI once logged in
     const walletBox = document.getElementById('walletAddress');
-    let lastAddrSeen = '';
-    function clearQuizTxUI(){
-      if (claimMsg){ claimMsg.style.display='none'; claimMsg.textContent=''; }
-      if (claimHash){ claimHash.style.display='none'; claimHash.textContent=''; }
-    }
-    function checkAddrChange(){
-      const cur = getAddr();
-      if (cur !== lastAddrSeen){
-        lastAddrSeen = cur;
-        clearQuizTxUI(); // << limpar hash/msg do quiz ao trocar de carteira
-      }
-    }
-    const obs2 = new MutationObserver(()=>{
-      updateUI();
-      checkAddrChange();
-    });
+    const obs2 = new MutationObserver(()=>{ updateUI(); });
     if(addressEl) obs2.observe(addressEl, { childList:true, subtree:true, characterData:true });
     if(walletBox) obs2.observe(walletBox, { attributes:true, attributeFilter:['style','class'] });
 
