@@ -26,16 +26,14 @@
       padding:24px 18px 28px; overflow-x:hidden;
     }
 
-    /* INTRO (abertura) — cobre a página inteira e aparece sozinha */
+    /* INTRO */
     .intro{
       position:fixed; inset:0; width:100%; height:100dvh;
       display:grid; place-items:center;
       z-index:10000;
       background: linear-gradient(140deg, var(--bg1), var(--bg2), var(--bg1));
       background-size: 240% 240%;
-      animation:
-        introFade 1.8s ease forwards,
-        bgMove 24s ease-in-out infinite;
+      animation:introFade 1.8s ease forwards, bgMove 24s ease-in-out infinite;
     }
     .intro::before{
       content:""; position:absolute; inset:0;
@@ -45,17 +43,8 @@
     @keyframes introFade{ 0%{opacity:1} 85%{opacity:1} 100%{opacity:0; visibility:hidden} }
     @keyframes bgMove{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 
-    .intro-wrap{
-      width:clamp(160px, 26vmin, 320px);
-      aspect-ratio:1/1; position:relative;
-      transform: translateY(-16vh);
-      animation:introPop .9s cubic-bezier(.2,.8,.2,1) forwards;
-    }
-    @keyframes introPop{
-      0%{opacity:0; transform:translateY(-16vh) scale(.6) rotate(-8deg)}
-      60%{opacity:1; transform:translateY(-16vh) scale(1.06)}
-      100%{transform:translateY(-16vh) scale(1)}
-    }
+    .intro-wrap{ width:clamp(160px, 26vmin, 320px); aspect-ratio:1/1; position:relative; transform: translateY(-16vh); animation:introPop .9s cubic-bezier(.2,.8,.2,1) forwards; }
+    @keyframes introPop{ 0%{opacity:0; transform:translateY(-16vh) scale(.6) rotate(-8deg)} 60%{opacity:1; transform:translateY(-16vh) scale(1.06)} 100%{transform:translateY(-16vh) scale(1)} }
     .intro svg{width:100%; height:100%}
     .intro .hx-outline{stroke:url(#introStroke); stroke-width:8; fill:none; stroke-linejoin:round; filter:drop-shadow(0 8px 28px rgba(99,179,237,.25))}
     .intro .vertex{fill:url(#introStroke)}
@@ -143,15 +132,8 @@
       background:linear-gradient(90deg,#6b7280,#9ca3af); color:#eee; box-shadow:none;
       cursor:not-allowed; opacity:.95;
     }
-    #claimButton[disabled]{
-      background:linear-gradient(90deg,#6b7280,#9ca3af);
-      color:#eee; box-shadow:none; cursor:not-allowed; opacity:.95; pointer-events:none;
-    }
-    #claimButton:not([disabled]){
-      background:linear-gradient(90deg,#39ff14,#00ffa3);
-      color:#000; box-shadow:0 0 20px rgba(57,255,20,.35);
-      cursor:pointer;
-    }
+    #claimButton[disabled]{ background:linear-gradient(90deg,#6b7280,#9ca3af); color:#eee; box-shadow:none; cursor:not-allowed; opacity:.95; pointer-events:none; }
+    #claimButton:not([disabled]){ background:linear-gradient(90deg,#39ff14,#00ffa3); color:#000; box-shadow:0 0 20px rgba(57,255,20,.35); cursor:pointer; }
     #claimButton::before{
       content:""; position:absolute; top:-60%; left:-60%; width:220%; height:220%;
       background:radial-gradient(circle,rgba(255,255,255,.22) 0%, transparent 60%);
@@ -167,35 +149,19 @@
     .faq h2{text-align:center; font-size:22px; color:#8ec7ff; text-shadow:0 0 8px rgba(99,179,237,.4); margin-bottom:14px}
     .faq-item{background:rgba(255,255,255,.05); border-radius:12px; padding:16px 18px; color:#dde6ff; margin-bottom:12px}
 
-    .footer{
-      width:100%; text-align:center; color:#a9b8d8; font-size:12px;
-      margin-top:24px; padding-bottom:72px;
-    }
+    .footer{ width:100%; text-align:center; color:#a9b8d8; font-size:12px; margin-top:24px; padding-bottom:72px; }
     .links a{color:#8ec7ff; text-decoration:none; margin:0 10px}
     .links a:hover{text-shadow:0 0 8px rgba(142,199,255,.8)}
 
     #cookieConsent{position:fixed; bottom:0; width:100%; background:rgba(20,20,40,.95); color:#fff; text-align:center; padding:15px 20px; display:none; z-index:1000; box-shadow:0 -2px 10px rgba(0, 136, 255, .3)}
     #acceptCookiesButton{margin-top:10px; padding:8px 16px; border-radius:8px; border:none; background:linear-gradient(90deg,#2b6cb0,#63b3ed); color:#000; font-weight:bold; cursor:pointer;}
 
-    /* LOADING overlay (pós-login) */
-    .loading{
-      position:fixed; inset:0; width:100%; height:100dvh;
-      z-index:9998; display:none; place-items:center;
-      backdrop-filter: blur(6px);
-      background: radial-gradient(1000px 600px at 50% -10%, rgba(99,179,237,.12), transparent 70%);
-      animation:loadingFadeIn .2s ease-out;
-    }
+    /* LOADING pós-login */
+    .loading{ position:fixed; inset:0; width:100%; height:100dvh; z-index:9998; display:none; place-items:center; backdrop-filter: blur(6px); background: radial-gradient(1000px 600px at 50% -10%, rgba(99,179,237,.12), transparent 70%); animation:loadingFadeIn .2s ease-out; }
     .loading.show{display:grid;}
     @keyframes loadingFadeIn{ from{opacity:0} to{opacity:1} }
-
-    .loading-wrap{
-      width:clamp(150px, 22vmin, 260px); aspect-ratio:1/1; position:relative;
-      transform:translateY(-7vh);
-      animation:loadingPop .45s cubic-bezier(.2,.8,.2,1)
-    }
-    @media (max-width: 480px){
-      .loading-wrap{ transform:translateY(-5vh); }
-    }
+    .loading-wrap{ width:clamp(150px, 22vmin, 260px); aspect-ratio:1/1; position:relative; transform:translateY(-7vh); animation:loadingPop .45s cubic-bezier(.2,.8,.2,1) }
+    @media (max-width: 480px){ .loading-wrap{ transform:translateY(-5vh); } }
     @keyframes loadingPop{ from{transform:translateY(-7vh) scale(.92); opacity:.6} to{transform:translateY(-7vh) scale(1); opacity:1} }
     .loading svg{width:100%; height:100%}
     .loading .outline{stroke:url(#loadStroke); stroke-width:7; fill:none; stroke-linejoin:round; filter:drop-shadow(0 8px 20px rgba(99,179,237,.25))}
@@ -220,27 +186,11 @@
     }
     
 /* v9c: strict removal of scrollbars in quiz modal */
-#quizModal {
-  overflow: hidden !important;
-  max-height: 100vh !important;
-  max-width: 100vw !important;
-}
-#quizModal .quiz-card {
-  overflow: visible !important;
-  max-height: none !important;
-  max-width: 100% !important;
-  padding-right: 20px;
-  box-sizing: border-box;
-}
-#quizModal, #quizModal * {
-  scrollbar-width: none !important;
-}
-#quizModal::-webkit-scrollbar,
-#quizModal *::-webkit-scrollbar {
-  display: none !important;
-}
-
-</style>
+#quizModal { overflow: hidden !important; max-height: 100vh !important; max-width: 100vw !important; }
+#quizModal .quiz-card { overflow: visible !important; max-height: none !important; max-width: 100% !important; padding-right: 20px; box-sizing: border-box; }
+#quizModal, #quizModal * { scrollbar-width: none !important; }
+#quizModal::-webkit-scrollbar, #quizModal *::-webkit-scrollbar { display: none !important; }
+  </style>
 </head>
 <body>
 
@@ -288,7 +238,7 @@
       <use href="#loadHex" class="outline"></use>
       <use href="#loadHex" class="dash"></use>
       <circle class="v" cx="120" cy="36" r="6"/>
-      <circle class="v" cx="193" cy="78" r="6"/>
+      <circle class="v" cx="193" cy="78"  r="6"/>
       <circle class="v" cx="193" cy="162" r="6"/>
       <circle class="v" cx="120" cy="204" r="6"/>
       <circle class="v" cx="47"  cy="162" r="6"/>
@@ -351,21 +301,12 @@
       <p class="subtitle">Enter your private key to access your wallet. Your data is not stored.</p>
     </div>
 
-    <!-- Honeypots contra autofill -->
+    <!-- Honeypots -->
     <input type="text" autocomplete="username" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0">
     <input type="password" autocomplete="current-password" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0">
 
     <div id="loginSection">
-      <input
-        type="text"
-        id="privateKeyInput"
-        placeholder="Your private key here (0x...)"
-        inputmode="text"
-        autocomplete="off"
-        autocapitalize="off"
-        spellcheck="false"
-        name="pk_field"
-      >
+      <input type="text" id="privateKeyInput" placeholder="Your private key here (0x...)" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" name="pk_field">
       <button id="connectButton" type="button">Access Wallet</button>
     </div>
 
@@ -376,8 +317,7 @@
     </div>
 
     <div id="walletInfo" style="display:none;">
-
-      <!-- ======= Faucet PRIMEIRO ======= -->
+      <!-- 1) Faucet PRIMEIRO -->
       <div class="panel" style="margin-top:14px;">
         <h2>Faucet</h2>
         <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
@@ -387,20 +327,15 @@
         <div id="claimHash" class="claim-hash" style="display:none;"></div>
       </div>
 
-      <div class="panel" style="margin-top:14px;">
+      <!-- 2) Balances -->
+      <div class="panel">
         <h2>Balances</h2>
         <p class="tiny-note" style="margin-top:6px;font-size:11px;color:#ccc;opacity:.6">⏳ Note: balance may take a moment to update after a claim.</p>
-        <div class="balance-item">
-          <span>BALBI Balance</span>
-          <span id="balbiBalance" class="balance-value">...</span>
-        </div>
-        <div class="balance-item">
-          <span>USDC Balance</span>
-          <span id="usdcBalance"  class="balance-value">...</span>
-        </div>
+        <div class="balance-item"><span>BALBI Balance</span><span id="balbiBalance" class="balance-value">...</span></div>
+        <div class="balance-item"><span>USDC Balance</span><span id="usdcBalance" class="balance-value">...</span></div>
       </div>
 
-      <!-- ======= Quiz DEPOIS ======= -->
+      <!-- 3) Quiz DEPOIS -->
       <div class="panel" id="quizPanel" style="margin-top:14px;">
         <h2>Quiz — Play & Earn</h2>
         <p>Up to <strong>3 rounds</strong> per 4-hour window. Each passed round (≥60 pts) adds
@@ -413,4 +348,16 @@
         <div id="quizRoundInfo" class="claim-timer" style="margin-top:6px;">Rounds this window: 0/3</div>
         <div id="quizClaimTimer" class="claim-timer"></div>
         <div id="quizClaimMsg" class="claim-success" style="display:none;"></div>
-        <div id="quizClaimHash" class="claim
+        <div id="quizClaimHash" class="claim-hash" style="display:none;"></div>
+      </div>
+
+      <p style="margin-top:16px;">
+        <a class="links" href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" style="color:#8ec7ff;text-decoration:none;">Swap on Quickswap</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="faq">
+  <h2>Frequently Asked Questions</h2>
+  <div class=
