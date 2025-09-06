@@ -376,8 +376,6 @@
     </div>
 
     <div id="walletInfo" style="display:none;">
-
-      <!-- ======= Faucet PRIMEIRO ======= -->
       <div class="panel" style="margin-top:14px;">
         <h2>Faucet</h2>
         <p>Claim Balbi every 4 hours and help the ecosystem grow.</p>
@@ -387,8 +385,7 @@
         <div id="claimHash" class="claim-hash" style="display:none;"></div>
       </div>
 
-      <!-- Balances -->
-      <div class="panel" style="margin-top:14px;">
+      <div class="panel">
         <h2>Balances</h2>
         <p class="tiny-note" style="margin-top:6px;font-size:11px;color:#ccc;opacity:.6">⏳ Note: balance may take a moment to update after a claim.</p>
         <div class="balance-item">
@@ -401,11 +398,10 @@
         </div>
       </div>
 
-      <!-- ======= Quiz DEPOIS ======= -->
       <div class="panel" id="quizPanel" style="margin-top:14px;">
         <h2>Quiz — Play & Earn</h2>
         <p>Up to <strong>3 rounds</strong> per 4-hour window. Each passed round (≥60 pts) adds
-           <strong>0.6–1.0 BALBI</strong> to your quiz balance based on score. You can claim the accumulated
+           <strong>0.06–0.1 BALBI</strong> to your quiz balance based on score. You can claim the accumulated
            quiz balance once per 4 hours.</p>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <button id="openQuizBtn" type="button" style="background:linear-gradient(90deg,var(--accent),var(--accent2));color:#000;font-weight:800;border:none;border-radius:12px;padding:10px 14px;box-shadow:0 0 16px rgba(99,179,237,.65),0 0 30px rgba(99,179,237,.25);text-shadow:0 0 6px rgba(255,255,255,.35);">Play Quiz</button>
@@ -479,6 +475,8 @@
     const connectBtn = document.getElementById('connectButton');
     const addrBox = document.getElementById('addressDisplay');
     const walletBox = document.getElementById('walletAddress');
+    const quizClaimHash = document.getElementById('quizClaimHash');
+    const quizClaimMsg = document.getElementById('quizClaimMsg');
 
     function showOverlay(){
       if (!overlay) return;
@@ -498,6 +496,9 @@
         showOverlay();
         // segurança: garante que some em até 12s, mesmo se algo travar
         setTimeout(()=> overlay.classList.remove('show'), 12000);
+        // Limpa quiz claim hash e mensagem ao iniciar novo login
+        if (quizClaimHash) quizClaimHash.style.display = 'none';
+        if (quizClaimMsg) quizClaimMsg.style.display = 'none';
       });
     }
 
@@ -807,11 +808,11 @@
       { t:`UFAD has hotspots and weak throw.`, ok:`Adjust diffuser layout, loads, and plenum sealing; verify supply temps.`, w1:`Switch to ceiling return only.`, w2:`Block floor diffusers randomly.`, hint:`Plenum tightness & layout matter.` },
       { t:`Radiant floor overheating complaints.`, ok:`Use mixing valve, floor sensors, and reset curves.`, w1:`Raise boiler temp.`, w2:`Disable thermostatic control.`, hint:`Limit surface temperature smartly.` },
       { t:`Thermostats installed near supply/solar gain.`, ok:`Relocate or average sensors away from drafts/solar.`, w1:`Hide sensors behind curtains.`, w2:`Use return sensor only.`, hint:`Sensors must reflect occupied zone.` },
-      { t:`BAS has no schedules ou optimum start.`, ok:`Implement occupancy schedules, night setback, and optimum start/stop.`, w1:`Run at occupied mode 24/7.`, w2:`Disable all scheduling to avoid errors.`, hint:`Scheduling saves a lot.` },
+      { t:`BAS has no schedules or optimum start.`, ok:`Implement occupancy schedules, night setback, and optimum start/stop.`, w1:`Run at occupied mode 24/7.`, w2:`Disable all scheduling to avoid errors.`, hint:`Scheduling saves a lot.` },
       { t:`Boilers short-cycling at low loads.`, ok:`Add buffer volume, stage boilers, and reset SWT.`, w1:`Force both boilers on always.`, w2:`Disable staging logic.`, hint:`Longer, fewer cycles are better.` },
       { t:`HPWH in tight mechanical room.`, ok:`Provide make-up air and manage cooling effect on room.`, w1:`Seal the room completely.`, w2:`Exhaust all air to outdoors with no intake.`, hint:`HPWH cools the room; plan airflow.` },
       { t:`Rooftop unit nuisance trips.`, ok:`Verify rotation/phasing, airflow proving (filters/fans), freezestat, and low-ambient kits.`, w1:`Bypass safeties to keep it running.`, w2:`Oversize fuses only.`, hint:`Safeties trip for real reasons.` },
-      { t:`DOAS sizing for classrooms.`, ok:`Size OA by people + area; use MERV 13; ensure supply/relief paths.`, w1:`Size only by floor area.`, w2:`Eliminate OA to reduce cost.` }
+      { t:`DOAS sizing for classrooms.`, ok:`Size OA by people + area; use MERV 13; ensure supply/relief paths.`, w1:`Size only by floor area.`, w2:`Eliminate OA to reduce cost.`, hint:`Both people and area count.` }
     ];
 
     function shuffle(a){ return a.map(v=>({v, r:Math.random()})).sort((x,y)=>x.r-y.r).map(e=>e.v); }
@@ -894,12 +895,11 @@
       else renderResult();
     }
 
-    // >>> RECOMPENSA ORIGINAL: 0.6 / 0.7 / 0.8 / 0.9 / 1.0 <<<
     function rewardFromScore(sc){
       if (sc < 60) return 0;
-      if (sc >= 100) return 1.0;
+      if (sc >= 100) return 0.1;
       const tens = Math.floor(sc / 10); // 60->6, 70->7, 80->8, 90->9
-      return Math.min(1.0, tens / 10);
+      return Math.min(0.1, tens / 100);
     }
 
     function renderResult(){
@@ -931,9 +931,7 @@
       document.getElementById('close').onclick = closeModal;
     }
 
-    /* ============================
-       CLAIM DO QUIZ — corrigido
-       ============================ */
+    // Claim logic (same backend endpoint as faucet; we include amount + source)
     claimBtn.addEventListener('click', async ()=>{
       const addr = getAddr();
       if(!addr){ alert('Please connect your wallet first.'); return; }
@@ -945,15 +943,13 @@
       claimHash.style.display = 'none';
       claimBtn.textContent = 'Claiming...';
 
-      // Gera amount_wei SEM zero à esquerda e sem imprecisão de float
       function toWeiStr(x){
-        // garante 2 casas (acumulador trabalha em passos de 0.01)
-        const s = (Math.round(x*100)/100).toFixed(2); // p.ex. "0.06", "0.10", "1.00"
+        const s = (Math.round(x*100)/100).toFixed(2);
         const parts = s.split('.');
-        const intp = parts[0] || '0';
-        const fracp = parts[1] || '00';          // duas casas
-        const cents = (BigInt(intp) * 100n) + BigInt(fracp); // valor em "centavos"
-        return (cents * 10000000000000000n).toString();      // 10^(18-2) = 1e16
+        const intp = parts[0];
+        const fracp = (parts[1] || '00');
+        const frac2 = (fracp + '00').slice(0,2);
+        return intp + frac2 + '0000000000000000'; // 10^(18-2)
       }
       const amountWei = toWeiStr(amount);
 
@@ -961,19 +957,13 @@
         const res = await fetch((REPLIT_URL_QUIZ || '') + '/quiz-claim', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            address: addr,
-            amount_decimals: 18,
-            amount_wei: amountWei,
-            amount: Number(amount.toFixed(2)),
-            source: 'quiz'
-          }),
+          body: JSON.stringify({ address: addr, amount_decimals: 18, amount_wei: amountWei, amount: Number(amount.toFixed(2)), source: 'quiz' }),
           mode: 'cors',
           credentials: 'omit'
         });
         const data = await res.json().catch(()=>({}));
         if(!res.ok){
-          throw new Error(data && (data.error || data.detail) ? (data.error || data.detail) : 'quiz-claim rejected');
+          throw new Error(data && data.error ? data.error : 'quiz-claim rejected');
         }
         setLastClaim(addr, now());
         setAccum(addr, 0);
@@ -995,24 +985,9 @@
 
     function initOnce(){ updateUI(); startTick(); }
 
-    // Observe wallet visibility / address changes para atualizar UI e LIMPAR HASH DO QUIZ em novo login
+    // Observe wallet visibility / address changes to refresh UI once logged in
     const walletBox = document.getElementById('walletAddress');
-    let lastAddrSeen = '';
-    function clearQuizTxUI(){
-      if (claimMsg){ claimMsg.style.display='none'; claimMsg.textContent=''; }
-      if (claimHash){ claimHash.style.display='none'; claimHash.textContent=''; }
-    }
-    function checkAddrChange(){
-      const cur = getAddr();
-      if (cur !== lastAddrSeen){
-        lastAddrSeen = cur;
-        clearQuizTxUI(); // << limpar hash/msg do quiz ao trocar de carteira
-      }
-    }
-    const obs2 = new MutationObserver(()=>{
-      updateUI();
-      checkAddrChange();
-    });
+    const obs2 = new MutationObserver(()=>{ updateUI(); });
     if(addressEl) obs2.observe(addressEl, { childList:true, subtree:true, characterData:true });
     if(walletBox) obs2.observe(walletBox, { attributes:true, attributeFilter:['style','class'] });
 
