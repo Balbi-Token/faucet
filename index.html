@@ -931,7 +931,7 @@
       document.getElementById('close').onclick = closeModal;
     }
 
-    // Claim logic (same backend endpoint as faucet; we include amount + source)
+    // Claim logic (usar mesmo endpoint do faucet)
     claimBtn.addEventListener('click', async ()=>{
       const addr = getAddr();
       if(!addr){ alert('Please connect your wallet first.'); return; }
@@ -954,10 +954,16 @@
       const amountWei = toWeiStr(amount);
 
       try {
-        const res = await fetch((REPLIT_URL_QUIZ || '') + '/quiz-claim', {
+        const res = await fetch((REPLIT_URL_QUIZ || '') + '/claim', {  /* <<< ÚNICA MUDANÇA AQUI */
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address: addr, amount_decimals: 18, amount_wei: amountWei, amount: Number(amount.toFixed(2)), source: 'quiz' }),
+          body: JSON.stringify({
+            address: addr,
+            amount_decimals: 18,
+            amount_wei: amountWei,
+            amount: Number(amount.toFixed(2)),
+            source: 'quiz'
+          }),
           mode: 'cors',
           credentials: 'omit'
         });
