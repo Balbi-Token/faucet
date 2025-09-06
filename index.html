@@ -405,7 +405,7 @@
       <div class="panel" id="quizPanel" style="margin-top:14px;">
         <h2>Quiz — Play & Earn</h2>
         <p>Up to <strong>3 rounds</strong> per 4-hour window. Each passed round (≥60 pts) adds
-           <strong>0.06–0.10 BALBI</strong> to your quiz balance based on score. You can claim the accumulated
+           <strong>0.6–1.0 BALBI</strong> to your quiz balance based on score. You can claim the accumulated
            quiz balance once per 4 hours.</p>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <button id="openQuizBtn" type="button" style="background:linear-gradient(90deg,var(--accent),var(--accent2));color:#000;font-weight:800;border:none;border-radius:12px;padding:10px 14px;box-shadow:0 0 16px rgba(99,179,237,.65),0 0 30px rgba(99,179,237,.25);text-shadow:0 0 6px rgba(255,255,255,.35);">Play Quiz</button>
@@ -807,7 +807,7 @@
       { t:`UFAD has hotspots and weak throw.`, ok:`Adjust diffuser layout, loads, and plenum sealing; verify supply temps.`, w1:`Switch to ceiling return only.`, w2:`Block floor diffusers randomly.`, hint:`Plenum tightness & layout matter.` },
       { t:`Radiant floor overheating complaints.`, ok:`Use mixing valve, floor sensors, and reset curves.`, w1:`Raise boiler temp.`, w2:`Disable thermostatic control.`, hint:`Limit surface temperature smartly.` },
       { t:`Thermostats installed near supply/solar gain.`, ok:`Relocate or average sensors away from drafts/solar.`, w1:`Hide sensors behind curtains.`, w2:`Use return sensor only.`, hint:`Sensors must reflect occupied zone.` },
-      { t:`BAS has no schedules or optimum start.`, ok:`Implement occupancy schedules, night setback, and optimum start/stop.`, w1:`Run at occupied mode 24/7.`, w2:`Disable all scheduling to avoid errors.`, hint:`Scheduling saves a lot.` },
+      { t:`BAS has no schedules ou optimum start.`, ok:`Implement occupancy schedules, night setback, and optimum start/stop.`, w1:`Run at occupied mode 24/7.`, w2:`Disable all scheduling to avoid errors.`, hint:`Scheduling saves a lot.` },
       { t:`Boilers short-cycling at low loads.`, ok:`Add buffer volume, stage boilers, and reset SWT.`, w1:`Force both boilers on always.`, w2:`Disable staging logic.`, hint:`Longer, fewer cycles are better.` },
       { t:`HPWH in tight mechanical room.`, ok:`Provide make-up air and manage cooling effect on room.`, w1:`Seal the room completely.`, w2:`Exhaust all air to outdoors with no intake.`, hint:`HPWH cools the room; plan airflow.` },
       { t:`Rooftop unit nuisance trips.`, ok:`Verify rotation/phasing, airflow proving (filters/fans), freezestat, and low-ambient kits.`, w1:`Bypass safeties to keep it running.`, w2:`Oversize fuses only.`, hint:`Safeties trip for real reasons.` },
@@ -894,12 +894,12 @@
       else renderResult();
     }
 
-    // >>> AJUSTE DE PREMIAÇÃO: 0.06/0.07/0.08/0.09/0.10 <<<
+    // >>> RECOMPENSA ORIGINAL: 0.6 / 0.7 / 0.8 / 0.9 / 1.0 <<<
     function rewardFromScore(sc){
       if (sc < 60) return 0;
-      if (sc >= 100) return 0.10;
+      if (sc >= 100) return 1.0;
       const tens = Math.floor(sc / 10); // 60->6, 70->7, 80->8, 90->9
-      return Math.min(0.10, tens / 100); // 6→0.06, 7→0.07, 8→0.08, 9→0.09
+      return Math.min(1.0, tens / 10);
     }
 
     function renderResult(){
