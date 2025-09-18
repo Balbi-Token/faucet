@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Balbi Faucet</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" sizes="32x32" href="logo1.png">
+  <link rel="icon" type="image/png" sizes="3232" href="logo1.png">
   <style>
     :root{
       --bg1:#0a1022; --bg2:#0d1b34;
@@ -209,7 +209,7 @@
     .loading .v:nth-child(5){animation-delay:.6s}
     .loading .v:nth-child(6){animation-delay:.75s}
     @keyframes pulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.18)} }
-  
+
     /* Neon active state for Quiz Claim button */
     #quizPanel #quizClaimBtn.quiz-claim-active{
       background: linear-gradient(90deg, #22c55e, #86efac);
@@ -218,7 +218,7 @@
       box-shadow: 0 0 16px rgba(34,197,94,.75), 0 0 32px rgba(134,239,172,.45);
       text-shadow: 0 0 6px rgba(255,255,255,.35);
     }
-    
+
 /* v9c: strict removal of scrollbars in quiz modal */
 #quizModal {
   overflow: hidden !important;
@@ -239,8 +239,7 @@
 #quizModal *::-webkit-scrollbar {
   display: none !important;
 }
-
-</style>
+  </style>
 </head>
 <body>
 
@@ -491,49 +490,195 @@
   // Script para login e controle da UI
   const { address, isConnected } = useWeb3ModalAccount();
   const { open } = useWeb3Modal();
-
-  function updateUI() {
-    const loginSection = document.getElementById('loginSection');
-    const walletAddressEl = document.getElementById('walletAddress');
-    const walletInfoEl = document.getElementById('walletInfo');
-    const addressDisplay = document.getElementById('addressDisplay');
-    const connectButton = document.getElementById('connectButton');
-    const logoutButton = document.getElementById('logoutButton');
-
-    if (isConnected.value && address.value) {
-      console.log("Connected with address:", address.value);
-      loginSection.style.display = 'none';
-      walletAddressEl.style.display = 'block';
-      walletInfoEl.style.display = 'block';
-      addressDisplay.textContent = address.value;
-    } else {
-      console.log("Disconnected.");
-      loginSection.style.display = 'block';
-      walletAddressEl.style.display = 'none';
-      walletInfoEl.style.display = 'none';
-      addressDisplay.textContent = '';
+  const { provider } = useWeb3ModalProvider();
+  
+  // Novos elementos e constantes
+  const backendURL = 'https://balbi-faucet-backend.balbi.repl.co';
+  const claimButton = document.getElementById('claimButton');
+  const claimTimer = document.getElementById('claimTimer');
+  const claimSuccess = document.getElementById('claimSuccess');
+  const claimHash = document.getElementById('claimHash');
+  const balbiBalanceEl = document.getElementById('balbiBalance');
+  const usdcBalanceEl = document.getElementById('usdcBalance');
+  
+  async function fetchBalances(walletAddress) {
+    try {
+        const response = await fetch(`${backendURL}/balance`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ address: walletAddress }),
+            mode: 'cors'
+        });
+        const data = await response.json();
+        if (response.ok) {
+            balbiBalanceEl.textContent = Number(data.balbi).toFixed(4);
+            usdcBalanceEl.textContent = Number(data.usdc).toFixed(2);
+        } else {
+            console.error('Failed to fetch balances:', data.error);
+        }
+    } catch (error) {
+        console.error('Error fetching balances:', error);
     }
   }
 
-  // Monitora as mudanças de conexão
+  async function updateClaimButton() {
+    const lastClaimTime = localStorage.getItem('lastClaimTime');
+    const fourHours = 4 * 60 * 60 * 1000;
+    const now = Date.now();
+    
+    if (!lastClaimTime || now - lastClaimTime > fourHours) {
+        claimButton.disabled = false;
+        claimButton.textContent = 'Claim Balbi';
+        claimTimer.textContent = 'Ready to claim!';
+        claimSuccess.style.display = 'none';
+        claimHash.style.display = 'none';
+    } else {
+        claimButton.disabled = true;
+        const timeLeft = fourHours - (now - lastClaimTime);
+        startCountdown(timeLeft);
+    }
+  }
+
+  function startCountdown(duration) {
+    let timer = duration;
+    let interval = setInterval(() => {
+        let hours = Math.floor((timer / (1000 * 60 * 60)) % 24);
+        let minutes = Math.floor((timer / (1000 * 60)) % 60);
+        let seconds = Math.floor((timer / 1000) % 60);
+
+        claimTimer.textContent = `Next claim in: ${hours}h ${minutes}m ${seconds}s`;
+
+        if (--timer < 0) {
+            clearInterval(interval);
+            updateClaimButton();
+        }
+    }, 1000);
+  }
+
+  // --- Funções de Claim (Quiz) e Tapper (opcional) ---
+  const quizClaimBtn = document.getElementById('quizClaimBtn');
+  const quizClaimMsg = document.getElementById('quizClaimMsg');
+  const quizClaimHash = document.getElementById('quizClaimHash');
+
+  async function claimQuizTokens(address) {
+    const acc = 0.15; // Placeholder value - replace with logic from your quiz
+    try {
+        const res = await fetch(`${backendURL}/quiz-claim`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ address, amount: acc }),
+            mode: 'cors'
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            throw new Error(data && data.error ? data.error : 'quiz-claim rejected');
+        }
+        quizClaimMsg.textContent = 'Quiz tokens sent successfully!';
+        quizClaimMsg.style.display = 'block';
+        if (data && data.txHash) {
+            quizClaimHash.textContent = 'Tx Hash: ' + data.txHash;
+            quizClaimHash.style.display = 'block';
+        }
+    } catch (e) {
+        quizClaimMsg.textContent = 'Quiz claim failed: ' + (e.message || 'unknown error');
+        quizClaimMsg.style.display = 'block';
+    }
+  }
+  
+  if (quizClaimBtn) {
+    quizClaimBtn.addEventListener('click', () => {
+        if (address.value) {
+            claimQuizTokens(address.value);
+        }
+    });
+  }
+  
+  // Event Listeners
+  if (claimButton) {
+    claimButton.addEventListener('click', async () => {
+        const currentAddress = address.value;
+        if (!currentAddress) {
+            alert('Please connect your wallet first!');
+            return;
+        }
+
+        claimButton.disabled = true;
+        claimButton.textContent = 'Claiming...';
+        claimSuccess.style.display = 'none';
+        claimHash.style.display = 'none';
+
+        try {
+            const response = await fetch(`${backendURL}/claim`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address: currentAddress }),
+                mode: 'cors'
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('lastClaimTime', Date.now());
+                claimSuccess.textContent = 'Tokens sent successfully!';
+                claimSuccess.style.display = 'block';
+                claimHash.textContent = 'Tx Hash: ' + data.txHash;
+                claimHash.style.display = 'block';
+                await fetchBalances(currentAddress);
+                updateClaimButton();
+            } else {
+                throw new Error(data.error || 'Claim failed.');
+            }
+        } catch (error) {
+            claimSuccess.textContent = 'Claim failed: ' + error.message;
+            claimSuccess.style.display = 'block';
+            claimButton.disabled = false;
+            claimButton.textContent = 'Claim Balbi';
+        }
+    });
+  }
+  
+  // O botão de conexão será manipulado automaticamente pelo Web3Modal
+  const connectButton = document.getElementById('connectButton');
+  if (connectButton) {
+    connectButton.addEventListener('click', async () => {
+      await open();
+    });
+  }
+
+  // Lógica de atualização da UI
+  function updateUI() {
+      const loginSection = document.getElementById('loginSection');
+      const walletAddressEl = document.getElementById('walletAddress');
+      const walletInfoEl = document.getElementById('walletInfo');
+      const addressDisplay = document.getElementById('addressDisplay');
+      
+      if (isConnected.value && address.value) {
+          loginSection.style.display = 'none';
+          walletAddressEl.style.display = 'block';
+          walletInfoEl.style.display = 'block';
+          addressDisplay.textContent = address.value;
+          fetchBalances(address.value);
+          updateClaimButton();
+      } else {
+          loginSection.style.display = 'block';
+          walletAddressEl.style.display = 'none';
+          walletInfoEl.style.display = 'none';
+          addressDisplay.textContent = '';
+      }
+  }
+
+  // Monitora as mudanças de conexão e endereço
   isConnected.subscribe(updateUI);
   address.subscribe(updateUI);
-
+  
   // Manipula o botão de desconexão
-  const { provider } = useWeb3ModalProvider();
+  const logoutButton = document.getElementById('logoutButton');
   if (logoutButton) {
     logoutButton.addEventListener('click', async () => {
       if (provider.value && provider.value.disconnect) {
         await provider.value.disconnect();
       }
+      localStorage.removeItem('lastClaimTime');
       updateUI();
-    });
-  }
-
-  // O botão de conexão será manipulado automaticamente pelo Web3Modal
-  if (connectButton) {
-    connectButton.addEventListener('click', async () => {
-      await open();
     });
   }
 
@@ -541,17 +686,5 @@
   document.addEventListener('DOMContentLoaded', updateUI);
 </script>
 
-<script>
-  try { localStorage.removeItem('balbiPrivateKey'); } catch(e) {}
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const pk = document.getElementById('privateKeyInput');
-    if (pk) pk.value = '';
-  });
-</script>
-<script>
-  const s=document.createElement('script');
-  s.src='faucet-frontend.js?v=' + Date.now();
-  document.head.appendChild(s);
-</script>
 </body>
 </html>
