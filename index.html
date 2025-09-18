@@ -433,13 +433,7 @@
   <button id="acceptCookiesButton" type="button">Accept</button>
 </div>
 <script type="module">
-  import {
-    createWeb3Modal,
-    defaultConfig,
-    useWeb3Modal,
-    useWeb3ModalAccount,
-    useWeb3ModalProvider
-  } from 'https://unpkg.com/@web3modal/ethers@5-5.0.0/dist/index.mjs';
+  import { createWeb3Modal, defaultConfig } from 'https://unpkg.com/@web3modal/ethers@5-5.0.0/dist/index.mjs';
 
   // 1. Defina o ID do projeto
   const projectId = '7794f7fbb6272b20eaae65d8588fe882';
@@ -467,7 +461,6 @@
     explorerUrl: 'https://polygonscan.com',
     rpcUrl: 'https://rpc.ankr.com/polygon'
   };
-
   const chains = [mainnet, polygon];
 
   // 4. Configure o Web3Modal
@@ -481,49 +474,83 @@
   });
 
   // 5. Crie o modal
-  createWeb3Modal({
+  const web3modal = createWeb3Modal({
     ethersConfig,
     chains,
     projectId
   });
-  
-  // Script para login e controle da UI
-  const { address, isConnected } = useWeb3ModalAccount();
-  const { open } = useWeb3Modal();
-  const { provider } = useWeb3ModalProvider();
-  
-  // Conecta o botão de forma explícita, caso a vinculação automática falhe.
-  document.getElementById('connectButton').addEventListener('click', async () => {
-    await open();
-  });
-  
-  // Novos elementos e constantes
+
+  // 6. Scripts para login e controle da UI
   const backendURL = 'https://balbi-faucet-backend.balbi.repl.co';
+  const connectButton = document.getElementById('connectButton');
+  const logoutButton = document.getElementById('logoutButton');
+  const loginSection = document.getElementById('loginSection');
+  const walletAddressEl = document.getElementById('walletAddress');
+  const walletInfoEl = document.getElementById('walletInfo');
+  const addressDisplay = document.getElementById('addressDisplay');
   const claimButton = document.getElementById('claimButton');
   const claimTimer = document.getElementById('claimTimer');
   const claimSuccess = document.getElementById('claimSuccess');
   const claimHash = document.getElementById('claimHash');
   const balbiBalanceEl = document.getElementById('balbiBalance');
   const usdcBalanceEl = document.getElementById('usdcBalance');
-  
+  const quizClaimBtn = document.getElementById('quizClaimBtn');
+  const quizClaimMsg = document.getElementById('quizClaimMsg');
+  const quizClaimHash = document.getElementById('quizClaimHash');
+
   async function fetchBalances(walletAddress) {
     try {
-        const response = await fetch(`${backendURL}/balance`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ address: walletAddress }),
-            mode: 'cors'
-        });
-        const data = await response.json();
-        if (response.ok) {
-            balbiBalanceEl.textContent = Number(data.balbi).toFixed(4);
-            usdcBalanceEl.textContent = Number(data.usdc).toFixed(2);
-        } else {
-            console.error('Failed to fetch balances:', data.error);
-        }
+      const response = await fetch(`${backendURL}/balance`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: walletAddress }),
+        mode: 'cors'
+      });
+      const data = await response.json();
+      if (response.ok) {
+        balbiBalanceEl.textContent = Number(data.balbi).toFixed(4);
+        usdcBalanceEl.textContent = Number(data.usdc).toFixed(2);
+      } else {
+        console.error('Failed to fetch balances:', data.error);
+      }
     } catch (error) {
-        console.error('Error fetching balances:', error);
+      console.error('Error fetching balances:', error);
     }
+  }
+
+  function updateUI(account, isConnected) {
+    if (isConnected && account) {
+      loginSection.style.display = 'none';
+      walletAddressEl.style.display = 'block';
+      walletInfoEl.style.display = 'block';
+      addressDisplay.textContent = account;
+      fetchBalances(account);
+      updateClaimButton();
+    } else {
+      loginSection.style.display = 'block';
+      walletAddressEl.style.display = 'none';
+      walletInfoEl.style.display = 'none';
+      addressDisplay.textContent = '';
+      localStorage.removeItem('lastClaimTime');
+    }
+  }
+
+  // Lógica de atualização da UI quando a conta muda
+  web3modal.subscribeState(state => {
+    updateUI(state.selectedAccount, state.isConnected);
+  });
+
+  // Event Listeners
+  if (connectButton) {
+    connectButton.addEventListener('click', () => {
+      web3modal.open();
+    });
+  }
+
+  if (logoutButton) {
+    logoutButton.addEventListener('click', async () => {
+      web3modal.disconnect();
+    });
   }
 
   async function updateClaimButton() {
@@ -553,55 +580,18 @@
 
         claimTimer.textContent = `Next claim in: ${hours}h ${minutes}m ${seconds}s`;
 
-        if (--timer < 0) {
+        if (timer <= 0) {
             clearInterval(interval);
             updateClaimButton();
         }
+        timer -= 1000;
     }, 1000);
   }
 
-  // --- Funções de Claim (Quiz) e Tapper (opcional) ---
-  const quizClaimBtn = document.getElementById('quizClaimBtn');
-  const quizClaimMsg = document.getElementById('quizClaimMsg');
-  const quizClaimHash = document.getElementById('quizClaimHash');
-
-  async function claimQuizTokens(address) {
-    const acc = 0.15; // Placeholder value - replace with logic from your quiz
-    try {
-        const res = await fetch(`${backendURL}/quiz-claim`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ address, amount: acc }),
-            mode: 'cors'
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-            throw new Error(data && data.error ? data.error : 'quiz-claim rejected');
-        }
-        quizClaimMsg.textContent = 'Quiz tokens sent successfully!';
-        quizClaimMsg.style.display = 'block';
-        if (data && data.txHash) {
-            quizClaimHash.textContent = 'Tx Hash: ' + data.txHash;
-            quizClaimHash.style.display = 'block';
-        }
-    } catch (e) {
-        quizClaimMsg.textContent = 'Quiz claim failed: ' + (e.message || 'unknown error');
-        quizClaimMsg.style.display = 'block';
-    }
-  }
-  
-  if (quizClaimBtn) {
-    quizClaimBtn.addEventListener('click', () => {
-        if (address.value) {
-            claimQuizTokens(address.value);
-        }
-    });
-  }
-  
-  // Event Listeners
+  // Funções de Claim (Faucet e Quiz)
   if (claimButton) {
     claimButton.addEventListener('click', async () => {
-        const currentAddress = address.value;
+        const currentAddress = web3modal.getState().selectedAccount;
         if (!currentAddress) {
             alert('Please connect your wallet first!');
             return;
@@ -640,47 +630,46 @@
         }
     });
   }
-  
-  // Lógica de atualização da UI
-  function updateUI() {
-      const loginSection = document.getElementById('loginSection');
-      const walletAddressEl = document.getElementById('walletAddress');
-      const walletInfoEl = document.getElementById('walletInfo');
-      const addressDisplay = document.getElementById('addressDisplay');
-      
-      if (isConnected.value && address.value) {
-          loginSection.style.display = 'none';
-          walletAddressEl.style.display = 'block';
-          walletInfoEl.style.display = 'block';
-          addressDisplay.textContent = address.value;
-          fetchBalances(address.value);
-          updateClaimButton();
-      } else {
-          loginSection.style.display = 'block';
-          walletAddressEl.style.display = 'none';
-          walletInfoEl.style.display = 'none';
-          addressDisplay.textContent = '';
-      }
+
+  async function claimQuizTokens(address) {
+    const acc = 0.15; // Placeholder value - replace with logic from your quiz
+    try {
+        const res = await fetch(`${backendURL}/quiz-claim`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ address, amount: acc }),
+            mode: 'cors'
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            throw new Error(data && data.error ? data.error : 'quiz-claim rejected');
+        }
+        quizClaimMsg.textContent = 'Quiz tokens sent successfully!';
+        quizClaimMsg.style.display = 'block';
+        if (data && data.txHash) {
+            quizClaimHash.textContent = 'Tx Hash: ' + data.txHash;
+            quizClaimHash.style.display = 'block';
+        }
+    } catch (e) {
+        quizClaimMsg.textContent = 'Quiz claim failed: ' + (e.message || 'unknown error');
+        quizClaimMsg.style.display = 'block';
+    }
   }
 
-  // Monitora as mudanças de conexão e endereço
-  isConnected.subscribe(updateUI);
-  address.subscribe(updateUI);
-  
-  // Manipula o botão de desconexão
-  const logoutButton = document.getElementById('logoutButton');
-  if (logoutButton) {
-    logoutButton.addEventListener('click', async () => {
-      if (provider.value && provider.value.disconnect) {
-        await provider.value.disconnect();
-      }
-      localStorage.removeItem('lastClaimTime');
-      updateUI();
+  if (quizClaimBtn) {
+    quizClaimBtn.addEventListener('click', () => {
+        const currentAddress = web3modal.getState().selectedAccount;
+        if (currentAddress) {
+            claimQuizTokens(currentAddress);
+        }
     });
   }
 
   // Inicializa a UI
-  document.addEventListener('DOMContentLoaded', updateUI);
+  document.addEventListener('DOMContentLoaded', () => {
+    const state = web3modal.getState();
+    updateUI(state.selectedAccount, state.isConnected);
+  });
 </script>
 
 </body>
