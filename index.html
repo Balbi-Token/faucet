@@ -437,6 +437,7 @@
   import {
     createWeb3Modal,
     defaultConfig,
+    useWeb3Modal,
     useWeb3ModalAccount,
     useWeb3ModalProvider
   } from 'https://unpkg.com/@web3modal/ethers@5-5.0.0/dist/index.mjs';
@@ -486,12 +487,10 @@
     chains,
     projectId
   });
-</script>
-
-<script type="module">
-  import { useWeb3ModalAccount } from 'https://unpkg.com/@web3modal/ethers@5-5.0.0/dist/index.mjs';
-
+  
+  // Script para login e controle da UI
   const { address, isConnected } = useWeb3ModalAccount();
+  const { open } = useWeb3Modal();
 
   function updateUI() {
     const loginSection = document.getElementById('loginSection');
@@ -517,8 +516,8 @@
   }
 
   // Monitora as mudanças de conexão
-  useWeb3ModalAccount().isConnected.subscribe(updateUI);
-  useWeb3ModalAccount().address.subscribe(updateUI);
+  isConnected.subscribe(updateUI);
+  address.subscribe(updateUI);
 
   // Manipula o botão de desconexão
   const { provider } = useWeb3ModalProvider();
@@ -534,7 +533,6 @@
   // O botão de conexão será manipulado automaticamente pelo Web3Modal
   if (connectButton) {
     connectButton.addEventListener('click', async () => {
-      const { open } = useWeb3Modal();
       await open();
     });
   }
