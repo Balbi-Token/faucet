@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Balbi Faucet</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <!-- Favicon (ajuste o href se quiser usar outro arquivo) -->
   <link rel="icon" type="image/png" sizes="32x32" href="logo1.png">
   <style>
     :root{
@@ -95,6 +94,7 @@
     @keyframes dash{to{stroke-dashoffset:-104}}
     .vertex{fill:url(#stroke)}
     .title{font-weight:800; font-size:28px; color:#b3d9ff; text-shadow:0 0 10px rgba(99,179,237,.55); margin:0}
+    /* Mudança de texto: subtítulo para refletir a nova forma de login */
     .subtitle{color:var(--muted); margin:0 8px 16px; text-align:center}
 
     /* Inputs */
@@ -244,7 +244,6 @@
 </head>
 <body>
 
-<!-- INTRO -->
 <div class="intro" id="intro" aria-hidden="true">
   <svg width="0" height="0" aria-hidden="true">
     <defs>
@@ -271,7 +270,6 @@
   </div>
 </div>
 
-<!-- LOADING pós-login -->
 <div class="loading" id="loadingOverlay" aria-hidden="true">
   <svg width="0" height="0" aria-hidden="true">
     <defs>
@@ -298,7 +296,6 @@
   </div>
 </div>
 
-<!-- BG hex com vértices -->
 <div class="hex-drift" aria-hidden="true">
   <svg width="0" height="0" aria-hidden="true">
     <defs>
@@ -348,25 +345,14 @@
         </svg>
       </div>
       <h1 class="title">Balbi Faucet</h1>
-      <p class="subtitle">Enter your private key to access your wallet. Your data is not stored.</p>
+      <p class="subtitle">Connect your wallet to get started with the Balbi Faucet.</p>
     </div>
 
-    <!-- Honeypots contra autofill -->
     <input type="text" autocomplete="username" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0">
     <input type="password" autocomplete="current-password" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;border:0;padding:0">
 
     <div id="loginSection">
-      <input
-        type="text"
-        id="privateKeyInput"
-        placeholder="Your private key here (0x...)"
-        inputmode="text"
-        autocomplete="off"
-        autocapitalize="off"
-        spellcheck="false"
-        name="pk_field"
-      >
-      <button id="connectButton" type="button">Access Wallet</button>
+      <button id="connectButton" type="button">Connect Wallet</button>
     </div>
 
     <div id="walletAddress" class="wallet-address" style="display:none;">
@@ -414,9 +400,7 @@
       </div>
 
       <p style="margin-top:16px;">
-        <a class="links" href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" style="color:#8ec7ff;text-decoration:none;">
-          Swap on Quickswap
-        </a>
+        <a class="links" href="https://dapp.quickswap.exchange/swap/v3/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5?chainId=137" target="_blank" style="color:#8ec7ff;text-decoration:none;"> Swap on Quickswap </a>
       </p>
     </div>
   </div>
@@ -430,29 +414,135 @@
   </div>
   <div class="faq-item">
     <h3>Is this wallet secure?</h3>
-    <p>Yes. The entered private key is not stored on our server. Login is performed only in your browser.</p>
+    <p>Yes. We do not store any of your data. The connection and signing of transactions happen directly in your browser, via your chosen wallet app.</p>
   </div>
   <div class="faq-item">
     <h3>Are there any fees?</h3>
     <p>The wallet is completely free. You only pay the standard blockchain network fees (gas fees) for transactions.</p>
   </div>
 </div>
-
 <div class="footer">
   <div class="links">
     <a href="terms.html">Terms of Service</a>
     <a href="privacy.html">Privacy Policy</a>
     <a href="https://polygonscan.com/token/0x619B0fcDcb30a45091745Fb12C9640237bbF27c5" target="_blank">View Contract</a>
   </div>
-  <div>© 2025 Balbi Faucet. Built with ❤️ for the crypto community.</div>
+  <div>© 2025 Balbi Faucet. Built with ❤️ para a comunidade cripto.</div>
 </div>
-
 <div id="cookieConsent">
   <p>We use cookies to store your private key locally and improve your experience. By continuing, you agree to our Privacy Policy.</p>
   <button id="acceptCookiesButton" type="button">Accept</button>
 </div>
+<script type="module">
+  import {
+    createWeb3Modal,
+    defaultConfig,
+    useWeb3ModalAccount,
+    useWeb3ModalProvider
+  } from 'https://unpkg.com/@web3modal/ethers@5-5.0.0/dist/index.mjs';
 
-<!-- Garante input vazio -->
+  // 1. Defina o ID do projeto
+  const projectId = '7794f7fbb6272b20eaae65d8588fe882';
+
+  // 2. Defina os metadados da sua DApp
+  const metadata = {
+    name: 'Balbi Faucet',
+    description: 'Faucet oficial do Balbi Token',
+    url: 'https://balbi-token.github.io',
+    icons: ['https://balbi-token.github.io/logo1.png']
+  };
+
+  // 3. Defina as cadeias suportadas
+  const mainnet = {
+    chainId: 1,
+    name: 'Ethereum',
+    currency: 'ETH',
+    explorerUrl: 'https://etherscan.io',
+    rpcUrl: 'https://rpc.ankr.com/eth'
+  };
+  const polygon = {
+    chainId: 137,
+    name: 'Polygon',
+    currency: 'MATIC',
+    explorerUrl: 'https://polygonscan.com',
+    rpcUrl: 'https://rpc.ankr.com/polygon'
+  };
+
+  const chains = [mainnet, polygon];
+
+  // 4. Configure o Web3Modal
+  const ethersConfig = defaultConfig({
+    metadata,
+    enableEIP6963: true,
+    enableInjected: true,
+    enableCoinbase: true,
+    rpcUrl: '...',
+    defaultChainId: 1
+  });
+
+  // 5. Crie o modal
+  createWeb3Modal({
+    ethersConfig,
+    chains,
+    projectId
+  });
+</script>
+
+<script type="module">
+  import { useWeb3ModalAccount } from 'https://unpkg.com/@web3modal/ethers@5-5.0.0/dist/index.mjs';
+
+  const { address, isConnected } = useWeb3ModalAccount();
+
+  function updateUI() {
+    const loginSection = document.getElementById('loginSection');
+    const walletAddressEl = document.getElementById('walletAddress');
+    const walletInfoEl = document.getElementById('walletInfo');
+    const addressDisplay = document.getElementById('addressDisplay');
+    const connectButton = document.getElementById('connectButton');
+    const logoutButton = document.getElementById('logoutButton');
+
+    if (isConnected.value && address.value) {
+      console.log("Connected with address:", address.value);
+      loginSection.style.display = 'none';
+      walletAddressEl.style.display = 'block';
+      walletInfoEl.style.display = 'block';
+      addressDisplay.textContent = address.value;
+    } else {
+      console.log("Disconnected.");
+      loginSection.style.display = 'block';
+      walletAddressEl.style.display = 'none';
+      walletInfoEl.style.display = 'none';
+      addressDisplay.textContent = '';
+    }
+  }
+
+  // Monitora as mudanças de conexão
+  useWeb3ModalAccount().isConnected.subscribe(updateUI);
+  useWeb3ModalAccount().address.subscribe(updateUI);
+
+  // Manipula o botão de desconexão
+  const { provider } = useWeb3ModalProvider();
+  if (logoutButton) {
+    logoutButton.addEventListener('click', async () => {
+      if (provider.value && provider.value.disconnect) {
+        await provider.value.disconnect();
+      }
+      updateUI();
+    });
+  }
+
+  // O botão de conexão será manipulado automaticamente pelo Web3Modal
+  if (connectButton) {
+    connectButton.addEventListener('click', async () => {
+      const { open } = useWeb3Modal();
+      await open();
+    });
+  }
+
+  // Inicializa a UI
+  document.addEventListener('DOMContentLoaded', updateUI);
+</script>
+
 <script>
   try { localStorage.removeItem('balbiPrivateKey'); } catch(e) {}
   document.addEventListener('DOMContentLoaded', ()=>{
@@ -460,543 +550,10 @@
     if (pk) pk.value = '';
   });
 </script>
-
-<!-- Carrega seu front-end -->
 <script>
   const s=document.createElement('script');
   s.src='faucet-frontend.js?v=' + Date.now();
   document.head.appendChild(s);
 </script>
-
-<!-- Mostra loading ao clicar e mantém por ~1.2s; esconde ao logar -->
-<script>
-  (function(){
-    const overlay = document.getElementById('loadingOverlay');
-    const connectBtn = document.getElementById('connectButton');
-    const addrBox = document.getElementById('addressDisplay');
-    const walletBox = document.getElementById('walletAddress');
-    const quizClaimHash = document.getElementById('quizClaimHash');
-    const quizClaimMsg = document.getElementById('quizClaimMsg');
-
-    function showOverlay(){
-      if (!overlay) return;
-      overlay.classList.add('show');
-      overlay.dataset.start = String(Date.now());
-    }
-    function hideOverlay(){
-      if (!overlay) return;
-      const start = Number(overlay.dataset.start || Date.now());
-      const minShow = 1200; // ~1.2s mínimo
-      const elapsed = Date.now() - start;
-      setTimeout(()=> overlay.classList.remove('show'), Math.max(0, minShow - elapsed));
-    }
-
-    if (connectBtn){
-      connectBtn.addEventListener('click', ()=>{
-        showOverlay();
-        // segurança: garante que some em até 12s, mesmo se algo travar
-        setTimeout(()=> overlay.classList.remove('show'), 12000);
-        // Limpa quiz claim hash e mensagem ao iniciar novo login
-        if (quizClaimHash) quizClaimHash.style.display = 'none';
-        if (quizClaimMsg) quizClaimMsg.style.display = 'none';
-      });
-    }
-
-    const obs = new MutationObserver(()=>{
-      const hasAddr = addrBox && addrBox.textContent && addrBox.textContent.trim().length > 0;
-      const isShown = walletBox && getComputedStyle(walletBox).display !== 'none';
-      if (hasAddr && isShown){
-        hideOverlay();
-      }
-    });
-    if (addrBox) obs.observe(addrBox, { childList:true, subtree:true, characterData:true });
-    if (walletBox) obs.observe(walletBox, { attributes:true, attributeFilter:['style','class'] });
-  })();
-</script>
-
-<!-- Defs reutilizados -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs>
-    <linearGradient id="hexStroke" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#2b6cb0"/><stop offset="100%" stop-color="#63b3ed"/>
-    </linearGradient>
-  </defs>
-</svg>
-
-
-  <!-- QUIZ MODAL -->
-  <style>
-    /* Scoped quiz styles */
-    #quizModal{position:fixed; inset:0; z-index:9999; display:none; align-items:center; justify-content:center;
-      background:rgba(6,10,24,.9); backdrop-filter:blur(6px);}
-    #quizModal .quiz-card{box-shadow:0 0 22px rgba(99,179,237,.25), 0 16px 44px rgba(8,14,35,.55), inset 0 1px 0 rgba(255,255,255,.05);width:min(820px,94vw); background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
-      border:1px solid rgba(47,82,152,.35); box-shadow:0 16px 44px rgba(8,14,35,.55), inset 0 1px 0 rgba(255,255,255,.05);
-      border-radius:18px; padding:20px; color:#e6eefb; font-family:Inter,system-ui,sans-serif; max-height:90vh; overflow:auto}
-    #quizModal h3{margin:0 0 6px; font-size:22px; color:#8ec7ff}
-    #quizModal p{margin:8px 0}
-    #quizModal .qblock{box-shadow:0 0 22px rgba(99,179,237,.22), inset 0 0 0 1px rgba(47,82,152,.35);box-shadow:0 0 18px rgba(99,179,237,.18);margin:14px 0; padding:14px; border-radius:12px; background:rgba(255,255,255,.05); border:1px solid #2f529833}
-    #quizModal .opts{display:grid; gap:10px; margin-top:8px}
-    #quizModal button{padding:10px 14px; border-radius:10px; border:none; cursor:pointer}
-    #quizModal .primary{background:linear-gradient(90deg,#2b6cb0,#63b3ed); color:#000; font-weight:800;box-shadow:0 0 16px rgba(99,179,237,.65), 0 0 32px rgba(99,179,237,.35);text-shadow:0 0 6px rgba(255,255,255,.4);}
-    #quizModal .ghost{background:rgba(255,255,255,.06); color:#e6eefb; border:1px solid #335aa833;box-shadow:0 0 10px rgba(46,105,189,.35);}
-    #quizModal .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
-    #quizModal .score{font-weight:800; color:#8ec7ff}
-    #quizModal .hint{color:#a5b4cf; font-style:italic; display:none; margin-top:6px}
-    #quizModal .close-x{position:absolute; top:14px; right:16px; background:transparent; color:#e6eefb; border:none; font-size:18px; cursor:pointer}
-    @media (max-width:520px){ #quizModal .row{flex-direction:column} }
-  
-    /* Neon active state for Quiz Claim button */
-    #quizPanel #quizClaimBtn.quiz-claim-active{
-      background: linear-gradient(90deg, #22c55e, #86efac);
-      color:#052e16; font-weight:800;
-      border:none;
-      box-shadow: 0 0 16px rgba(34,197,94,.75), 0 0 32px rgba(134,239,172,.45);
-      text-shadow: 0 0 6px rgba(255,255,255,.35);
-    }
-    </style>
-<style>
-
-  /* === Neon Theme (scoped) === */
-  :root {
-    --glow-color: #00ffcc;
-    --secondary-glow: #ff00cc;
-    --quiz-bg: rgba(255,255,255,0.05);
-  }
-  #quizModal .quiz-card{
-    position: relative;
-    background: linear-gradient(180deg, rgba(15,18,30,.6), rgba(15,18,30,.25));
-    border: 1px solid rgba(0,255,204,.25);
-    box-shadow: 0 20px 50px rgba(0,0,0,.6), 0 0 30px rgba(0,255,204,.15);
-  }
-  #quizModal .quiz-card::before{
-    content:''; position:absolute; inset:-2px;
-    border-radius:18px;
-    background:
-      radial-gradient(60% 60% at 50% 0%, rgba(0,255,204,.25), transparent 60%),
-      radial-gradient(50% 50% at 0% 100%, rgba(255,0,204,.18), transparent 60%);
-    filter: blur(12px);
-    z-index:-1;
-  }
-  #quizModal h3{ color:#b3fff0; text-shadow:0 0 8px rgba(0,255,204,.35); }
-  #quizModal .qblock{
-    background: var(--quiz-bg);
-    border: 1px solid rgba(0,255,204,.18);
-    box-shadow: 0 0 24px rgba(0,255,204,.22), inset 0 0 0 1px rgba(47,82,152,.35);
-  }
-  #quizModal .opts button{
-    background: linear-gradient(90deg, #00ffd0, #ff5ee1, #00ffd0);
-    background-size: 200% 200%;
-    color:#0a0f14; font-weight:800; border:none;
-    box-shadow: 0 0 16px rgba(0,255,204,.55), 0 0 26px rgba(255,0,204,.25);
-    transition: transform .15s ease;
-    animation: neonShift 5s linear infinite;
-  }
-  #quizModal .opts button:hover{ transform: translateY(-1px) scale(1.01); }
-  #quizModal .ghost{ color:#e6eefb; border:1px solid rgba(0,255,204,.15) }
-  #quizModal #showHint{ background: rgba(255,255,255,.06); animation:none; color:#e6eefb }
-  #quizModal .primary{
-    background: linear-gradient(90deg, #00ffd0, #ff5ee1, #00ffd0) !important;
-    background-size: 200% 200% !important;
-    color:#0a0f14 !important; font-weight:800 !important; border:none !important;
-    box-shadow: 0 0 18px rgba(0,255,204,.6), 0 0 32px rgba(255,0,204,.35) !important;
-    animation: neonShift 5s linear infinite !important;
-  }
-  #quizModal .hint{ color:#9ddbd1 }
-  @keyframes neonShift{
-    0%{ background-position: 0% 50%; }
-    50%{ background-position: 100% 50%; }
-    100%{ background-position: 0% 50%; }
-  }
-  /* Panel buttons neon */
-  #quizPanel #openQuizBtn{
-    background: linear-gradient(90deg, var(--accent, #00ffd0), var(--accent2, #ff5ee1), var(--accent, #00ffd0)) !important;
-    background-size: 200% 200% !important;
-    color:#04130f !important; font-weight:800 !important; border:none !important; border-radius:12px !important;
-    padding:10px 14px !important;
-    box-shadow: 0 0 18px rgba(0,255,204,.6), 0 0 32px rgba(255,0,204,.35) !important;
-    animation: neonShift 6s linear infinite !important;
-  }
-  /* Claim button green when active (override inline with !important) */
-  #quizPanel #quizClaimBtn.quiz-claim-active{
-    background: linear-gradient(90deg, #22c55e, #86efac, #22c55e) !important;
-    background-size: 200% 200% !important;
-    color:#052e16 !important; font-weight:800 !important;
-    border:none !important; border-radius:12px !important;
-    box-shadow: 0 0 18px rgba(34,197,94,.75), 0 0 38px rgba(134,239,172,.55) !important;
-    animation: neonShift 6s linear infinite !important;
-  }
-
-</style>
-  <div id="quizModal" role="dialog" aria-modal="true" aria-label="Balbi Quiz">
-    <div class="quiz-card">
-      <button class="close-x" id="quizCloseBtn" title="Close">✕</button>
-      <div id="quizStage">
-        <!-- Filled by script -->
-      </div>
-    </div>
-  </div>
-
-  <script>
-  (function(){
-
-    const REPLIT_URL_QUIZ = 'https://74caa2ca-fab9-4e76-a1f0-3e32c4aaf7a4-00-lt9t4bvht6p6.spock.replit.dev'; // same backend as faucet
-    const addressEl = document.getElementById('addressDisplay');
-    const openBtn = document.getElementById('openQuizBtn');
-    const claimBtn = document.getElementById('quizClaimBtn');
-    const roundInfo = document.getElementById('quizRoundInfo');
-    const claimTimer = document.getElementById('quizClaimTimer');
-    const claimMsg = document.getElementById('quizClaimMsg');
-    const claimHash = document.getElementById('quizClaimHash');
-    const modal = document.getElementById('quizModal');
-    const stage = document.getElementById('quizStage');
-    const closeBtn = document.getElementById('quizCloseBtn');
-
-    // LocalStorage keys
-    function keys(addr){
-      return {
-        window: `quizWindow_${addr}`,
-        accum: `quizAccum_${addr}`,
-        lastClaim: `quizLastClaimTime_${addr}`
-      };
-    }
-    const FOUR_H = 4 * 60 * 60 * 1000;
-
-    // --- Randomness memory per window (STRICT: no repeats until the whole pool is used) ---
-    function qMemKey(addr, wStart){ return `quizQMem_${addr}_${wStart}`; }
-    function readQMem(addr, wStart){
-      try { return JSON.parse(localStorage.getItem(qMemKey(addr,wStart))) || []; } catch(e){ return []; }
-    }
-    function writeQMem(addr, wStart, arr){
-      localStorage.setItem(qMemKey(addr,wStart), JSON.stringify(arr.slice(0, 2000)));
-    }
-
-    function drawUniqueIndicesStrict(addr, wStart, poolLen, n){
-      // current used set for this 4h window
-      let used = new Set(readQMem(addr, wStart));
-      // If we already used the entire pool, reset
-      if (used.size >= poolLen) used = new Set();
-
-      // Build available list
-      const available = [];
-      for (let i=0;i<poolLen;i++){
-        if (!used.has(i)) available.push(i);
-      }
-
-      // If available < n, reset used and make all available
-      let pickFrom = available;
-      if (pickFrom.length < n){
-        used = new Set();
-        pickFrom = Array.from({length: poolLen}, (_,i)=>i);
-      }
-
-      // Fisher-Yates shuffle then take n
-      for (let i = pickFrom.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pickFrom[i], pickFrom[j]] = [pickFrom[j], pickFrom[i]];
-      }
-      const chosen = pickFrom.slice(0, n);
-
-      // Update memory
-      for (const c of chosen) used.add(c);
-      writeQMem(addr, wStart, Array.from(used));
-      return chosen;
-    }
-
-    function now(){ return Date.now(); }
-    function getAddr(){ return (addressEl && addressEl.textContent || '').trim(); }
-    function readJSON(key, def){ try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch(e){ return def; } }
-    function writeJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
-
-    function getWindow(addr){
-      const k = keys(addr).window;
-      let w = readJSON(k, null);
-      if(!w || (now() - w.start) >= FOUR_H) {
-        w = { start: now(), count: 0 };
-        writeJSON(k, w);
-      }
-      return w;
-    }
-    function incWindowCount(addr){
-      const k = keys(addr).window;
-      let w = getWindow(addr);
-      w.count = (w.count || 0) + 1;
-      writeJSON(k, w);
-      return w.count;
-    }
-    function getAccum(addr){ return Number(localStorage.getItem(keys(addr).accum) || '0'); }
-    function setAccum(addr, v){ localStorage.setItem(keys(addr).accum, String(Math.max(0, Number(v)||0))); }
-    function addAccum(addr, v){ setAccum(addr, getAccum(addr) + Number(v||0)); }
-    function getLastClaim(addr){ return Number(localStorage.getItem(keys(addr).lastClaim) || '0'); }
-    function setLastClaim(addr, t){ localStorage.setItem(keys(addr).lastClaim, String(t)); }
-    function fmt(n){ return (Math.round(n*100)/100).toFixed(2); }
-
-    function updateUI(){
-      const addr = getAddr();
-      const w = getWindow(addr);
-      roundInfo.textContent = `Rounds this window: ${(w.count||0)}/3`;
-      const accum = getAccum(addr);
-      claimBtn.textContent = `Claim ${fmt(accum)} BALBI`;
-      const blocked = getClaimTimeLeft(addr) > 0;
-      const canClaim = (accum > 0) && !blocked;
-      claimBtn.disabled = !canClaim;
-      if(canClaim) claimBtn.classList.add('quiz-claim-active');
-      else claimBtn.classList.remove('quiz-claim-active');
-      claimTimer.textContent = renderClaimTimerText(addr);
-    }
-
-    function getClaimTimeLeft(addr){
-      const last = getLastClaim(addr);
-      if(!last) return 0;
-      const left = last + FOUR_H - now();
-      return Math.max(0, left);
-    }
-    function renderClaimTimerText(addr){
-      const left = getClaimTimeLeft(addr);
-      if(left <= 0) return '';
-      const h = Math.floor(left / 3600000);
-      const m = Math.floor((left % 3600000)/60000);
-      const s = Math.floor((left % 60000)/1000);
-      return `Next quiz claim in: ${h}h ${m}m ${s}s`;
-    }
-    let tick = null;
-    function startTick(){ if(tick) clearInterval(tick); tick = setInterval(updateUI, 1000); }
-
-    // === 50 UNIQUE HVAC QUESTIONS (EN) ===
-    const QUESTIONS = [
-      { t:`Commercial building with stale air and odors; minimum OA only.`, ok:`Increase outdoor air to ASHRAE targets and rebalance to improve IAQ.`, w1:`Reduce OA to save energy and keep current balance.`, w2:`Use a refrigerant safety standard to set minimum ventilation.`, hint:`Proper OA and balance drive IAQ.` },
-      { t:`Hospital shows mold due to high humidity; HVAC doesn’t control RH.`, ok:`Dehumidify supply air and keep RH < 60% with dedicated control.`, w1:`Raise only temperature setpoint and ignore RH.`, w2:`Use an energy standard to pick one RH for critical spaces.`, hint:`Treat humidity directly; mold risk rises >~60% RH.` },
-      { t:`Oversized ducts cause uneven distribution and noise.`, ok:`Resize using recognized duct methods (e.g., static regain/SMACNA) and rebalance.`, w1:`Add more fans in series without revising ductwork.`, w2:`Use electrical code to pick air duct sizes.`, hint:`Sizing + TAB fixes the root cause.` },
-      { t:`Refrigerant selection includes high-GWP options.`, ok:`Prioritize lower-GWP refrigerant, ensuring safety, efficiency, and compatibility.`, w1:`Pick the highest GWP for lowest CAPEX.`, w2:`Use occupancy ventilation rules to approve refrigerant type.`, hint:`Balance sustainability and safety.` },
-      { t:`High-rise building with unwanted infiltration.`, ok:`Adjust zone pressures (slightly positive in clean zones) and improve airtightness.`, w1:`Tape windows without revising setpoints/balancing.`, w2:`Determine pressures from comfort standard only.`, hint:`Pressure relationships matter.` },
-      { t:`Data center racks show hotspots.`, ok:`Implement hot/cold aisle containment and seal bypass.`, w1:`Only increase CRAC setpoint.`, w2:`Randomly add perforated tiles.`, hint:`Airflow management beats brute force.` },
-      { t:`Office has comfort variation across zones.`, ok:`Use zoned control (e.g., commissioned VAV) and proper diffusion.`, w1:`Upsize the central unit for entire floor.`, w2:`Rely on a single return sensor for the whole floor.`, hint:`More local control = more comfort.` },
-      { t:`School uses low-efficiency filters; IAQ is poor.`, ok:`Adopt MERV 13 where feasible and ensure proper sealing/seating.`, w1:`Lower filtration efficiency to reduce pressure drop.`, w2:`Use refrigerant safety class to choose MERV.`, hint:`Filtration reduces particles significantly.` },
-      { t:`Industrial system with recurring refrigerant leaks.`, ok:`Leak detection program, records, and elimination of root cause.`, w1:`Periodically top up and keep operating.`, w2:`Use minimum OA rules to define acceptable leakage.`, hint:`Leaks are not “normal operations.”` },
-      { t:`Theater disturbed by HVAC noise.`, ok:`Use duct silencers, proper diffusion, and controlled velocities.`, w1:`Increase airflow to “mask” noise.`, w2:`Apply a residential noise target to a theater.`, hint:`Treat acoustics in the air path.` },
-      { t:`Cold room uses too much energy; poor insulation and seals.`, ok:`Improve insulation and door management (seals/air curtains).`, w1:`Increase compressor capacity only.`, w2:`Use comfort standard to select cold-room panels.`, hint:`Reduce thermal losses first.` },
-      { t:`Lab has insufficient ACH for volatile contaminants.`, ok:`Increase air changes and provide dedicated exhaust/capture.`, w1:`Deodorize and keep ACH as is.`, w2:`Use energy standard to set minimum exhaust.`, hint:`Safety first: source capture & ACH.` },
-      { t:`Hotel rooms have inconsistent temperatures.`, ok:`Provide room-level thermostats/zones and perform TAB.`, w1:`Single setpoint for the whole building.`, w2:`Use ventilation rates to control guest setpoints.`, hint:`Individual control improves experience.` },
-      { t:`Mall corridors smell cooking odors from food court.`, ok:`Resize hood/exhaust/ducts and balance pressures.`, w1:`Only increase general mall OA.`, w2:`Use fluid safety classification to size Type I hoods.`, hint:`Kitchens need dedicated exhaust.` },
-      { t:`Gym windows condensation due to high RH.`, ok:`Dehumidify supply air and adjust diffusion/temps.`, w1:`Increase OA only without treating RH.`, w2:`Use building efficiency standard to set gym RH.`, hint:`Attack moisture; OA alone may not fix.` },
-      { t:`Cleanroom needs particle and pressure control.`, ok:`Maintain positive differential and HEPA filtration; tight doors/seals.`, w1:`Use MERV 8 and keep doors open “for more ventilation”.`, w2:`Use fluid safety code to define ISO class.`, hint:`Pressure + HEPA = baseline.` },
-      { t:`Library has cold drafts on occupants.`, ok:`Reposition diffusers and reduce terminal velocities.`, w1:`Reduce outdoor air rate.`, w2:`Use ammonia refrigeration code for diffuser selection.`, hint:`Proper diffusion avoids drafts.` },
-      { t:`Meeting rooms with high CO₂ during peaks.`, ok:`Adopt CO₂-based DCV and balance minimums.`, w1:`Only raise temp setpoint.`, w2:`Use fluid safety class to set CO₂ targets.`, hint:`DCV matches IAQ to occupancy.` },
-      { t:`Ground-floor lobby gets infiltration from door cycling.`, ok:`Vestibule/air curtain and slight positive interior pressure; seals working.`, w1:`Make interior negative to “pull air in.”`, w2:`Use fluid safety code to compute infiltration.`, hint:`Control door airflows.` },
-      { t:`Reception area smells from nearby restrooms.`, ok:`Provide adequate dedicated restroom exhaust and check traps.`, w1:`Perfume and reduce exhaust to save energy.`, w2:`Use comfort standard to set toilet exhaust.`, hint:`Dirty spaces need directional airflow.` },
-      { t:`Tall auditorium with thermal stratification.`, ok:`Destratification/high returns and uniform supply.`, w1:`Lower global setpoint without changing diffusion.`, w2:`Use OA minimum formula to size stage height.`, hint:`Treat stratification with airflow design.` },
-      { t:`Small IT room with a server hotspot.`, ok:`Duct cold air to load and seal bypass openings.`, w1:`Add heater to “balance” temperature.`, w2:`Use energy code to place racks.`, hint:`Bring air to where it’s needed.` },
-      { t:`Residence has odors rising from basement via stairs.`, ok:`Light exhaust in basement, seal penetrations, auto-closing door.`, w1:`Pressurize living room negative.`, w2:`Use fluid safety class for basement exhaust rate.`, hint:`Pressure gradient solves migration.` },
-      { t:`Gym air feels heavy after peak hours.`, ok:`Increase ACH, improve filtration, and use DCV/purge.`, w1:`Close OA intakes to save energy.`, w2:`Use fluid safety class to choose MERV.`, hint:`High bioeffluent needs renewal.` },
-      { t:`Parking garage ventilation design.`, ok:`Use CO/NO₂ sensors to modulate fans and meet code purge rates.`, w1:`Rely on a fixed low speed at all times.`, w2:`Use comfort temperature standard to set garage ACH.`, hint:`Demand-control by gas sensors.` },
-      { t:`Commercial kitchen fire/grease risk.`, ok:`Type I hoods with proper CFM, grease-rated ducts, and suppression.`, w1:`General OA alone will capture grease.`, w2:`Comfort standard determines hood class.`, hint:`Grease capture ≠ general ventilation.` },
-      { t:`Indoor pool (natatorium) corrosion and odor.`, ok:`Maintain ~50–60% RH, supply to deck, exhaust at surface, slight negative to adjacent spaces.`, w1:`Max OA with no dehumidification.`, w2:`Use office comfort targets for pool RH.`, hint:`Specialized airflow + dehumidification.` },
-      { t:`Airborne isolation room design.`, ok:`Negative pressure with anteroom and HEPA-filtered exhaust.`, w1:`Positive pressure to corridors.`, w2:`Use general office ACH as the sole criterion.`, hint:`Containment needs negative pressure.` },
-      { t:`Operating room pressurization.`, ok:`Positive to corridors with HEPA and tight control of temp/RH.`, w1:`Neutral to corridors to save energy.`, w2:`Use parking-garage rules for ACH.`, hint:`ORs are kept positive & clean.` },
-      { t:`Battery-charging room with hydrogen risk.`, ok:`Provide dedicated exhaust high in the space per charging rate; minimize ignition sources.`, w1:`Rely only on general OA of the building.`, w2:`Use comfort cooling standard to size exhaust.`, hint:`Ventilate at the top; consider H₂.` },
-      { t:`Warehouse heating bills high; stratification.`, ok:`Use HVLS/destrat fans and adjust supply strategy.`, w1:`Raise supply temp only.`, w2:`Turn off returns completely.`, hint:`Mix layers to reduce losses.` },
-      { t:`Heat pump frosting in winter.`, ok:`Ensure proper airflow and defrost cycle; clear drains/placement.`, w1:`Disable defrost to avoid interruptions.`, w2:`Run on continuous max speed.`, hint:`Defrost is intended behavior.` },
-      { t:`OA economizer not reducing cooling load.`, ok:`Enable enthalpy-based economizer with high-limit and proper sensors.`, w1:`Economizer fixed open year-round.`, w2:`Economizer never allowed to open.`, hint:`Use free cooling when conditions allow.` },
-      { t:`Consider heat recovery on DOAS.`, ok:`Use ERV/HRV to reduce OA load while maintaining IAQ.`, w1:`Bypass ERV to avoid any added pressure drop.`, w2:`Use only recirculation; remove OA.`, hint:`Recovery saves energy with IAQ.` },
-      { t:`Cooling coil fouling, rising ΔP and poor capacity.`, ok:`Clean coils, keep upstream filtration, and verify ΔP and airflow.`, w1:`Increase chilled-water temp only.`, w2:`Remove filters to lower pressure drop.`, hint:`Dirty coils = lost capacity.` },
-      { t:`VAV boxes “hunting.”`, ok:`Commission: tune PID, verify minimum flows, and static-pressure reset.`, w1:`Lock all boxes at maximum.`, w2:`Disable feedback from boxes.`, hint:`Control tuning + good setpoints.` },
-      { t:`Pumps oversized; poor control.`, ok:`Trim impeller or use VFD; balance; implement DP reset.`, w1:`Throttle discharge valve permanently.`, w2:`Run constant speed at 100%.`, hint:`Right-size or vary the speed.` },
-      { t:`Chilled-water ΔT is too low (“low ΔT syndrome”).`, ok:`Fix bypassing, valve authority, coil reset, and balance flows.`, w1:`Increase primary flow endlessly.`, w2:`Close all bypasses and all valves.`, hint:`Address coil performance & control.` },
-      { t:`High condenser-water approach temp.`, ok:`Clean towers/condensers, ensure treatment and design flow.`, w1:`Raise chiller lift permanently.`, w2:`Disable tower fans.`, hint:`Heat rejection needs maintenance.` },
-      { t:`VRF and refrigerant concentration limit (RCL).`, ok:`Ensure RCL compliance (volume/leak detection/segmentation).`, w1:`Ignore volume; RCL applies only to chillers.`, w2:`Rely on open windows as mitigation.`, hint:`Check room volume vs charge.` },
-      { t:`High duct leakage found on test.`, ok:`Upgrade sealing class, repair leaks, and re-test TAB.`, w1:`Increase fan speed to compensate.`, w2:`Ignore unless comfort complaints arise.`, hint:`Leakage = wasted capacity/energy.` },
-      { t:`Stair pressurization for smoke control.`, ok:`Pressurize stairs positive with relief paths; verify door opening forces.`, w1:`Negative stairwell to pull smoke out.`, w2:`Seal stairs airtight and over-pressurize.`, hint:`Keep smoke out; doors still operable.` },
-      { t:`UFAD has hotspots and weak throw.`, ok:`Adjust diffuser layout, loads, and plenum sealing; verify supply temps.`, w1:`Switch to ceiling return only.`, w2:`Block floor diffusers randomly.`, hint:`Plenum tightness & layout matter.` },
-      { t:`Radiant floor overheating complaints.`, ok:`Use mixing valve, floor sensors, and reset curves.`, w1:`Raise boiler temp.`, w2:`Disable thermostatic control.`, hint:`Limit surface temperature smartly.` },
-      { t:`Thermostats installed near supply/solar gain.`, ok:`Relocate or average sensors away from drafts/solar.`, w1:`Hide sensors behind curtains.`, w2:`Use return sensor only.`, hint:`Sensors must reflect occupied zone.` },
-      { t:`BAS has no schedules or optimum start.`, ok:`Implement occupancy schedules, night setback, and optimum start/stop.`, w1:`Run at occupied mode 24/7.`, w2:`Disable all scheduling to avoid errors.`, hint:`Scheduling saves a lot.` },
-      { t:`Boilers short-cycling at low loads.`, ok:`Add buffer volume, stage boilers, and reset SWT.`, w1:`Force both boilers on always.`, w2:`Disable staging logic.`, hint:`Longer, fewer cycles are better.` },
-      { t:`HPWH in tight mechanical room.`, ok:`Provide make-up air and manage cooling effect on room.`, w1:`Seal the room completely.`, w2:`Exhaust all air to outdoors with no intake.`, hint:`HPWH cools the room; plan airflow.` },
-      { t:`Rooftop unit nuisance trips.`, ok:`Verify rotation/phasing, airflow proving (filters/fans), freezestat, and low-ambient kits.`, w1:`Bypass safeties to keep it running.`, w2:`Oversize fuses only.`, hint:`Safeties trip for real reasons.` },
-      { t:`DOAS sizing for classrooms.`, ok:`Size OA by people + area; use MERV 13; ensure supply/relief paths.`, w1:`Size only by floor area.`, w2:`Eliminate OA to reduce cost.`, hint:`Both people and area count.` }
-    ];
-
-    function shuffle(a){ return a.map(v=>({v, r:Math.random()})).sort((x,y)=>x.r-y.r).map(e=>e.v); }
-
-    function openModal(){ modal.style.display = 'flex'; renderStart(); }
-    function closeModal(){ modal.style.display = 'none'; }
-    function ensureLogin(){
-      const addr = getAddr();
-      if(!addr){ alert('Please connect your wallet first.'); return false; }
-      return true;
-    }
-
-    openBtn.addEventListener('click', ()=>{
-      if(!ensureLogin()) return;
-      const addr = getAddr();
-      const w = getWindow(addr);
-      if((w.count||0) >= 3){
-        alert('Limit reached: wait until the current 4-hour window resets.');
-        return;
-      }
-      openModal();
-    });
-    closeBtn.addEventListener('click', closeModal);
-
-    // stages
-    let currentIdx = 0;
-    let score = 0;
-    let roundQs = [];
-
-    function renderStart(){
-      currentIdx = 0; score = 0;
-      roundQs = [];
-      const addrX = getAddr();
-      const wX = getWindow(addrX);
-      const drawn = drawUniqueIndicesStrict(addrX, wX.start, QUESTIONS.length, 5);
-      for(const di of drawn){ roundQs.push(QUESTIONS[di]); }
-      stage.innerHTML = `
-        <h3>Balbi Quiz — Round</h3>
-        <p>Answer 5 quick questions. ≥60 points grants a reward. Each correct = 20 pts.</p>
-        <div class="row">
-          <button id="beginRound" class="primary">Start Round</button>
-          <button id="cancelRound" class="ghost">Cancel</button>
-        </div>`;
-      document.getElementById('beginRound').onclick = ()=> renderQuestion(0);
-      document.getElementById('cancelRound').onclick = closeModal;
-    }
-
-    function renderQuestion(i){
-      currentIdx = i;
-      const q = roundQs[i];
-      const opts = shuffle([
-        {k:'a', txt:q.ok, ok:true},
-        {k:'b', txt:q.w1, ok:false},
-        {k:'c', txt:q.w2, ok:false},
-      ]);
-      stage.innerHTML = `
-        <h3>Question ${i+1}/5</h3>
-        <div class="qblock">
-          <p>${q.t}</p>
-          <div class="opts">
-            ${opts.map((o,idx)=>`<button class="ghost" data-idx="${idx}">${o.txt}</button>`).join('')}
-          </div>
-          <button id="showHint" class="ghost" style="margin-top:8px">Show hint</button>
-          <div id="hint" class="hint">${q.hint||''}</div>
-        </div>
-        <div class="row">
-          <button id="quit" class="ghost">Quit</button>
-        </div>`;
-      stage.querySelectorAll('.opts button').forEach((btn,idx)=>{
-        btn.onclick = ()=>{ handleAnswer(opts[idx].ok); };
-      });
-      document.getElementById('showHint').onclick = ()=>{ const h = document.getElementById('hint'); h.style.display = 'block'; };
-      document.getElementById('quit').onclick = closeModal;
-    }
-
-    function handleAnswer(ok){
-      if(ok) score += 20;
-      const next = currentIdx + 1;
-      if(next < 5) renderQuestion(next);
-      else renderResult();
-    }
-
-    function rewardFromScore(sc){
-      if (sc < 60) return 0;
-      if (sc >= 100) return 0.1;
-      const tens = Math.floor(sc / 10); // 60->6, 70->7, 80->8, 90->9
-      return Math.min(0.1, tens / 100);
-    }
-
-    function renderResult(){
-      const addr = getAddr();
-      const w = getWindow(addr);
-      const reward = rewardFromScore(score);
-      const passed = reward > 0;
-      if(passed) addAccum(addr, reward);
-      incWindowCount(addr);
-      updateUI();
-
-      stage.innerHTML = `
-        <h3>Round Complete</h3>
-        <p class="score">Score: ${score}/100</p>
-        <p>${passed ? `+ ${fmt(reward)} BALBI added to your quiz balance.` : 'Score below 60 — no reward this round.'}</p>
-        <div class="row">
-          <button id="playAgain" class="primary">Play Another Round</button>
-          <button id="close" class="ghost">Close</button>
-        </div>`;
-      document.getElementById('playAgain').onclick = ()=>{
-        const w2 = getWindow(addr);
-        if((w2.count||0) >= 3){
-          alert('Limit reached for this 4-hour window.');
-          closeModal();
-          return;
-        }
-        renderStart();
-      };
-      document.getElementById('close').onclick = closeModal;
-    }
-
-    // Claim logic (same backend endpoint as faucet; we include amount + source)
-    claimBtn.addEventListener('click', async ()=>{
-      const addr = getAddr();
-      if(!addr){ alert('Please connect your wallet first.'); return; }
-      const amount = getAccum(addr);
-      if(!(amount>0)) return;
-
-      claimBtn.disabled = true;
-      claimMsg.style.display = 'none';
-      claimHash.style.display = 'none';
-      claimBtn.textContent = 'Claiming...';
-
-      function toWeiStr(x){
-        const s = (Math.round(x*100)/100).toFixed(2);
-        const parts = s.split('.');
-        const intp = parts[0];
-        const fracp = (parts[1] || '00');
-        const frac2 = (fracp + '00').slice(0,2);
-        return intp + frac2 + '0000000000000000'; // 10^(18-2)
-      }
-      const amountWei = toWeiStr(amount);
-
-      try {
-        const res = await fetch((REPLIT_URL_QUIZ || '') + '/quiz-claim', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address: addr, amount_decimals: 18, amount_wei: amountWei, amount: Number(amount.toFixed(2)), source: 'quiz' }),
-          mode: 'cors',
-          credentials: 'omit'
-        });
-        const data = await res.json().catch(()=>({}));
-        if(!res.ok){
-          throw new Error(data && data.error ? data.error : 'quiz-claim rejected');
-        }
-        setLastClaim(addr, now());
-        setAccum(addr, 0);
-        claimMsg.textContent = 'Quiz tokens sent successfully!';
-        claimMsg.style.display = 'block';
-        if(data && data.txHash){
-          claimHash.textContent = 'Tx Hash: ' + data.txHash;
-          claimHash.style.display = 'block';
-        }
-      } catch(e){
-        claimMsg.textContent = 'Quiz claim failed: ' + (e.message || 'unknown error') + '. '
-          + 'Your backend must implement POST /quiz-claim and honor the passed amount.';
-        claimMsg.style.display = 'block';
-      } finally {
-        claimBtn.textContent = `Claim ${fmt(getAccum(getAddr()))} BALBI`;
-        updateUI();
-      }
-    });
-
-    function initOnce(){ updateUI(); startTick(); }
-
-    // Observe wallet visibility / address changes to refresh UI once logged in
-    const walletBox = document.getElementById('walletAddress');
-    const obs2 = new MutationObserver(()=>{ updateUI(); });
-    if(addressEl) obs2.observe(addressEl, { childList:true, subtree:true, characterData:true });
-    if(walletBox) obs2.observe(walletBox, { attributes:true, attributeFilter:['style','class'] });
-
-    document.addEventListener('DOMContentLoaded', initOnce);
-    updateUI();
-    initOnce();
-
-  })(); 
-  </script>
-
 </body>
 </html>
